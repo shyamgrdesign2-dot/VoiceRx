@@ -369,36 +369,58 @@ export function PatientReportedCard({ data, onCopy, onPillTap, defaultCollapsed 
                     <span className="mt-[1px] flex-shrink-0 text-tp-slate-400">
                       •
                     </span>
-                    <span className="flex-1">
-                      <span className="font-normal text-tp-slate-700">
-                        {item.name}
+                    {/* Touch: tap the row text to surface "Copy to Rx".
+                        Desktop: keep the inline copy icon affordance. */}
+                    {isTouch ? (
+                      <ActionableTooltip
+                        label="Copy to Rx"
+                        onAction={() => handleCopyItem(section.id, item, itemKey)}
+                      >
+                        <span className="flex-1 cursor-pointer">
+                          <span className="font-normal text-tp-slate-700">
+                            {item.name}
+                          </span>
+                          {item.detail && (
+                            <span className="text-tp-slate-400">
+                              {" "}({item.detail})
+                            </span>
+                          )}
+                        </span>
+                      </ActionableTooltip>
+                    ) : (
+                      <span className="flex-1">
+                        <span className="font-normal text-tp-slate-700">
+                          {item.name}
+                        </span>
+                        {item.detail && (
+                          <span className="text-tp-slate-400">
+                            {" "}({item.detail})
+                          </span>
+                        )}
                       </span>
-                      {item.detail && (
-                        <span className="text-tp-slate-400">
-                          {" "}({item.detail})
-                        </span>
-                      )}
-                    </span>
-                    <span className={cn("flex-shrink-0 transition-opacity", copiedKey === itemKey ? "opacity-100" : isTouch ? "opacity-70" : "opacity-0 group-hover/reported-item:opacity-100")}>
-                      {copiedKey === itemKey ? (
-                        <span className="vrx-filled-flash inline-flex items-center gap-[3px] text-[12.5px] font-semibold text-tp-success-500">
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
-                            <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                          Filled
-                        </span>
-                      ) : (
-                        <ActionableTooltip
-                          label={`Fill "${item.name}" to RxPad`}
-                          onAction={() => handleCopyItem(section.id, item, itemKey)}
-                        >
-                          <CopyIcon
-                            size={14}
-                            onClick={() => handleCopyItem(section.id, item, itemKey)}
-                          />
-                        </ActionableTooltip>
-                      )}
-                    </span>
+                    )}
+                    {!isTouch && (
+                      <span className={cn("flex-shrink-0 transition-opacity", copiedKey === itemKey ? "opacity-100" : "opacity-0 group-hover/reported-item:opacity-100")}>
+                        {copiedKey === itemKey ? (
+                          <span className="vrx-filled-flash inline-flex items-center gap-[3px] text-[12.5px] font-semibold text-tp-success-500">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
+                              <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            Filled
+                          </span>
+                        ) : (
+                          <ActionableTooltip
+                            label={`Fill "${item.name}" to RxPad`}
+                            onAction={() => handleCopyItem(section.id, item, itemKey)}
+                          >
+                            <CopyIcon
+                              size={14}
+                              onClick={() => handleCopyItem(section.id, item, itemKey)}
+                            />
+                          </ActionableTooltip>
+                        )}
+                      </span>
+                    )}
                   </li>
                 )
               })}

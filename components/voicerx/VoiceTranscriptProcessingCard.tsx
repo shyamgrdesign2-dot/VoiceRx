@@ -329,8 +329,8 @@ export function VoiceTranscriptProcessingCard({
               // benefit from a baseline minHeight so the card doesn't
               // jump around as bubbles cascade in.
               isAmbient
-                ? { maxHeight: "min(70vh, 560px)", minHeight: 280 }
-                : { maxHeight: "min(70vh, 560px)" }
+                ? { maxHeight: "min(48vh, 460px)", minHeight: 220 }
+                : { maxHeight: "min(48vh, 460px)" }
             }
           >
             {/* Bubbles render directly on the shiner card's slate-100

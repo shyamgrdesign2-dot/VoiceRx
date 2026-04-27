@@ -56,12 +56,20 @@ function VoiceRxFlowInner() {
 
     const updateOffset = () => {
       const width = window.innerWidth
+      // Width matches the Dr. Agent panel breakpoints declared on the
+      // panel container below — keep the two in lock-step so the live
+      // edge aura clears the panel exactly. iPad / tablet widths get
+      // a clamp of 330–360px so the chat copy and bubbles still read
+      // without bleeding off the page; xl breakpoints widen to 400px.
       if (width >= 1280) {
         setVoicePanelOffset(400)
         return
       }
       if (width >= 768) {
-        setVoicePanelOffset(300)
+        // Use the actual rendered panel width here (between min 330
+        // and max 360 inside the breakpoint range). Picking the upper
+        // bound keeps the aura hugging the panel edge.
+        setVoicePanelOffset(360)
         return
       }
       setVoicePanelOffset(0)
@@ -218,7 +226,12 @@ function VoiceRxFlowInner() {
     }
   }, [lastSignal, isVoicePanelOpen])
 
-  const agentRailPad = isVoicePanelOpen ? "md:pr-[300px] xl:pr-[400px]" : ""
+  // Reserve right-side padding equal to the Dr. Agent panel's
+  // rendered width so the RxPad section cards reflow under it
+  // instead of being hidden behind it on iPad / smaller laptops.
+  // Matches the panel container's `w-[clamp(330px,38vw,360px)]`
+  // tablet width and `xl:w-[400px]`.
+  const agentRailPad = isVoicePanelOpen ? "md:pr-[360px] xl:pr-[400px]" : ""
 
   return (
     <TPRxPadShell
@@ -282,7 +295,10 @@ function VoiceRxFlowInner() {
         <div
           data-voice-scope="dragent"
           className={cn(
-            "pointer-events-none fixed right-0 top-[62px] z-30 hidden h-[calc(100vh-62px)] w-[300px] overflow-hidden md:block xl:w-[400px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
+            // iPad / tablet (md ≤ width < xl): clamp width to
+            // 330–360px so the panel doesn't bleed off the page and
+            // also doesn't crush the chat copy. xl widens to 400px.
+            "pointer-events-none fixed right-0 top-[62px] z-30 hidden h-[calc(100vh-62px)] w-[clamp(330px,38vw,360px)] overflow-hidden md:block xl:w-[400px] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
             isVoicePanelOpen ? "visible translate-x-0" : "invisible translate-x-[110%]"
           )}
           aria-hidden={!isVoicePanelOpen}

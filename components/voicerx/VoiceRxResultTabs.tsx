@@ -206,11 +206,16 @@ export function VoiceRxResultTabs({
              variant and pulls TP-blue for both glyph and label so the
              selected tab reads as a real selection, not a faint tonal
              shift. Inactive chips stay slate-600 with Linear icons. */}
-          <TabsList className="vrx-rt-tabs grid h-[44px] w-full grid-cols-3 rounded-[14px] bg-tp-slate-100 p-[5px]">
+          {/* Tabs strip — switched from `grid grid-cols-3` to a flex
+             row with horizontal overflow-auto so the three chips have
+             a 4px gap between them and can scroll sideways on tight
+             panel widths instead of squeezing each chip down to a
+             cramped 1-2 character ellipsis. */}
+          <TabsList className="vrx-rt-tabs flex h-[44px] w-full items-stretch gap-[4px] overflow-x-auto rounded-[14px] bg-tp-slate-100 p-[5px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             <TabsTrigger
               value="transcript"
               className={cn(
-                "gap-[6px] rounded-[10px] text-[12.5px] font-semibold tracking-tight transition-all",
+                "shrink-0 flex-1 min-w-[110px] gap-[6px] whitespace-nowrap rounded-[10px] px-[10px] text-[12.5px] font-semibold tracking-tight transition-all",
                 "data-[state=active]:bg-white data-[state=active]:text-tp-blue-600 data-[state=active]:shadow-[0_1px_2px_rgba(15,23,42,0.06)]",
                 "data-[state=inactive]:text-tp-slate-600",
               )}
@@ -220,7 +225,7 @@ export function VoiceRxResultTabs({
             <TabsTrigger
               value="emr"
               className={cn(
-                "gap-[6px] rounded-[10px] text-[12.5px] font-semibold tracking-tight transition-all",
+                "shrink-0 flex-1 min-w-[110px] gap-[6px] whitespace-nowrap rounded-[10px] px-[10px] text-[12.5px] font-semibold tracking-tight transition-all",
                 "data-[state=active]:bg-white data-[state=active]:text-tp-blue-600 data-[state=active]:shadow-[0_1px_2px_rgba(15,23,42,0.06)]",
                 "data-[state=inactive]:text-tp-slate-600",
               )}
@@ -230,7 +235,7 @@ export function VoiceRxResultTabs({
             <TabsTrigger
               value="clinical"
               className={cn(
-                "gap-[6px] rounded-[10px] text-[12.5px] font-semibold tracking-tight transition-all",
+                "shrink-0 flex-1 min-w-[110px] gap-[6px] whitespace-nowrap rounded-[10px] px-[10px] text-[12.5px] font-semibold tracking-tight transition-all",
                 "data-[state=active]:bg-white data-[state=active]:text-tp-blue-600 data-[state=active]:shadow-[0_1px_2px_rgba(15,23,42,0.06)]",
                 "data-[state=inactive]:text-tp-slate-600",
               )}

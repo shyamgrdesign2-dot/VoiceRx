@@ -20,6 +20,7 @@ import {
 } from "lucide-react"
 
 import { cn } from "@/lib/utils"
+import { useTouchDevice } from "@/hooks/use-touch-device"
 
 type ClinicalNotesEditorProps = {
   value: string
@@ -65,6 +66,12 @@ export function ClinicalNotesEditor({
     if (value !== editor.getHTML()) editor.commands.setContent(value, { emitUpdate: false })
   }, [value, editor])
 
+  // Touch devices (iPad / phones) hide the formatting toolbar — the
+  // doctor uses the system keyboard for headings / bold / italic /
+  // underline / lists / undo / redo via its built-in shortcuts
+  // (Cmd+B, Cmd+I, Cmd+U, Cmd+Z, etc.).
+  const isTouch = useTouchDevice()
+
   if (!editor) return null
 
   const btnBase =
@@ -81,6 +88,7 @@ export function ClinicalNotesEditor({
         <div className="flex-1 overflow-y-auto z-10 bg-white rounded-t-xl">
           <EditorContent editor={editor} className="vrx-cn-content min-h-[160px] px-4 py-3 text-[13.5px] leading-[1.6] text-tp-slate-800" />
         </div>
+        {!isTouch && (
         <div className="flex flex-wrap items-center gap-0.5 border-t border-tp-slate-200 px-1.5 py-1.5 z-10 bg-white rounded-b-xl">
           <button type="button" aria-label="Heading 1" className={cn(btnBase, editor.isActive("heading", { level: 1 }) && btnActive)} onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()}>
             <Heading1 size={14} strokeWidth={2} />
@@ -119,6 +127,7 @@ export function ClinicalNotesEditor({
             <Redo2 size={14} strokeWidth={2.2} />
           </button>
         </div>
+        )}
       <style>{`
         .vrx-cn-editor { min-height: 240px; }
         .vrx-cn-editor h1 { font-size: 18px; font-weight: 700; margin: 14px 0 6px; color: #0f172a; }
