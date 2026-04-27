@@ -159,8 +159,8 @@ export function ConversationTranscript({ raw }: { raw: string }) {
 
 export function DictationTranscript({ raw }: { raw: string }) {
   return (
-    <p className="whitespace-pre-wrap text-[13px] leading-[1.55] text-tp-slate-800">
-      {raw}
+    <p className="whitespace-pre-wrap px-[6px] py-[8px] text-[13px] italic leading-[1.75] text-tp-slate-600">
+      {`“${raw}”`}
     </p>
   )
 }
@@ -314,7 +314,7 @@ export function VoiceTranscriptProcessingCard({
       {/* Card chrome: 16px radius, white base + rotating TP-blue shine.
           `vrx-shiner-enter` plays a one-shot fade/slide on mount. */}
       <div
-        className="vrx-shiner-enter relative flex w-full min-h-0 flex-1 flex-col overflow-hidden rounded-[16px] bg-tp-slate-100/80"
+        className="vrx-shiner-enter relative flex w-full min-h-0 flex-1 flex-col overflow-hidden rounded-[16px] bg-tp-slate-50/60"
         style={{ boxShadow: "0 1px 2px rgba(15,23,42,0.04)" }}
       >
         {/* Static white outer ring is achieved by the bg-white above; the
@@ -322,11 +322,10 @@ export function VoiceTranscriptProcessingCard({
         <ShineBorder
           variant="rotate"
           borderWidth={1.5}
-          /* Faster spin — was 11s, now 3.5s — so the rotating shine
-             reads as an active "loading" cue, not ambient decoration.
-             Shine palette swapped from solid TP-blue to the AI
-             gradient stops (pink → violet → indigo). */
-          duration={3.5}
+          /* Faster spin — so the rotating shine reads as an active
+             "loading" cue, not ambient decoration. Shine palette is
+             the AI gradient stops (pink → violet → indigo). */
+          duration={2.2}
           shineColor={["#D565EA", "#673AAC", "#1A1994"]}
           baseColor="rgba(226,226,234,0.95)"
         />

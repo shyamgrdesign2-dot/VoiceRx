@@ -48,6 +48,10 @@ interface RxPadSectionProps {
   onVoiceClick?: () => void
   /** Active-recording state — the voice icon turns into a pulsing state. */
   voiceActive?: boolean
+  /** Optional small node rendered next to the title — used for
+   *  contextual section-level indicators (e.g. an "n entries to verify"
+   *  pill when voice copy filled rows that aren't yet grounded). */
+  headerBadge?: React.ReactNode
 }
 
 export function RxPadSection({
@@ -63,6 +67,7 @@ export function RxPadSection({
   autofillLabel,
   onVoiceClick,
   voiceActive = false,
+  headerBadge,
 }: RxPadSectionProps) {
   return (
     <div className={`rounded-[16px] border border-tp-slate-100 bg-white ${voiceActive ? "tp-module-voice-active" : ""}`}>
@@ -76,6 +81,7 @@ export function RxPadSection({
           >
             {title}
           </h3>
+          {headerBadge}
         </div>
 
         {showHeaderActions ? (

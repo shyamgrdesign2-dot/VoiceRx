@@ -857,11 +857,25 @@ function EditableTableModule({
           ? searchInputRef.current
           : inputRefs.current[`${activeMenu.rowId ?? ""}:${activeMenu.colKey ?? ""}`]
       if (!anchor) return
+      const nextRect = anchor.getBoundingClientRect()
       setActiveMenu((current) => {
         if (!current) return current
+        const prev = current.anchorRect
+        if (
+          prev &&
+          prev.top === nextRect.top &&
+          prev.left === nextRect.left &&
+          prev.width === nextRect.width &&
+          prev.height === nextRect.height
+        ) {
+          // No-op: rect unchanged. Returning the same reference lets
+          // React bail out, which prevents this effect (which depends
+          // on activeMenu) from re-running into an infinite loop.
+          return current
+        }
         return {
           ...current,
-          anchorRect: anchor.getBoundingClientRect(),
+          anchorRect: nextRect,
         }
       })
     }
@@ -1137,6 +1151,26 @@ function EditableTableModule({
       saveDisabled={!hasAnyData}
       onVoiceClick={onVoiceClick}
       voiceActive={voiceActive}
+      headerBadge={(() => {
+        if (!groundedKey || !ungroundedRowIds || ungroundedRowIds.size === 0) return null
+        const count = rows.reduce(
+          (acc, r) => (ungroundedRowIds.has(r.id) ? acc + 1 : acc),
+          0,
+        )
+        if (count === 0) return null
+        return (
+          <TPTooltip
+            title={`${count} ${count === 1 ? "entry was" : "entries were"} filled from voice — pick a match from the ${title.toLowerCase()} list to verify each row`}
+            placement="top"
+            arrow
+          >
+            <span className="ml-[6px] inline-flex h-[22px] items-center gap-[5px] rounded-full bg-[rgba(217,119,6,0.12)] px-[8px] text-[11px] font-semibold uppercase tracking-[0.04em] text-[#B45309]">
+              <Info size={11} strokeWidth={2.2} />
+              {count} to verify
+            </span>
+          </TPTooltip>
+        )
+      })()}
     >
       <div ref={moduleRootRef} data-rx-module-root="true" className="space-y-[18px]">
         {rows.length > 0 ? (
@@ -1289,21 +1323,17 @@ function EditableTableModule({
                       <td
                         key={column.key}
                         className={`border-r border-tp-slate-100 p-0 align-middle transition-colors ${
-                          activeCell?.rowId === row.id && activeCell?.colKey === column.key ? "bg-tp-blue-50/20" : ""
-                        } ${isUngroundedCell ? "bg-[rgba(255,196,87,0.06)]" : ""}`}
+                          activeCell?.rowId === row.id && activeCell?.colKey === column.key
+                            ? "bg-tp-blue-50/20"
+                            : isUngroundedCell
+                              ? "bg-[rgba(217,119,6,0.07)]"
+                              : ""
+                        }`}
                         style={getResponsiveColumnStyle(column)}
                       >
                         <div className="relative h-[52px]">
                           {activeCell?.rowId === row.id && activeCell?.colKey === column.key ? (
                             <span className="pointer-events-none absolute inset-[2px] z-10 rounded-[6px] border border-tp-blue-500 shadow-[0_0_0_2px_rgba(75,74,213,0.16)]" />
-                          ) : isUngroundedCell ? (
-                            // Yellowish stroke + soft tint — only on the
-                            // primary "name" cell of medications / lab
-                            // investigations that were filled by voice
-                            // copy and haven't been grounded to a DB
-                            // entry yet. Cleared once the doctor picks
-                            // an option from the dropdown.
-                            <span className="pointer-events-none absolute inset-[2px] z-10 rounded-[6px] border border-[rgba(217,119,6,0.45)] shadow-[0_0_0_2px_rgba(217,119,6,0.10)]" />
                           ) : null}
                           {isMultiline ? (
                             <textarea
@@ -1630,25 +1660,12 @@ function EditableTableModule({
                               }}
                             />
                           )}
-                          {hasDropdown && (showDropdownToggle || isUngroundedCell) ? (
-                            <TPTooltip
-                              title={
-                                isUngroundedCell
-                                  ? "Filled from voice — pick an exact match from the drug DB to ground this entry"
-                                  : "Use ↑ ↓ to navigate options, press Enter to select"
-                              }
-                              placement="top"
-                              arrow
-                            >
+                          {hasDropdown && showDropdownToggle ? (
+                            <TPTooltip title="Use ↑ ↓ to navigate options, press Enter to select" placement="top" arrow>
                               <button
                                 type="button"
-                                aria-label={isUngroundedCell ? "Pick from drug DB" : "Toggle options"}
-                                className={[
-                                  "absolute right-[6px] top-1/2 z-10 inline-flex h-[20px] w-[20px] -translate-y-1/2 items-center justify-center transition-colors",
-                                  isUngroundedCell
-                                    ? "text-[#D97706] hover:text-[#B45309]"
-                                    : "text-tp-slate-500",
-                                ].join(" ")}
+                                aria-label="Toggle options"
+                                className="absolute right-[6px] top-1/2 z-10 inline-flex h-[20px] w-[20px] -translate-y-1/2 items-center justify-center text-tp-slate-500 transition-colors"
                                 onMouseDown={(event) => event.preventDefault()}
                                 onClick={() => {
                                   const inputNode = inputRefs.current[key]
@@ -1668,15 +1685,11 @@ function EditableTableModule({
                                   )
                                 }}
                               >
-                                {isUngroundedCell ? (
-                                  <Info size={14} strokeWidth={2} className="vrx-grounding-info" />
-                                ) : (
-                                  <ChevronDown
-                                    size={14}
-                                    strokeWidth={1.5}
-                                    className={`transition-transform duration-150 ${isMenuOpen ? "rotate-180" : ""}`}
-                                  />
-                                )}
+                                <ChevronDown
+                                  size={14}
+                                  strokeWidth={1.5}
+                                  className={`transition-transform duration-150 ${isMenuOpen ? "rotate-180" : ""}`}
+                                />
                               </button>
                             </TPTooltip>
                           ) : null}
