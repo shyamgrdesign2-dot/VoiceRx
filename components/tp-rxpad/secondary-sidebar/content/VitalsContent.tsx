@@ -271,9 +271,15 @@ function VitalsDateCard({
                   return (
                     <span
                       className={clsx(
-                        "flex shrink-0 items-center gap-[4px] whitespace-nowrap font-sans font-semibold text-[14px] leading-[20px]",
+                        // Reserve enough room for the arrow + value so
+                        // the glyph never wraps onto a second line.
+                        // Shimmer is intentionally NOT applied to the
+                        // value when it's abnormal — red stays solid
+                        // red so the out-of-range state still reads
+                        // at a glance even mid-shimmer cycle.
+                        "flex shrink-0 items-center justify-end gap-[4px] whitespace-nowrap font-sans font-semibold text-[14px] leading-[20px] min-w-[60px]",
                         dir ? "text-tp-error-500" : "text-tp-slate-700",
-                        historicalInlineTextClass(row.isHighlighted, row.isFresh, false, shimmerActive),
+                        !dir && historicalInlineTextClass(row.isHighlighted, row.isFresh, false, shimmerActive),
                       )}
                     >
                       {/* Red ↑/↓ glyph on the LEFT of the value when

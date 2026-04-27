@@ -184,7 +184,18 @@ function LabRow({
             {unit}
           </span>
         </div>
-        <span className={clsx("flex shrink-0 items-center gap-[4px] whitespace-nowrap font-sans font-normal text-[14px] leading-[20px]", abnormal ? "text-tp-error-500 font-medium" : "text-tp-slate-700", historicalInlineTextClass(isHighlighted, isFresh))}>
+        <span
+          className={clsx(
+            // Reserve enough room for the arrow + value so the glyph
+            // never gets pushed onto a second line when the row is
+            // narrow. Shimmer is intentionally NOT applied here when
+            // the value is abnormal — red stays solid red so the
+            // out-of-range state still reads at a glance.
+            "flex shrink-0 items-center justify-end gap-[4px] whitespace-nowrap font-sans font-normal text-[14px] leading-[20px] min-w-[60px]",
+            abnormal ? "text-tp-error-500 font-medium" : "text-tp-slate-700",
+            !abnormal && historicalInlineTextClass(isHighlighted, isFresh),
+          )}
+        >
           {/* Red ↑/↓ glyph sits to the LEFT of the result value when
               the lab is outside its reference range — instantly tells
               the doctor whether the patient is over or under range. */}
