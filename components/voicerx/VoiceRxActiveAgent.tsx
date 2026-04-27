@@ -431,9 +431,20 @@ export function VoiceRxActiveAgent({
     return raw.replace(/^(Doctor|Patient):\s*/gim, "").replace(/\n+/g, " ").trim()
   }, [mode])
   const liveHasText = !!transcript && transcript.trim().length > 0
-  const effectiveTranscript = liveHasText
+  const rawEffectiveTranscript = liveHasText
     ? transcript
     : (isAwaitingResponse ? fallbackScripted : transcript)
+  // Freeze the transcript while a critical block (mic unavailable /
+  // offline) is showing — neither add new dummy words nor wipe what the
+  // doctor already captured. The blurred backdrop should hold steady
+  // until they dismiss the error / regain access.
+  const frozenTranscriptRef = useRef<string | null>(null)
+  if (criticalBlock) {
+    if (frozenTranscriptRef.current === null) frozenTranscriptRef.current = rawEffectiveTranscript
+  } else if (frozenTranscriptRef.current !== null) {
+    frozenTranscriptRef.current = null
+  }
+  const effectiveTranscript = frozenTranscriptRef.current ?? rawEffectiveTranscript
   const hasTranscript = !!effectiveTranscript && effectiveTranscript.trim().length > 0
 
   // ── Slim rAF loop — publishes the `--vrx-live-level` CSS variable
@@ -619,7 +630,7 @@ export function VoiceRxActiveAgent({
                action row all stay in place so the doctor can still go
                back / collapse / cancel during processing. */}
           {bottomLoaderActive ? (
-            <div className={cn("vrx-transcript-zone-in relative flex min-h-0 flex-1 flex-col items-stretch justify-start", isCompactLayout ? "px-[16px] pt-[88px] pb-[12px]" : "px-[24px] pt-[100px] pb-[16px]", isHandoffExiting && "vrx-shiner-handoff-exit")}>
+            <div className={cn("vrx-transcript-zone-in relative flex min-h-0 flex-1 flex-col items-stretch justify-center gap-[14px]", isCompactLayout ? "px-[16px] pt-[64px] pb-[12px]" : "px-[24px] pt-[80px] pb-[16px]", isHandoffExiting && "vrx-shiner-handoff-exit")}>
               {/* Mock transformed transcript — for the demo, the shiner
                   card always shows curated content so the visual is
                   predictable regardless of the live mic state. */}
@@ -627,6 +638,37 @@ export function VoiceRxActiveAgent({
                 mode={mode === "ambient_consultation" ? "ambient_consultation" : "dictation"}
                 transcript={mode === "ambient_consultation" ? MOCK_AMBIENT_TRANSCRIPT : MOCK_DICTATION_TRANSCRIPT}
               />
+              {/* Caption + progress bar sit RIGHT BELOW the shiner card so
+                  the two read as one tightly coupled "we're working" unit
+                  — earlier the loader anchored to the panel's bottom edge
+                  which left a large dead gap when the shiner was small. */}
+              <div className={cn("vrx-shiner-loader flex flex-col items-center gap-[10px]", isHandoffExiting && "vrx-bottom-loader--exit")}>
+                <CaptionCarousel />
+                <div className="vrx-progress-track relative h-[5px] w-[240px] overflow-hidden rounded-full bg-tp-slate-100/80 shadow-[0_0_0_1px_rgba(75,74,213,0.08),0_4px_14px_-6px_rgba(75,74,213,0.35)]">
+                  <span
+                    aria-hidden
+                    className="vrx-progress-fill absolute inset-y-0 left-0 block w-full rounded-full"
+                    style={{
+                      background:
+                        "linear-gradient(90deg, var(--ai-pink, #D565EA) 0%, var(--ai-violet, #673AAC) 50%, var(--ai-indigo, #1A1994) 100%)",
+                    }}
+                  />
+                  <span aria-hidden className="vrx-progress-sheen absolute inset-y-0 left-0 block w-[40%] rounded-full" />
+                </div>
+              </div>
+              <style>{`
+                .vrx-progress-sheen {
+                  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 50%, rgba(255,255,255,0) 100%);
+                  animation: vrxLoaderSheen 1.8s linear infinite;
+                }
+                @keyframes vrxLoaderSheen {
+                  0%   { transform: translateX(-120%); }
+                  100% { transform: translateX(360%); }
+                }
+                @media (prefers-reduced-motion: reduce) {
+                  .vrx-progress-sheen { animation: none; }
+                }
+              `}</style>
             </div>
           ) : (
           <div className={cn("relative flex min-h-0 flex-1 flex-col items-center justify-center", isCompactLayout ? "px-[16px] pt-[88px]" : "px-[24px] pt-[100px]", dockExiting && "vrx-transcript-zone--exit")}>
@@ -748,30 +790,11 @@ export function VoiceRxActiveAgent({
                (slide-down + fade) and is replaced by the CaptionCarousel
                loader sitting in its place at the bottom. */}
           {bottomLoaderActive ? (
-            /* Bottom-block replacement during processing — caption
-               carousel + progress bar slide up into the slot the dock
-               just vacated. The progress bar fills over ~7s (the time
-               between processing-phase enter and tabs reveal). */
-            <div className={cn("vrx-bottom-loader relative z-10 shrink-0 px-[18px] pb-[60px] pt-[22px]", isHandoffExiting && "vrx-bottom-loader--exit")}>
-              <div className="flex flex-col items-stretch gap-[12px]">
-                <div className="flex justify-center">
-                  <CaptionCarousel />
-                </div>
-                <div className="vrx-progress-track relative mx-auto h-[4px] w-[200px] overflow-hidden rounded-full bg-tp-slate-100/80">
-                  <span
-                    aria-hidden
-                    className="vrx-progress-fill absolute inset-y-0 left-0 block w-full rounded-full"
-                    style={{
-                      // AI-gradient fill — this loader sits BELOW the
-                      // shiner card (separate from the submit CTA),
-                      // so it carries the brand violet→indigo sweep.
-                      background:
-                        "linear-gradient(90deg, var(--ai-pink, #D565EA) 0%, var(--ai-violet, #673AAC) 50%, var(--ai-indigo, #1A1994) 100%)",
-                    }}
-                  />
-                </div>
-              </div>
-            </div>
+            // Loader is now rendered INSIDE the centered transcript zone
+            // above (right beneath the shiner card) so the two read as
+            // a single unit. Keep the bottom block empty during the
+            // processing phase rather than reserving a tall slot.
+            null
           ) : (
           <div className={cn("vrx-bottom-block relative z-10 shrink-0 overflow-visible", dockExiting && "vrx-bottom-block--exit")}>
             {/* Footer blob removed — it sat INSIDE the card shell and was

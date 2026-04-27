@@ -128,6 +128,15 @@ interface RxPadSyncContextValue {
    *  sees a single coordinated "Rx just got filled" affordance. */
   copyAllAuraActive: boolean
   flashCopyAllAura: () => void
+  /** True while a "copying to RxPad" overlay is showing — backdrop blur
+   *  + edge aura + caption — before the actual fill fires. Set by
+   *  {@link runCopyWithAura}. */
+  copyOverlayActive: boolean
+  /** Show the copy overlay for ~2.5s, then fire requestCopyToRxPad with
+   *  the given payload(s). Use this anywhere a doctor presses a copy /
+   *  "fill to RxPad" affordance so the action reads as a deliberate
+   *  AI-mediated transfer rather than an instant clipboard write. */
+  runCopyWithAura: (payload: RxPadCopyPayload | RxPadCopyPayload[], delayMs?: number) => void
   /** Label of the module (or sidebar section) currently running an inline
    *  voice recorder, or null when none is active. Used by VoiceRxFlow to
    *  extend the global voice-lock + tooltip to the module-level flow and
@@ -165,6 +174,8 @@ const RxPadSyncContext = createContext<RxPadSyncContextValue>({
   voiceActive: false,
   copyAllAuraActive: false,
   flashCopyAllAura: () => {},
+  copyOverlayActive: false,
+  runCopyWithAura: () => {},
   setVoiceActive: () => {},
   activeVoiceModule: null,
   setActiveVoiceModule: () => {},
@@ -195,6 +206,8 @@ export function RxPadSyncProvider({ children }: { children: React.ReactNode }) {
     if (copyAllAuraTimerRef.current) clearTimeout(copyAllAuraTimerRef.current)
     copyAllAuraTimerRef.current = setTimeout(() => setCopyAllAuraActive(false), 2000)
   }, [])
+  const [copyOverlayActive, setCopyOverlayActive] = useState(false)
+  const copyOverlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [activeVoiceModule, setActiveVoiceModule] = useState<string | null>(null)
   const [historicalUpdates, setHistoricalUpdates] = useState<HistoricalUpdatesState>({})
   const [historicalUnseen, setHistoricalUnseen] = useState<Partial<Record<NavItemId, boolean>>>({})
@@ -288,6 +301,32 @@ export function RxPadSyncProvider({ children }: { children: React.ReactNode }) {
     })
   }, [])
 
+  const runCopyWithAura = useCallback(
+    (payload: RxPadCopyPayload | RxPadCopyPayload[], delayMs = 2200) => {
+      // Show the overlay + edge aura immediately so the doctor reads
+      // the action as deliberate. After delayMs, fire the actual fill
+      // and tear the overlay back down. The aura runs slightly past the
+      // fill so the just-filled modules pulse against a still-warm rim.
+      setCopyOverlayActive(true)
+      setCopyAllAuraActive(true)
+      if (copyOverlayTimerRef.current) clearTimeout(copyOverlayTimerRef.current)
+      if (copyAllAuraTimerRef.current) clearTimeout(copyAllAuraTimerRef.current)
+      copyOverlayTimerRef.current = setTimeout(() => {
+        const payloads = Array.isArray(payload) ? payload : [payload]
+        for (const p of payloads) {
+          setCopySequence((prev) => {
+            const next = prev + 1
+            setLastCopyRequest({ id: next, payload: p })
+            return next
+          })
+        }
+        setCopyOverlayActive(false)
+      }, delayMs)
+      copyAllAuraTimerRef.current = setTimeout(() => setCopyAllAuraActive(false), delayMs + 1200)
+    },
+    [],
+  )
+
   const publishSignal = useCallback((signal: Omit<RxPadSignal, "id">) => {
     setSignalSequence((prev) => {
       const next = prev + 1
@@ -310,6 +349,8 @@ export function RxPadSyncProvider({ children }: { children: React.ReactNode }) {
       setVoiceActive,
       copyAllAuraActive,
       flashCopyAllAura,
+      copyOverlayActive,
+      runCopyWithAura,
       activeVoiceModule,
       setActiveVoiceModule,
       historicalUpdates,
@@ -333,6 +374,8 @@ export function RxPadSyncProvider({ children }: { children: React.ReactNode }) {
       voiceActive,
       copyAllAuraActive,
       flashCopyAllAura,
+      copyOverlayActive,
+      runCopyWithAura,
       activeVoiceModule,
       historicalUpdates,
       isHistoricalSectionUnseen,

@@ -328,9 +328,13 @@ export function VoiceTranscriptProcessingCard({
               // (Doctor/Patient turns) have more height variance and
               // benefit from a baseline minHeight so the card doesn't
               // jump around as bubbles cascade in.
+              // Explicit fixed height (instead of maxHeight) so the
+              // shiner card has a stable footprint that pairs cleanly
+              // with the centered parent — no large empty gap above the
+              // bottom loader, no jumping as bubbles cascade in.
               isAmbient
-                ? { maxHeight: "min(48vh, 460px)", minHeight: 220 }
-                : { maxHeight: "min(48vh, 460px)" }
+                ? { height: "min(52vh, 380px)" }
+                : { height: "min(38vh, 280px)" }
             }
           >
             {/* Bubbles render directly on the shiner card's slate-100

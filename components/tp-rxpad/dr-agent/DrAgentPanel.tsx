@@ -815,7 +815,7 @@ export function DrAgentPanel({
   }, [liveSupported, liveFinal, liveInterim, voiceRxScriptedTranscript])
 
   // ── Integration ──
-  const { requestCopyToRxPad, lastSignal, publishSignal, setPatientAllergies, setAiFillInProgress, pushHistoricalUpdates, activeVoiceModule, flashCopyAllAura } = useRxPadSync()
+  const { requestCopyToRxPad, lastSignal, publishSignal, setPatientAllergies, setAiFillInProgress, pushHistoricalUpdates, activeVoiceModule, runCopyWithAura } = useRxPadSync()
   const lastSignalIdRef = useRef<number>(0)
 
   // Scripted fallback — only when the browser can't do real live transcription.
@@ -873,13 +873,23 @@ export function DrAgentPanel({
     }
     onVoiceCaptureModeChange?.(voiceRxDialogChoice)
     setVoiceRxDialogOpen(false)
+    // Starting a fresh consultation clears any previously generated
+    // structured Rx — the doctor explicitly chose dictate/ambient again,
+    // so we should drop them straight into the recorder, not flip back
+    // into the old result tabs. They can still copy/edit on the RxPad
+    // independently; this CTA is for capturing a NEW Rx.
+    setVoiceRxResult(null)
+    setVoiceRxResultMinimized(false)
+    setVoiceRxScriptedTranscript("")
+    resetLiveTranscript()
+    setVoiceRxAwaitingResponse(false)
     setVoiceRxRecording(true)
     needsSnapshotSeedRef.current = true
     setMessagesByPatient((prev) => ({
       ...prev,
       [selectedPatientId]: [],
     }))
-  }, [voiceRxDialogChoice, onVoiceCaptureModeChange, selectedPatientId, setMessagesByPatient, activeVoiceModule])
+  }, [voiceRxDialogChoice, onVoiceCaptureModeChange, selectedPatientId, setMessagesByPatient, activeVoiceModule, resetLiveTranscript])
 
   const cancelVoiceRxRecording = useCallback(() => {
     if (voiceRxTimeoutRef.current) {
@@ -1471,7 +1481,10 @@ export function DrAgentPanel({
   // ── Fill to RxPad ──
   const handleCopy = useCallback((payload: unknown) => {
     if (payload && typeof payload === "object" && "sourceDateLabel" in payload) {
-      requestCopyToRxPad(payload as RxPadCopyPayload)
+      // Show the copy overlay + edge aura for ~2.5s, THEN fire the
+      // actual fill — reads as a deliberate AI-mediated transfer
+      // instead of an instant clipboard write.
+      runCopyWithAura(payload as RxPadCopyPayload)
       // Also persist to sessionStorage so RxPad can pick it up if opened later
       try {
         const existing = sessionStorage.getItem("pendingRxPadCopy")
@@ -1480,7 +1493,7 @@ export function DrAgentPanel({
         sessionStorage.setItem("pendingRxPadCopy", JSON.stringify(arr))
       } catch { /* ignore storage errors */ }
     }
-  }, [requestCopyToRxPad])
+  }, [runCopyWithAura])
 
   // ── Sidebar Navigation ──
   const handleSidebarNav = useCallback((tab: string) => {
@@ -2238,18 +2251,15 @@ export function DrAgentPanel({
               emrCard={
                 <VoiceStructuredRxCard
                   data={voiceRxResult.structured}
-                  onCopy={(payload) => requestCopyToRxPad(payload)}
+                  onCopy={(payload) => runCopyWithAura(payload)}
                   hideHeader={true}
                 />
               }
               onCopyToRx={() => {
-                // Fire the edge aura for ~2s — the rxpad receives the
-                // bulk payload at the same time, but per-module pulses
-                // are suppressed so the doctor sees ONE coordinated
-                // "whole Rx just got filled" signal instead of every
-                // section ringing in parallel.
-                flashCopyAllAura()
-                requestCopyToRxPad(voiceRxResult.structured.copyAllPayload)
+                // 2.5s overlay + edge aura, THEN fire the bulk fill —
+                // reads as a single coordinated AI-mediated transfer
+                // instead of an instant clipboard-style write.
+                runCopyWithAura(voiceRxResult.structured.copyAllPayload)
               }}
               onBack={() => setVoiceRxResultMinimized(true)}
               onMinimize={onClose}

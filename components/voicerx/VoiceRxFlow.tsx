@@ -7,6 +7,7 @@ import { DrAgentFab } from "@/components/tp-rxpad/dr-agent/shell/DrAgentFab"
 import { DrAgentPanel } from "@/components/tp-rxpad/dr-agent/DrAgentPanel"
 import { VoiceRxLiveBorder } from "@/components/voicerx/VoiceRxLiveBorder"
 import { FullscreenAiOverlay } from "@/components/voicerx/FullscreenAiOverlay"
+import { CopyToRxPadOverlay } from "@/components/voicerx/CopyToRxPadOverlay"
 import { RxPreviewSidebar } from "@/components/voicerx/RxPreviewSidebar"
 import { FlashSnackbar } from "@/components/tp-ui/flash-snackbar"
 import { RxPad } from "@/components/rx/rxpad/RxPad"
@@ -30,7 +31,7 @@ function VoiceRxFlowInner() {
     [patientId],
   )
 
-  const { lastSignal, setVoiceActive, aiFillInProgress, activeVoiceModule, copyAllAuraActive } = useRxPadSync()
+  const { lastSignal, setVoiceActive, aiFillInProgress, activeVoiceModule, copyAllAuraActive, copyOverlayActive } = useRxPadSync()
   const [isVoicePanelOpen, setIsVoicePanelOpen] = useState(true)
   const [voicePanelOffset, setVoicePanelOffset] = useState(0)
   const [hasNudge, setHasNudge] = useState(false)
@@ -341,6 +342,11 @@ function VoiceRxFlowInner() {
           rgba(255,255,255,0.72) wash. */}
       <FullscreenAiOverlay active={aiFillInProgress} rightOffset={isVoicePanelOpen ? voicePanelOffset : 0} />
 
+      {/* Copy → RxPad overlay — soft backdrop blur + "Copying data into
+          RxPad…" caption shown for ~2.5s before any per-item / per-section
+          / Copy-All fill actually fires. Pairs with the edge aura below. */}
+      <CopyToRxPadOverlay active={copyOverlayActive} rightOffset={isVoicePanelOpen ? voicePanelOffset : 0} />
+
       {/* Rx Preview — slide-in panel (replaces the old /print-preview
           full-page route). Pattern matches the dental-model preview. */}
       <RxPreviewSidebar
@@ -360,7 +366,7 @@ function VoiceRxFlowInner() {
         //      replaces the per-module pulses for the bulk-fill action.
         // We still hide it while the AI-fill overlay is up so the
         // fullscreen loader stays the sole focal surface.
-        active={(!!voiceCaptureMode || copyAllAuraActive) && !aiFillInProgress}
+        active={(!!voiceCaptureMode || copyAllAuraActive || copyOverlayActive) && !aiFillInProgress}
         rightOffset={isVoicePanelOpen ? voicePanelOffset : 0}
       />
 
