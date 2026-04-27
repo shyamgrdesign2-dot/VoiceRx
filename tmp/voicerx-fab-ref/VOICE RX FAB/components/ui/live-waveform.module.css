@@ -1,0 +1,9 @@
+.root {
+  width: 100%;
+  min-width: 0;
+}
+
+.canvas {
+  display: block;
+  width: 100%;
+}
