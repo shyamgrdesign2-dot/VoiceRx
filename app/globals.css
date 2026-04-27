@@ -297,11 +297,11 @@
 }
 
 @keyframes tpHistoricalTextShimmer {
-  /* Mirrors `vrxCaptionShine` on the loader caption — sweep direction
-     and cadence in lock-step so the sidebar shimmer reads as the same
-     family. Continuous loop with no rest interval. */
-  0%   { background-position: 200% 0%; }
-  100% { background-position: -200% 0%; }
+  /* Same recipe as the loader caption shimmer, but the sweep travels
+     LEFT → RIGHT (highlight band enters from the left edge of the
+     text and exits on the right). Continuous loop, no rest interval. */
+  0%   { background-position: -200% 0%; }
+  100% { background-position: 200% 0%; }
 }
 
 @keyframes tpHistoricalLineGlow {

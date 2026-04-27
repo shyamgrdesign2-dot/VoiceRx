@@ -134,7 +134,7 @@ export function historicalInlineTextClass(
       "font-semibold bg-[linear-gradient(92deg,#D565EA_0%,#673AAC_58%,#1A1994_100%)] bg-[length:180%_100%] bg-clip-text text-transparent [animation:tpHistoricalTextIntro_1s_cubic-bezier(0.22,1,0.36,1)_2]",
     isHighlighted &&
       !isIntro &&
-      "[color:inherit] [background-image:linear-gradient(100deg,#45455c_0%,#45455c_32%,#D565EA_46%,#673AAC_50%,#1A1994_54%,#45455c_68%,#45455c_100%)] [background-size:200%_100%] bg-clip-text [-webkit-text-fill-color:transparent] [animation:tpHistoricalTextShimmer_2.4s_linear_infinite]",
+      "[color:inherit] [background-image:linear-gradient(100deg,#45455c_0%,#45455c_32%,#D565EA_46%,#673AAC_50%,#1A1994_54%,#45455c_68%,#45455c_100%)] [background-size:200%_100%] bg-clip-text [-webkit-text-fill-color:transparent] [animation:tpHistoricalTextShimmer_3s_linear_infinite]",
   )
 }
 
