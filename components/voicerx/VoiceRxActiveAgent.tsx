@@ -529,7 +529,7 @@ export function VoiceRxActiveAgent({
              plain dark label, no gradient fill. ────────────────────── */}
         <div className={cn("pointer-events-none absolute inset-x-0 top-0 z-30 flex items-center justify-between", isCompactLayout ? "px-[10px] pt-[12px]" : "px-[14px] pt-[14px]")}>
           <span
-              className="vrx-mode-heading pointer-events-auto relative flex items-center gap-[7px] rounded-[10px] py-[3px] pl-[5px] pr-[4px]"
+              className="vrx-mode-heading pointer-events-auto relative flex items-center gap-[7px] rounded-[10px] p-[5px]"
             style={{ animation: "vrxChipIn 320ms cubic-bezier(0.16,1,0.3,1) both" }}
           >
             <button
@@ -543,7 +543,7 @@ export function VoiceRxActiveAgent({
               </svg>
             </button>
             <span
-              className={cn("font-semibold leading-none text-tp-slate-700", isCompactLayout ? "text-[12.5px]" : "text-[13.5px]")}
+              className="text-[13.5px] font-semibold leading-none text-tp-slate-700"
               style={{ letterSpacing: "0.1px" }}
             >
               {mode === "ambient_consultation" ? "Conversation Mode" : "Dictation Mode"}

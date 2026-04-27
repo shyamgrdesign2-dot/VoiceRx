@@ -141,9 +141,9 @@ export function AgentHeader({
       >
         {/* Left: Dr. Agent brand tag — floating liquid-glass card with 10px radius */}
         <div className="pointer-events-auto relative z-10 flex items-center gap-[6px]">
-          <span className="vrx-agent-brand-tag relative flex items-center gap-[7px] rounded-[10px] py-[3px] pl-[6px] pr-[4px]">
+          <span className="vrx-agent-brand-tag relative flex items-center gap-[7px] rounded-[10px] p-[5px]">
             <span
-              className="relative inline-flex h-[22px] w-[22px] shrink-0 items-center justify-center overflow-hidden"
+              className="relative inline-flex h-[20px] w-[20px] shrink-0 items-center justify-center overflow-hidden"
               aria-hidden
               style={{ borderRadius: 7 }}
             >

@@ -126,7 +126,7 @@ export function VoiceRxResultTabs({
           consistently. Back arrow returns to chat; minimize collapses the
           rail. The mode label sits as a chip on the left. */}
       <div className="shrink-0 flex items-center justify-between gap-2 px-3 pt-3 pb-[12px]">
-        <span className="vrx-rt-mode-pill inline-flex items-center gap-[7px] rounded-[10px] py-[3px] pl-[5px] pr-[4px]">
+        <span className="vrx-rt-mode-pill inline-flex items-center gap-[7px] rounded-[10px] p-[5px]">
           <button
             type="button"
             onClick={onBack}
