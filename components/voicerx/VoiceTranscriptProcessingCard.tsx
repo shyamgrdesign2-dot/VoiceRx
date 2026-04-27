@@ -279,16 +279,17 @@ export function VoiceTranscriptProcessingCard({
   clinicalNotesSlot,
   onComplete,
 }: Props) {
-  // Phase machine. We START in `structuring`; `tabs` arrives at `totalMs`.
-  // The 3s "transcript morph in" handshake is owned by the Submit button
-  // spinner upstream — by the time this card mounts, the transcript text
-  // is ready to display.
-  const [phase, setPhase] = useState<Phase>("structuring")
+  // Phase machine — the inline structuring → tabs swap is gone. The
+  // shiner card stays on the transcript view for its entire lifetime;
+  // the next surface (the full result-tabs panel) takes over from the
+  // outer DrAgentPanel via `setVoiceRxResult` instead of morphing this
+  // card into a tab strip in place. We still fire `onComplete` on the
+  // same schedule so callers that gate other UI on it stay in sync.
+  const [phase] = useState<Phase>("structuring")
   const [activeTab, setActiveTab] = useState<TabId>("tp_emr")
 
   useEffect(() => {
     const t = window.setTimeout(() => {
-      setPhase("tabs")
       onComplete?.()
     }, totalMs - structuringMs)
     return () => window.clearTimeout(t)
@@ -321,7 +322,16 @@ export function VoiceTranscriptProcessingCard({
         {phase === "structuring" ? (
           <div
             className="relative flex flex-col overflow-y-auto p-[14px]"
-            style={{ maxHeight: "min(70vh, 560px)", minHeight: 280 }}
+            style={
+              // Dictation transcripts are often 1-2 short lines — let
+              // the card hug the content. Conversation transcripts
+              // (Doctor/Patient turns) have more height variance and
+              // benefit from a baseline minHeight so the card doesn't
+              // jump around as bubbles cascade in.
+              isAmbient
+                ? { maxHeight: "min(70vh, 560px)", minHeight: 280 }
+                : { maxHeight: "min(70vh, 560px)" }
+            }
           >
             {/* Bubbles render directly on the shiner card's slate-100
                 surface — no inner wrapper. The white doctor bubble +

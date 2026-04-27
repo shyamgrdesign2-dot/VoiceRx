@@ -96,15 +96,12 @@ export function useHistoricalSectionHighlights(sectionId: NavItemId) {
   }
 }
 
-export function historicalInlineHighlightClass(isHighlighted?: boolean, isFresh?: boolean) {
-  /* Highlighted rows always carry the rounded-corner padding. Fresh
-     rows additionally render an animated TP-AI wash + a thin gradient
-     left-rail so the new data is unambiguously visible — the previous
-     bg-clip-text-only treatment was too subtle on slate-700 text. */
-  return cn(
-    isHighlighted && "group relative w-full overflow-visible rounded-[6px]",
-    isHighlighted && isFresh && "tp-historical-row--fresh",
-  )
+export function historicalInlineHighlightClass(isHighlighted?: boolean, _isFresh?: boolean) {
+  /* Row-level wash + left rail removed — the freshness affordance now
+     lives only on the TEXT itself via the bg-clip shimmer in
+     `historicalInlineTextClass`. The row keeps just the rounded-corner
+     padding so the hit area still reads as a single row. */
+  return cn(isHighlighted && "group relative w-full overflow-visible rounded-[6px]")
 }
 
 /**
@@ -119,30 +116,25 @@ export function historicalInlineHighlightClass(isHighlighted?: boolean, isFresh?
  */
 export function historicalInlineTextClass(
   isHighlighted?: boolean,
-  isFresh?: boolean,
+  _isFresh?: boolean,
   isIntro = false,
-  isShimmering: boolean = Boolean(isFresh),
+  _isShimmering: boolean = false,
 ) {
-  const showShimmer = isFresh && isShimmering && !isIntro
+  // The shimmer is now driven solely by `isHighlighted` — a row that
+  // was filled by AI keeps its TP AI text shimmer for the lifetime of
+  // the visit (no auto-settle after 6.8s). The intro flicker still
+  // runs only on first arrival; the continuous sweep takes over from
+  // then on. Recipe + sweep direction match the loader caption
+  // (`vrxCaptionShine`) so both surfaces read as the same family.
   return cn(
     isHighlighted &&
       "inline-block rounded-[4px] px-[1px] transition-colors duration-500 ease-out",
     isHighlighted &&
-      isFresh &&
       isIntro &&
-      // 2-second TP AI flicker intro — fully gradient-coloured text
-      // for the first 2s after the row arrives. Repeats twice (1s × 2)
-      // so the doctor's eye lands on the freshly filled row before
-      // the continuous shimmer takes over.
       "font-semibold bg-[linear-gradient(92deg,#D565EA_0%,#673AAC_58%,#1A1994_100%)] bg-[length:180%_100%] bg-clip-text text-transparent [animation:tpHistoricalTextIntro_1s_cubic-bezier(0.22,1,0.36,1)_2]",
     isHighlighted &&
-      showShimmer &&
-      // Strong TP AI gradient sweep — gradient anchors at slate-700
-      // (fully readable) on either side, but the highlight band uses
-      // saturated AI palette stops with full opacity so the moving
-      // colour reads even at small text sizes. Drop-shadow gives a
-      // soft halo under the moving band.
-      "font-semibold [color:inherit] [background-image:linear-gradient(100deg,#334155_0%,#334155_28%,#D565EA_44%,#673AAC_50%,#1A1994_56%,#334155_72%,#334155_100%)] [background-size:240%_100%] bg-clip-text [-webkit-text-fill-color:transparent] [animation:tpHistoricalTextShimmer_2.4s_linear_infinite] [filter:drop-shadow(0_0_4px_rgba(103,58,172,0.18))]",
+      !isIntro &&
+      "[color:inherit] [background-image:linear-gradient(100deg,#45455c_0%,#45455c_32%,#D565EA_46%,#673AAC_50%,#1A1994_54%,#45455c_68%,#45455c_100%)] [background-size:200%_100%] bg-clip-text [-webkit-text-fill-color:transparent] [animation:tpHistoricalTextShimmer_2.4s_linear_infinite]",
   )
 }
 

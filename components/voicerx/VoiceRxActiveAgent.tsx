@@ -2,6 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
+import { playSubmitSound } from "@/lib/voice-rx-sounds"
 import {
   AlertCircle,
   Check,
@@ -956,7 +957,7 @@ export function VoiceRxActiveAgent({
               ) : (
               <button
                 type="button"
-                onClick={() => onSubmit({ durationMs: elapsedMs })}
+                onClick={() => { playSubmitSound(); onSubmit({ durationMs: elapsedMs }) }}
                 disabled={!canSubmit}
                 aria-label="Submit consultation"
                 className={cn(
@@ -1526,7 +1527,7 @@ export function VoiceRxActiveAgent({
             stream={stream} paused={paused} levelRef={levelRef} elapsedLabel={elapsedLabel}
             statusLabel={statusLabel} manualMute={manualMute} isAwaitingResponse={isAwaitingResponse}
             canSubmit={canSubmit} banner={miniBanner}
-            onToggleMute={() => setManualMute((v) => !v)} onSubmit={() => onSubmit({ durationMs: elapsedMs })}
+            onToggleMute={() => setManualMute((v) => !v)} onSubmit={() => { playSubmitSound(); onSubmit({ durationMs: elapsedMs }) }}
             onExpand={onExpand ?? (() => {})} onRequestCancel={handleRequestCancel}
           />,
           document.body,

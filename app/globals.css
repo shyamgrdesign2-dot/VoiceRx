@@ -297,57 +297,11 @@
 }
 
 @keyframes tpHistoricalTextShimmer {
-  0% { background-position: -180% center; }
-  54% { background-position: 180% center; }
-  100% { background-position: 180% center; }
-}
-
-/* Row-level affordance for newly-filled historical rows. The
-   bg-clip-text shimmer alone reads too softly on slate-700 text, so
-   we layer a wash + gradient rail + soft glow underneath. Fades out
-   over ~6.5s in lock-step with SHIMMER_TOTAL_MS in
-   useHistoricalSectionHighlights. */
-@keyframes tpHistoricalRowFreshWash {
-  0%   { background-position: 0% 50%; opacity: 0.85; }
-  50%  { background-position: 100% 50%; opacity: 1; }
-  100% { background-position: 200% 50%; opacity: 0.85; }
-}
-@keyframes tpHistoricalRowFreshFade {
-  0%, 88% { opacity: 1; }
-  100%    { opacity: 0; }
-}
-.tp-historical-row--fresh {
-  position: relative;
-  isolation: isolate;
-  padding-left: 6px;
-  background-image: linear-gradient(
-    100deg,
-    rgba(213, 101, 234, 0.10) 0%,
-    rgba(103, 58, 172, 0.10) 35%,
-    rgba(26, 25, 148, 0.08) 60%,
-    rgba(213, 101, 234, 0.10) 100%
-  );
-  background-size: 220% 100%;
-  background-repeat: no-repeat;
-  border-radius: 6px;
-  animation:
-    tpHistoricalRowFreshWash 3s ease-in-out infinite,
-    tpHistoricalRowFreshFade 6.8s ease-out forwards;
-}
-.tp-historical-row--fresh::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 4px;
-  bottom: 4px;
-  width: 2.5px;
-  border-radius: 2px;
-  background: linear-gradient(180deg, #D565EA 0%, #673AAC 50%, #1A1994 100%);
-  box-shadow: 0 0 8px rgba(103, 58, 172, 0.45);
-  pointer-events: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .tp-historical-row--fresh { animation: none; opacity: 1; }
+  /* Mirrors `vrxCaptionShine` on the loader caption — sweep direction
+     and cadence in lock-step so the sidebar shimmer reads as the same
+     family. Continuous loop with no rest interval. */
+  0%   { background-position: 200% 0%; }
+  100% { background-position: -200% 0%; }
 }
 
 @keyframes tpHistoricalLineGlow {

@@ -994,26 +994,21 @@ export function DrAgentPanel({
       // scripted conversation that the shiner card animates in — so the
       // doctor sees the same Doctor/Patient turns they just watched
       // morph in the active-agent panel, not the raw recording.
-      // Stage the handoff: play the shiner-exit for 320ms, THEN swap
-      // to the result tabs. The result-tabs entrance slides in from
-      // the top against the still-visible-but-leaving shiner.
-      const HANDOFF_EXIT_MS = 320
-      setVoiceRxHandoffExiting(true)
-      window.setTimeout(() => {
-        setVoiceRxResultMinimized(false)
-        setVoiceRxResult({
-          transcript: demoTranscript,
-          sections: resultSections,
-          clinicalNotesHtml: emrSectionsToHtml(resultSections),
-          durationMs: meta?.durationMs ?? 0,
-          structured,
-          modeLabel: voiceRxDialogChoice === "dictation_consultation" ? "Dictation Mode" : "Conversation Mode",
-        })
-
-        setVoiceRxAwaitingResponse(false)
-        setVoiceRxHandoffExiting(false)
-        voiceRxTimeoutRef.current = null
-      }, HANDOFF_EXIT_MS)
+      // Direct hand-off — no exit animation on the shiner. The
+      // result-tabs view mounts in place, which feels smoother than
+      // the previous staged 320ms slide-up + remount.
+      setVoiceRxHandoffExiting(false)
+      setVoiceRxResultMinimized(false)
+      setVoiceRxResult({
+        transcript: demoTranscript,
+        sections: resultSections,
+        clinicalNotesHtml: emrSectionsToHtml(resultSections),
+        durationMs: meta?.durationMs ?? 0,
+        structured,
+        modeLabel: voiceRxDialogChoice === "dictation_consultation" ? "Dictation Mode" : "Conversation Mode",
+      })
+      setVoiceRxAwaitingResponse(false)
+      voiceRxTimeoutRef.current = null
     }, VOICE_RX_LOADER_MS)
   }, [
     voiceRxLiveTranscript,

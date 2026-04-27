@@ -108,25 +108,17 @@ export function VoiceRxResultTabs({
   return (
     <div className="vrx-result-tabs vrx-result-tabs--enter relative flex h-full w-full flex-col bg-white">
       <style>{`
-        /* Result-tabs entrance — the panel as a whole drops in from
-           the top so it feels like the tabs are sliding down over the
-           shiner card. Inner rows (top bar, tabs strip, content) get
-           a tiny stagger so the eye reads "card first, then tabs,
-           then content". */
-        .vrx-result-tabs--enter { animation: vrxResultTabsIn 460ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-        .vrx-result-tabs--enter > div:nth-of-type(1) { animation: vrxResultTabsRowIn 480ms 60ms cubic-bezier(0.22, 1, 0.36, 1) both; }
-        .vrx-result-tabs--enter > div:nth-of-type(2) > div:first-child { animation: vrxResultTabsRowIn 520ms 140ms cubic-bezier(0.22, 1, 0.36, 1) both; }
+        /* Result-tabs entrance — quick fade in only. The earlier
+           staged slide-down (panel + rows) competed with the shiner
+           hand-off and read as a glitch; a plain fade hands off
+           cleanly. */
+        .vrx-result-tabs--enter { animation: vrxResultTabsIn 220ms ease-out both; }
         @keyframes vrxResultTabsIn {
-          0%   { opacity: 0; transform: translateY(-18px); }
-          100% { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes vrxResultTabsRowIn {
-          0%   { opacity: 0; transform: translateY(-12px); }
-          100% { opacity: 1; transform: translateY(0); }
+          0%   { opacity: 0; }
+          100% { opacity: 1; }
         }
         @media (prefers-reduced-motion: reduce) {
-          .vrx-result-tabs--enter,
-          .vrx-result-tabs--enter > div { animation: none; opacity: 1; transform: none; }
+          .vrx-result-tabs--enter { animation: none; opacity: 1; }
         }
 
       `}</style>
