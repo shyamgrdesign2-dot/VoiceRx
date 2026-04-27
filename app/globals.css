@@ -304,6 +304,33 @@
   100% { background-position: -200% 0%; }
 }
 
+/* Subtle white shimmer band painted OVER red (`text-tp-error-500`)
+   text — used on freshly-arrived abnormal vitals / lab values so the
+   red signal stays solid red while a soft white sweep passes through.
+   Same direction + cadence as `tpHistoricalTextShimmer`. */
+.tp-historical-red-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    currentColor 0%,
+    currentColor 38%,
+    rgba(255, 255, 255, 0.85) 50%,
+    currentColor 62%,
+    currentColor 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: tpHistoricalTextShimmer 4s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tp-historical-red-shimmer {
+    animation: none;
+    -webkit-text-fill-color: currentColor;
+    background-image: none;
+  }
+}
+
 @keyframes tpHistoricalLineGlow {
   0%, 100% {
     opacity: 0.52;

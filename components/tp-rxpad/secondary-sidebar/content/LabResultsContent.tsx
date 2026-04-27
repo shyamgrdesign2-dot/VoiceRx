@@ -186,14 +186,17 @@ function LabRow({
         </div>
         <span
           className={clsx(
-            // Reserve enough room for the arrow + value so the glyph
-            // never gets pushed onto a second line when the row is
-            // narrow. Shimmer is intentionally NOT applied here when
-            // the value is abnormal — red stays solid red so the
-            // out-of-range state still reads at a glance.
-            "flex shrink-0 items-center justify-end gap-[4px] whitespace-nowrap font-sans font-normal text-[14px] leading-[20px] min-w-[60px]",
+            // Hugs its own content (no fixed min-width) — short values
+            // like "84" stay snug next to the arrow. The arrow + value
+            // share one inline-flex row so the glyph can't wrap.
+            "flex shrink-0 items-center gap-[4px] whitespace-nowrap font-sans font-normal text-[14px] leading-[20px]",
             abnormal ? "text-tp-error-500 font-medium" : "text-tp-slate-700",
+            // Non-abnormal: AI gradient shimmer.
+            // Abnormal: subtle WHITE shimmer band over the red text so
+            // the out-of-range state still reads as red while the row
+            // is fresh.
             !abnormal && historicalInlineTextClass(isHighlighted, isFresh),
+            abnormal && isHighlighted && isFresh && "tp-historical-red-shimmer",
           )}
         >
           {/* Red ↑/↓ glyph sits to the LEFT of the result value when
