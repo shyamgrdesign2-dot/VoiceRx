@@ -297,11 +297,11 @@
 }
 
 @keyframes tpHistoricalTextShimmer {
-  /* Same recipe as the loader caption shimmer, but the sweep travels
-     LEFT → RIGHT (highlight band enters from the left edge of the
-     text and exits on the right). Continuous loop, no rest interval. */
-  0%   { background-position: -200% 0%; }
-  100% { background-position: 200% 0%; }
+  /* Mirrors `vrxCaptionShine` 1:1 — for a 200%-wide bg image,
+     `background-position: 200% → -200%` is the recipe that visually
+     sweeps the highlight band LEFT → RIGHT across the text. */
+  0%   { background-position: 200% 0%; }
+  100% { background-position: -200% 0%; }
 }
 
 @keyframes tpHistoricalLineGlow {
