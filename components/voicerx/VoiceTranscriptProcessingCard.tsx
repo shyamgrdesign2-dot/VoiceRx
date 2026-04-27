@@ -298,11 +298,20 @@ export function VoiceTranscriptProcessingCard({
   const isAmbient = mode === "ambient_consultation"
 
   return (
-    <div className="flex w-full flex-col gap-[10px]">
+    // Wrapper height is driven by the Dr. Agent panel's centered slot
+    // — 45% of the available chat-region height (with sensible min/max
+    // floors so it doesn't get tiny on short windows or balloon on tall
+    // monitors). The shiner shell + inner scroll inherit `h-full` from
+    // here, so the card scales naturally with the panel rather than
+    // sitting at a fixed pixel height.
+    <div
+      className="flex w-full min-h-0 flex-col gap-[10px]"
+      style={{ height: "45%", minHeight: 180, maxHeight: 480 }}
+    >
       {/* Card chrome: 16px radius, white base + rotating TP-blue shine.
           `vrx-shiner-enter` plays a one-shot fade/slide on mount. */}
       <div
-        className="vrx-shiner-enter relative w-full overflow-hidden rounded-[16px] bg-tp-slate-100/80"
+        className="vrx-shiner-enter relative flex w-full min-h-0 flex-1 flex-col overflow-hidden rounded-[16px] bg-tp-slate-100/80"
         style={{ boxShadow: "0 1px 2px rgba(15,23,42,0.04)" }}
       >
         {/* Static white outer ring is achieved by the bg-white above; the
@@ -321,21 +330,7 @@ export function VoiceTranscriptProcessingCard({
 
         {phase === "structuring" ? (
           <div
-            className="relative flex flex-col overflow-y-auto p-[14px]"
-            style={
-              // Dictation transcripts are often 1-2 short lines — let
-              // the card hug the content. Conversation transcripts
-              // (Doctor/Patient turns) have more height variance and
-              // benefit from a baseline minHeight so the card doesn't
-              // jump around as bubbles cascade in.
-              // Explicit fixed height (instead of maxHeight) so the
-              // shiner card has a stable footprint that pairs cleanly
-              // with the centered parent — no large empty gap above the
-              // bottom loader, no jumping as bubbles cascade in.
-              isAmbient
-                ? { height: "min(52vh, 380px)" }
-                : { height: "min(38vh, 280px)" }
-            }
+            className="relative flex min-h-0 flex-1 flex-col overflow-y-auto p-[14px]"
           >
             {/* Bubbles render directly on the shiner card's slate-100
                 surface — no inner wrapper. The white doctor bubble +
