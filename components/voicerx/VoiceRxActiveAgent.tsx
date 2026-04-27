@@ -948,9 +948,9 @@ export function VoiceRxActiveAgent({
                 >
                   <span
                     aria-hidden
-                    className="inline-block h-[18px] w-[18px] animate-spin rounded-full border-[2.5px] border-tp-violet-200 border-t-tp-violet-600"
+                    className="inline-block h-[18px] w-[18px] animate-spin rounded-full border-[2.5px] border-tp-slate-200 border-t-tp-slate-500"
                   />
-                  <span className="text-[13px] font-semibold tracking-[0.05px] text-tp-violet-700">
+                  <span className="text-[13px] font-semibold tracking-[0.05px] text-tp-slate-600">
                     Processing
                   </span>
                 </div>
