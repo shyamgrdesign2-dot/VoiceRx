@@ -2256,10 +2256,11 @@ export function DrAgentPanel({
                 />
               }
               onCopyToRx={() => {
-                // 2.5s overlay + edge aura, THEN fire the bulk fill —
-                // reads as a single coordinated AI-mediated transfer
-                // instead of an instant clipboard-style write.
-                runCopyWithAura(voiceRxResult.structured.copyAllPayload)
+                // Bulk Copy-All: edge gradient frames the fill, but
+                // per-module pulses are suppressed so the doctor sees
+                // ONE coordinated rim signal instead of every section
+                // ringing in parallel.
+                runCopyWithAura(voiceRxResult.structured.copyAllPayload, { bulk: true })
               }}
               onBack={() => setVoiceRxResultMinimized(true)}
               onMinimize={onClose}

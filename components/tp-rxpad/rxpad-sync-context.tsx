@@ -136,7 +136,10 @@ interface RxPadSyncContextValue {
    *  the given payload(s). Use this anywhere a doctor presses a copy /
    *  "fill to RxPad" affordance so the action reads as a deliberate
    *  AI-mediated transfer rather than an instant clipboard write. */
-  runCopyWithAura: (payload: RxPadCopyPayload | RxPadCopyPayload[], delayMs?: number) => void
+  runCopyWithAura: (
+    payload: RxPadCopyPayload | RxPadCopyPayload[],
+    opts?: { bulk?: boolean; delayMs?: number },
+  ) => void
   /** Label of the module (or sidebar section) currently running an inline
    *  voice recorder, or null when none is active. Used by VoiceRxFlow to
    *  extend the global voice-lock + tooltip to the module-level flow and
@@ -302,16 +305,28 @@ export function RxPadSyncProvider({ children }: { children: React.ReactNode }) {
   }, [])
 
   const runCopyWithAura = useCallback(
-    (payload: RxPadCopyPayload | RxPadCopyPayload[], delayMs = 2200) => {
-      // Show the overlay + edge aura immediately so the doctor reads
-      // the action as deliberate. After delayMs, fire the actual fill
-      // and tear the overlay back down. The aura runs slightly past the
-      // fill so the just-filled modules pulse against a still-warm rim.
+    (
+      payload: RxPadCopyPayload | RxPadCopyPayload[],
+      opts?: { bulk?: boolean; delayMs?: number },
+    ) => {
+      // Edge-gradient-only treatment — no backdrop blur, no caption.
+      // The aura fires for ~2s; the actual fill lands halfway through
+      // so the doctor sees the gradient activate, then the data appear.
+      // For BULK ("Copy all to RxPad") we also raise copyAllAuraActive
+      // so per-module pulses are suppressed (the edge rim becomes the
+      // single coordinated signal). For SINGLE-ITEM / per-section
+      // copies we leave it false — RxPadFunctional then runs its
+      // per-module flash + scroll-into-view as usual.
+      const delayMs = opts?.delayMs ?? 2000
+      const bulk = !!opts?.bulk
       setCopyOverlayActive(true)
-      setCopyAllAuraActive(true)
+      if (bulk) setCopyAllAuraActive(true)
       if (copyOverlayTimerRef.current) clearTimeout(copyOverlayTimerRef.current)
       if (copyAllAuraTimerRef.current) clearTimeout(copyAllAuraTimerRef.current)
-      copyOverlayTimerRef.current = setTimeout(() => {
+      // Fire the actual fill at the midpoint so the gradient frames
+      // the moment data lands.
+      const fillAt = Math.max(200, Math.round(delayMs * 0.45))
+      window.setTimeout(() => {
         const payloads = Array.isArray(payload) ? payload : [payload]
         for (const p of payloads) {
           setCopySequence((prev) => {
@@ -320,9 +335,11 @@ export function RxPadSyncProvider({ children }: { children: React.ReactNode }) {
             return next
           })
         }
-        setCopyOverlayActive(false)
-      }, delayMs)
-      copyAllAuraTimerRef.current = setTimeout(() => setCopyAllAuraActive(false), delayMs + 1200)
+      }, fillAt)
+      copyOverlayTimerRef.current = setTimeout(() => setCopyOverlayActive(false), delayMs)
+      if (bulk) {
+        copyAllAuraTimerRef.current = setTimeout(() => setCopyAllAuraActive(false), delayMs)
+      }
     },
     [],
   )

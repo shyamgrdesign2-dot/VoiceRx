@@ -6,6 +6,7 @@ import { Calendar2, Notepad2, Trash } from "iconsax-reactjs"
 import {
   ChevronDown,
   GripVertical,
+  Info,
   Plus,
   Search,
 } from "lucide-react"
@@ -84,6 +85,14 @@ type TableModuleConfig = {
   highlightedRowIds?: Set<string>
   /** Tooltip text for highlighted rows, keyed by row ID */
   highlightedRowTooltips?: Record<string, string>
+  /** Column key whose value must be grounded to a DB entry — only the
+   *  primary "name" cell of medications / lab investigations carries
+   *  this. When the row's id is in `ungroundedRowIds`, the cell renders
+   *  a yellow stroke + orange info icon; selecting an option from the
+   *  dropdown calls `onGroundRow` to clear the flag. */
+  groundedKey?: string
+  ungroundedRowIds?: Set<string>
+  onGroundRow?: (rowId: string) => void
 }
 
 type ActiveMenu = {
@@ -385,6 +394,9 @@ function EditableTableModule({
   moduleDataAttr,
   highlightedRowIds,
   highlightedRowTooltips,
+  groundedKey,
+  ungroundedRowIds,
+  onGroundRow,
 }: TableModuleConfig) {
   const isTablet = useTabletMode()
   const [searchText, setSearchText] = useState("")
@@ -1261,6 +1273,8 @@ function EditableTableModule({
                     )
                     const value = row[column.key] ?? ""
                     const displayValue = hasDropdown ? (editingCellValues[key] ?? value) : value
+                    const isUngroundedCell =
+                      column.key === groundedKey && !!ungroundedRowIds?.has(row.id)
                     const fieldClass = [
                       "h-[52px] w-full border-0 bg-transparent px-3 py-0",
                       "font-['Inter',sans-serif] text-[14px] leading-[20px] text-[#454551]",
@@ -1276,12 +1290,20 @@ function EditableTableModule({
                         key={column.key}
                         className={`border-r border-tp-slate-100 p-0 align-middle transition-colors ${
                           activeCell?.rowId === row.id && activeCell?.colKey === column.key ? "bg-tp-blue-50/20" : ""
-                        }`}
+                        } ${isUngroundedCell ? "bg-[rgba(255,196,87,0.06)]" : ""}`}
                         style={getResponsiveColumnStyle(column)}
                       >
                         <div className="relative h-[52px]">
                           {activeCell?.rowId === row.id && activeCell?.colKey === column.key ? (
                             <span className="pointer-events-none absolute inset-[2px] z-10 rounded-[6px] border border-tp-blue-500 shadow-[0_0_0_2px_rgba(75,74,213,0.16)]" />
+                          ) : isUngroundedCell ? (
+                            // Yellowish stroke + soft tint — only on the
+                            // primary "name" cell of medications / lab
+                            // investigations that were filled by voice
+                            // copy and haven't been grounded to a DB
+                            // entry yet. Cleared once the doctor picks
+                            // an option from the dropdown.
+                            <span className="pointer-events-none absolute inset-[2px] z-10 rounded-[6px] border border-[rgba(217,119,6,0.45)] shadow-[0_0_0_2px_rgba(217,119,6,0.10)]" />
                           ) : null}
                           {isMultiline ? (
                             <textarea
@@ -1392,6 +1414,13 @@ function EditableTableModule({
                                     setCellValue(row.id, column.key, pickedValue)
                                     if (isCustomOption(picked)) {
                                       registerCustomValue(pickedValue)
+                                    } else if (
+                                      groundedKey &&
+                                      column.key === groundedKey &&
+                                      ungroundedRowIds?.has(row.id)
+                                    ) {
+                                      // DB-backed option — ground row.
+                                      onGroundRow?.(row.id)
                                     }
                                     endDropdownEditing(key)
                                   }
@@ -1546,6 +1575,13 @@ function EditableTableModule({
                                     setCellValue(row.id, column.key, pickedValue)
                                     if (isCustomOption(picked)) {
                                       registerCustomValue(pickedValue)
+                                    } else if (
+                                      groundedKey &&
+                                      column.key === groundedKey &&
+                                      ungroundedRowIds?.has(row.id)
+                                    ) {
+                                      // DB-backed option — ground row.
+                                      onGroundRow?.(row.id)
                                     }
                                     endDropdownEditing(key)
                                   }
@@ -1594,12 +1630,25 @@ function EditableTableModule({
                               }}
                             />
                           )}
-                          {hasDropdown && showDropdownToggle ? (
-                            <TPTooltip title="Use ↑ ↓ to navigate options, press Enter to select" placement="top" arrow>
+                          {hasDropdown && (showDropdownToggle || isUngroundedCell) ? (
+                            <TPTooltip
+                              title={
+                                isUngroundedCell
+                                  ? "Filled from voice — pick an exact match from the drug DB to ground this entry"
+                                  : "Use ↑ ↓ to navigate options, press Enter to select"
+                              }
+                              placement="top"
+                              arrow
+                            >
                               <button
                                 type="button"
-                                aria-label="Toggle options"
-                                className="absolute right-[6px] top-1/2 z-10 inline-flex h-[20px] w-[20px] -translate-y-1/2 items-center justify-center text-tp-slate-500"
+                                aria-label={isUngroundedCell ? "Pick from drug DB" : "Toggle options"}
+                                className={[
+                                  "absolute right-[6px] top-1/2 z-10 inline-flex h-[20px] w-[20px] -translate-y-1/2 items-center justify-center transition-colors",
+                                  isUngroundedCell
+                                    ? "text-[#D97706] hover:text-[#B45309]"
+                                    : "text-tp-slate-500",
+                                ].join(" ")}
                                 onMouseDown={(event) => event.preventDefault()}
                                 onClick={() => {
                                   const inputNode = inputRefs.current[key]
@@ -1619,11 +1668,15 @@ function EditableTableModule({
                                   )
                                 }}
                               >
-                                <ChevronDown
-                                  size={14}
-                                  strokeWidth={1.5}
-                                  className={`transition-transform duration-150 ${isMenuOpen ? "rotate-180" : ""}`}
-                                />
+                                {isUngroundedCell ? (
+                                  <Info size={14} strokeWidth={2} className="vrx-grounding-info" />
+                                ) : (
+                                  <ChevronDown
+                                    size={14}
+                                    strokeWidth={1.5}
+                                    className={`transition-transform duration-150 ${isMenuOpen ? "rotate-180" : ""}`}
+                                  />
+                                )}
                               </button>
                             </TPTooltip>
                           ) : null}
@@ -1862,6 +1915,17 @@ function EditableTableModule({
                         if (activeMenu.rowId && activeMenu.colKey) {
                           setCellValue(activeMenu.rowId, activeMenu.colKey, value)
                           endDropdownEditing(`${activeMenu.rowId}:${activeMenu.colKey}`)
+                          // Picking a DB-suggested option for the
+                          // grounded column clears the ungrounded flag
+                          // — now we know this row maps to a real
+                          // formulary entry.
+                          if (
+                            groundedKey &&
+                            activeMenu.colKey === groundedKey &&
+                            ungroundedRowIds?.has(activeMenu.rowId)
+                          ) {
+                            onGroundRow?.(activeMenu.rowId)
+                          }
                         }
                         closeMenu()
                       }}
@@ -2044,6 +2108,20 @@ export function RxPadFunctional({ patientId = "__patient__" }: { patientId?: str
   // Full transcript-to-rows shaping arrives in the next phase; today's
   // cancel/submit both collapse the inline recorder back to the search row.
   const [voiceModuleId, setVoiceModuleId] = useState<string | null>(null)
+
+  // Grounding — row IDs whose primary "name" cell was filled by a copy
+  // payload but hasn't been confirmed against the drug / lab DB yet.
+  // Shared across modules (IDs are unique). Cleared per-row when the
+  // doctor selects an option from the dropdown for that cell.
+  const [ungroundedRowIds, setUngroundedRowIds] = useState<Set<string>>(() => new Set())
+  const groundRow = useCallback((rowId: string) => {
+    setUngroundedRowIds((prev) => {
+      if (!prev.has(rowId)) return prev
+      const next = new Set(prev)
+      next.delete(rowId)
+      return next
+    })
+  }, [])
   const handleVoiceToggle = useCallback((moduleId: string) => {
     setVoiceModuleId((current) => (current === moduleId ? null : moduleId))
   }, [])
@@ -2241,29 +2319,38 @@ export function RxPadFunctional({ patientId = "__patient__" }: { patientId?: str
     }
     const medicationsList = payload.medications ?? []
     if (medicationsList.length) {
-      setMedicationRows((prev) => [
-        ...prev,
-        ...medicationsList.map((item) => ({
-          id: getRowId("med"),
-          medicine: item.medicine,
-          unitPerDose: item.unitPerDose,
-          frequency: item.frequency,
-          when: item.when,
-          duration: item.duration,
-          note: item.note || `From ${sourceLabel}`,
-        })),
-      ])
+      const newMedRows = medicationsList.map((item) => ({
+        id: getRowId("med"),
+        medicine: item.medicine,
+        unitPerDose: item.unitPerDose,
+        frequency: item.frequency,
+        when: item.when,
+        duration: item.duration,
+        note: item.note || `From ${sourceLabel}`,
+      }))
+      setMedicationRows((prev) => [...prev, ...newMedRows])
+      // Mark each new medicine row as ungrounded — the doctor needs
+      // to pick a DB-backed option from the dropdown to confirm the
+      // exact formulary entry before this row is treated as canonical.
+      setUngroundedRowIds((prev) => {
+        const next = new Set(prev)
+        for (const r of newMedRows) next.add(r.id)
+        return next
+      })
     }
     const labInvestigationsList = payload.labInvestigations ?? []
     if (labInvestigationsList.length) {
-      setLabRows((prev) => [
-        ...prev,
-        ...labInvestigationsList.map((item) => ({
-          id: getRowId("lab"),
-          investigation: item,
-          note: `From ${sourceLabel}`,
-        })),
-      ])
+      const newLabRows = labInvestigationsList.map((item) => ({
+        id: getRowId("lab"),
+        investigation: item,
+        note: `From ${sourceLabel}`,
+      }))
+      setLabRows((prev) => [...prev, ...newLabRows])
+      setUngroundedRowIds((prev) => {
+        const next = new Set(prev)
+        for (const r of newLabRows) next.add(r.id)
+        return next
+      })
     }
     if (payload.advice) {
       setAdviceRows((prev) => [
@@ -2729,6 +2816,9 @@ export function RxPadFunctional({ patientId = "__patient__" }: { patientId?: str
         }}
         highlightedRowIds={interactionRowIds}
         highlightedRowTooltips={Object.fromEntries(tableInteractions.map((t) => [t.rowId, `⚠ ${t.description} — interacts with ${t.interactsWith}`]))}
+        groundedKey="medicine"
+        ungroundedRowIds={ungroundedRowIds}
+        onGroundRow={groundRow}
         cannedChips={[
           "Paracetamol 650mg",
           "Amoxicillin 500mg",
@@ -2785,6 +2875,9 @@ export function RxPadFunctional({ patientId = "__patient__" }: { patientId?: str
         voiceActive={voiceModuleId === "lab"}
         searchPlaceholder="Search & Add Lab Investigation"
         cannedChips={LAB_INVESTIGATION_BASE_OPTIONS}
+        groundedKey="investigation"
+        ungroundedRowIds={ungroundedRowIds}
+        onGroundRow={groundRow}
         getOptionTag={(option) => {
           const score = bestMatchPercent(
             option,

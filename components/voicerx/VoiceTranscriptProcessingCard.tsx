@@ -298,15 +298,18 @@ export function VoiceTranscriptProcessingCard({
   const isAmbient = mode === "ambient_consultation"
 
   return (
-    // Wrapper height is driven by the Dr. Agent panel's centered slot
-    // — 45% of the available chat-region height (with sensible min/max
-    // floors so it doesn't get tiny on short windows or balloon on tall
-    // monitors). The shiner shell + inner scroll inherit `h-full` from
-    // here, so the card scales naturally with the panel rather than
-    // sitting at a fixed pixel height.
+    // Conversation mode: ~50% of the Dr. Agent panel's centered slot
+    // (with sensible min/max floors). Dictation mode: hug content —
+    // the doctor's note is usually 1–2 short lines, no point reserving
+    // a tall slot for it. The shiner shell + inner scroll inherit
+    // h-full / flex-1 from here when sized, or wrap content otherwise.
     <div
       className="flex w-full min-h-0 flex-col gap-[10px]"
-      style={{ height: "45%", minHeight: 180, maxHeight: 480 }}
+      style={
+        isAmbient
+          ? { height: "50%", minHeight: 220, maxHeight: 520 }
+          : undefined
+      }
     >
       {/* Card chrome: 16px radius, white base + rotating TP-blue shine.
           `vrx-shiner-enter` plays a one-shot fade/slide on mount. */}
