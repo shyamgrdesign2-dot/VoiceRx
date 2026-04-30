@@ -103,6 +103,7 @@ export function ActionButton({
   const [voiceProcessingTranscript, setVoiceProcessingTranscript] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const rxSync = useRxPadSync();
+  const micDisabled = rxSync.micUnavailable && !isVoiceActive;
 
   const overlayActive = isVoiceActive || !!voiceProcessingTranscript;
   useEffect(() => {
@@ -248,28 +249,22 @@ export function ActionButton({
       {handleVoice ? (
         <button
           type="button"
-          onClick={handleVoice}
-          aria-label={`Dictate ${label}`}
-          title="Dictate"
-          // Keep this trigger clickable while THIS section is the one
-          // dictating, so the user can toggle the recorder off. When
-          // another section is active we mark `data-voice-block` so the
-          // global voice-lock captures the click and surfaces the
-          // "VoiceRx is active in …" tooltip instead of spawning a
-          // second recorder that would conflict with the live one.
+          onClick={micDisabled ? undefined : handleVoice}
+          aria-label={micDisabled ? (rxSync.micUnavailableReason ?? "Microphone unavailable") : `Dictate ${label}`}
+          title={micDisabled ? (rxSync.micUnavailableReason ?? "Microphone unavailable") : "Dictate"}
           {...(isVoiceActive
             ? { "data-voice-allow": true }
             : { "data-voice-block": true })}
-          aria-disabled={isVoiceActive || !!voiceProcessingTranscript}
+          aria-disabled={micDisabled || isVoiceActive || !!voiceProcessingTranscript}
           className={clsx(
             "inline-flex h-[36px] w-[36px] shrink-0 items-center justify-center transition-all",
-            isVoiceActive || voiceProcessingTranscript
-              ? "opacity-25 pointer-events-none"
-              : "hover:scale-[1.06] active:scale-[0.94]",
+            micDisabled
+              ? "opacity-30 cursor-not-allowed"
+              : isVoiceActive || voiceProcessingTranscript
+                ? "opacity-25 pointer-events-none"
+                : "hover:scale-[1.06] active:scale-[0.94]",
           )}
         >
-          {/* Naked animated-gradient wave — same pattern as the Rx module
-              header mic trigger. No background, no stroke. */}
           <span className="tp-voice-wave-icon" />
         </button>
       ) : null}

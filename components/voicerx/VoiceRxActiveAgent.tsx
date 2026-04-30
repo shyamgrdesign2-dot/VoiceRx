@@ -22,6 +22,7 @@ import {
 import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
+import { useRxPadSync } from "@/components/tp-rxpad/rxpad-sync-context"
 import { VoiceRxSiriWaveform } from "./VoiceRxSiriWaveform"
 import { VoiceRxMiniFab, type VoiceRxMiniFabBannerTone } from "./VoiceRxMiniFab"
 import { useNetConnection } from "./use-net-connection"
@@ -323,6 +324,12 @@ export function VoiceRxActiveAgent({
   const { stream, devices, error: micError, retry: retryMic } = useMicStream(selectedDeviceId, !isAwaitingResponse)
   const { activeDevice, activeLabel } = useActiveMic(stream, devices, selectedDeviceId)
   const levelRef = useRef(0)
+
+  const { setMicUnavailable } = useRxPadSync()
+  useEffect(() => {
+    setMicUnavailable(!!micError, micError || null)
+    return () => setMicUnavailable(false)
+  }, [micError, setMicUnavailable])
 
   useEffect(() => {
     if (!stream) return

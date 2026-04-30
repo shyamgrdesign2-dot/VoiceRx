@@ -146,6 +146,12 @@ interface RxPadSyncContextValue {
    *  by sibling modules to disable their own triggers. */
   activeVoiceModule: string | null
   setActiveVoiceModule: (label: string | null) => void
+  /** True when the microphone is unavailable (denied / no device / no API).
+   *  Set by VoiceRxActiveAgent; read by per-module voice icons to disable
+   *  themselves and show an explanatory tooltip. */
+  micUnavailable: boolean
+  micUnavailableReason: string | null
+  setMicUnavailable: (unavailable: boolean, reason?: string | null) => void
   /** Sidebar sections with unseen RxPad / sync updates (red dot on rail). */
   historicalUpdates: HistoricalUpdatesState
   isHistoricalSectionUnseen: (id: NavItemId) => boolean
@@ -182,6 +188,9 @@ const RxPadSyncContext = createContext<RxPadSyncContextValue>({
   setVoiceActive: () => {},
   activeVoiceModule: null,
   setActiveVoiceModule: () => {},
+  micUnavailable: false,
+  micUnavailableReason: null,
+  setMicUnavailable: () => {},
   historicalUpdates: {},
   isHistoricalSectionUnseen: () => false,
   pushHistoricalUpdates: () => {},
@@ -212,6 +221,12 @@ export function RxPadSyncProvider({ children }: { children: React.ReactNode }) {
   const [copyOverlayActive, setCopyOverlayActive] = useState(false)
   const copyOverlayTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [activeVoiceModule, setActiveVoiceModule] = useState<string | null>(null)
+  const [micUnavailable, setMicUnavailableRaw] = useState(false)
+  const [micUnavailableReason, setMicUnavailableReason] = useState<string | null>(null)
+  const setMicUnavailable = useCallback((unavailable: boolean, reason?: string | null) => {
+    setMicUnavailableRaw(unavailable)
+    setMicUnavailableReason(unavailable ? (reason ?? "Microphone unavailable") : null)
+  }, [])
   const [historicalUpdates, setHistoricalUpdates] = useState<HistoricalUpdatesState>({})
   const [historicalUnseen, setHistoricalUnseen] = useState<Partial<Record<NavItemId, boolean>>>({})
   const [lastUndoRequest, setLastUndoRequest] = useState<RxPadUndoRequest | null>(null)
@@ -370,6 +385,9 @@ export function RxPadSyncProvider({ children }: { children: React.ReactNode }) {
       runCopyWithAura,
       activeVoiceModule,
       setActiveVoiceModule,
+      micUnavailable,
+      micUnavailableReason,
+      setMicUnavailable,
       historicalUpdates,
       isHistoricalSectionUnseen,
       pushHistoricalUpdates,
@@ -394,6 +412,8 @@ export function RxPadSyncProvider({ children }: { children: React.ReactNode }) {
       copyOverlayActive,
       runCopyWithAura,
       activeVoiceModule,
+      micUnavailable,
+      micUnavailableReason,
       historicalUpdates,
       isHistoricalSectionUnseen,
       pushHistoricalUpdates,

@@ -318,14 +318,9 @@ type Props = {
 }
 
 export function NavPanel({ active, onSelect, voiceActiveSection }: Props) {
-  const { isHistoricalSectionUnseen, voiceActive } = useRxPadSync()
+  const { isHistoricalSectionUnseen } = useRxPadSync()
   const scrollRef = useRef<HTMLDivElement | null>(null)
   const [showScrollHint, setShowScrollHint] = useState(false)
-  // Combined recording flag — true if EITHER a Dr. Agent voice
-  // consultation is live OR a per-section recorder is recording.
-  // While true the rail items are voice-blocked so the global
-  // voice-lock surfaces "VoiceRx is active in …" if the user clicks.
-  const anyVoiceLive = voiceActive || !!voiceActiveSection
 
   useEffect(() => {
     const node = scrollRef.current
@@ -372,7 +367,6 @@ export function NavPanel({ active, onSelect, voiceActiveSection }: Props) {
             active={active === id}
             hasUnseen={isHistoricalSectionUnseen(id)}
             isVoiceRecording={voiceActiveSection === id}
-            voiceLocked={anyVoiceLive}
             onClick={onSelect}
           />
         ))}
@@ -386,50 +380,6 @@ export function NavPanel({ active, onSelect, voiceActiveSection }: Props) {
         </div>
       ) : null}
 
-      {/* Dr. Agent voice live → overlay a recording indicator + thin
-          voice-wave atop the blue navbar. Sits ABOVE the nav items so
-          the doctor sees an unmistakable cue that VoiceRx is on, even
-          while clicks are intercepted by the global voice-lock. The
-          per-section red dot stays where it is (on the active section)
-          — this only adds the rail-level signal. */}
-      {voiceActive ? (
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 top-0 z-40 flex flex-col items-center gap-[4px] pt-[6px]"
-        >
-          <span className="relative inline-flex h-[10px] w-[10px] items-center justify-center">
-            <span className="absolute inset-0 rounded-full bg-rose-400" />
-            <span
-              className="absolute inset-0 rounded-full bg-rose-400/60"
-              style={{ animation: "tpNavVoiceDot 1.4s ease-in-out infinite" }}
-            />
-          </span>
-          <div className="tp-nav-voicewave flex h-[12px] items-end gap-[2px]">
-            <span /><span /><span /><span /><span />
-          </div>
-          <style>{`
-            .tp-nav-voicewave > span {
-              display: block;
-              width: 2px;
-              border-radius: 2px;
-              background: linear-gradient(180deg, #fda4af 0%, #fb7185 100%);
-              animation: tpNavVoiceWave 0.9s ease-in-out infinite;
-            }
-            .tp-nav-voicewave > span:nth-child(1) { animation-delay: 0s;    height: 6px; }
-            .tp-nav-voicewave > span:nth-child(2) { animation-delay: 0.10s; height: 9px; }
-            .tp-nav-voicewave > span:nth-child(3) { animation-delay: 0.20s; height: 12px; }
-            .tp-nav-voicewave > span:nth-child(4) { animation-delay: 0.10s; height: 9px; }
-            .tp-nav-voicewave > span:nth-child(5) { animation-delay: 0s;    height: 6px; }
-            @keyframes tpNavVoiceWave {
-              0%, 100% { transform: scaleY(0.4); }
-              50%      { transform: scaleY(1);    }
-            }
-            @media (prefers-reduced-motion: reduce) {
-              .tp-nav-voicewave > span { animation: none; }
-            }
-          `}</style>
-        </div>
-      ) : null}
     </div>
   )
 }

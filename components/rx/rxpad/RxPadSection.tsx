@@ -8,6 +8,7 @@ import {
 } from "lucide-react"
 import { Eraser, Grid5, Ram, Trash } from "iconsax-reactjs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import { useRxPadSync } from "@/components/tp-rxpad/rxpad-sync-context"
 
 /**
  * RxPad Section Wrapper
@@ -69,6 +70,37 @@ export function RxPadSection({
   voiceActive = false,
   headerBadge,
 }: RxPadSectionProps) {
+  const { micUnavailable, micUnavailableReason } = useRxPadSync()
+  const micDisabled = micUnavailable && !voiceActive
+
+  const voiceIconButton = onVoiceClick ? (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          {...(voiceActive
+            ? { "data-voice-allow": true }
+            : { "data-voice-block": true })}
+          className={`inline-flex h-[36px] w-[36px] items-center justify-center transition-transform ${
+            micDisabled
+              ? "opacity-30 cursor-not-allowed"
+              : "hover:scale-[1.06] active:scale-[0.94]"
+          }`}
+          aria-label={micDisabled ? (micUnavailableReason ?? "Microphone unavailable") : voiceActive ? "Stop dictation" : "Dictate into this section"}
+          aria-disabled={micDisabled}
+          onClick={micDisabled ? undefined : onVoiceClick}
+        >
+          <span className="tp-voice-wave-icon" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="top" sideOffset={6} className="rounded-[6px] border-0 bg-tp-slate-900 px-2.5 py-1.5 text-[12px] leading-[1.45] text-white shadow-[0_8px_20px_-10px_rgba(15,23,42,0.45)]">
+        {micDisabled
+          ? (micUnavailableReason ?? "Microphone unavailable")
+          : voiceActive ? "Stop dictation" : `Dictate ${title.toLowerCase()} by voice`}
+      </TooltipContent>
+    </Tooltip>
+  ) : null
+
   return (
     <div className={`rounded-[16px] border border-tp-slate-100 bg-white ${voiceActive ? "tp-module-voice-active" : ""}`}>
       {/* Header */}
@@ -84,31 +116,16 @@ export function RxPadSection({
           {headerBadge}
         </div>
 
+        {onVoiceClick && !showHeaderActions ? (
+          <TooltipProvider delayDuration={200}>
+            {voiceIconButton}
+          </TooltipProvider>
+        ) : null}
+
         {showHeaderActions ? (
           <TooltipProvider delayDuration={200}>
           <div className="inline-flex items-center gap-[14px]">
-            {/* Per-module voice trigger — naked animated-gradient wave,
-                sits immediately before the Template icon. */}
-            {onVoiceClick ? (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    type="button"
-                    {...(voiceActive
-                      ? { "data-voice-allow": true }
-                      : { "data-voice-block": true })}
-                    className="inline-flex h-[36px] w-[36px] items-center justify-center transition-transform hover:scale-[1.06] active:scale-[0.94]"
-                    aria-label={voiceActive ? "Stop dictation" : "Dictate into this section"}
-                    onClick={onVoiceClick}
-                  >
-                    <span className="tp-voice-wave-icon" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top" sideOffset={6} className="rounded-[6px] border-0 bg-tp-slate-900 px-2.5 py-1.5 text-[12px] leading-[1.45] text-white shadow-[0_8px_20px_-10px_rgba(15,23,42,0.45)]">
-                  {voiceActive ? "Stop dictation" : `Dictate ${title.toLowerCase()} by voice`}
-                </TooltipContent>
-              </Tooltip>
-            ) : null}
+            {voiceIconButton}
             <Tooltip>
               <TooltipTrigger asChild>
                 <button

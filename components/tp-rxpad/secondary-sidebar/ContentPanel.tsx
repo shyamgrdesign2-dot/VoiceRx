@@ -94,12 +94,13 @@ function sectionHeaderAiLabel(activeId: NavItemId, title: string): string | null
 
 function SectionHeader({ title, activeId, onClose }: { title: string; activeId: NavItemId; onClose?: () => void }) {
   const headerSignalLabel = sectionHeaderAiLabel(activeId, title)
-  // Recording-aware collapse. If the per-section recorder is live OR a
-  // Dr. Agent voice consultation is running, collapsing the panel would
-  // tear down the recorder mid-sentence. Confirm first; on "Discard"
-  // we still call `onClose` so the parent owns the actual cleanup.
-  const { activeVoiceModule, voiceActive } = useRxPadSync()
-  const isVoiceLive = !!activeVoiceModule || voiceActive
+  // Recording-aware collapse. If a per-section recorder is live,
+  // collapsing the panel would tear down the recorder mid-sentence.
+  // Confirm first; on "Discard" we still call `onClose` so the
+  // parent owns the actual cleanup. Global VoiceRx FAB flow does NOT
+  // block collapse — it lives in its own panel.
+  const { activeVoiceModule } = useRxPadSync()
+  const isVoiceLive = !!activeVoiceModule
   const [confirmOpen, setConfirmOpen] = useState(false)
 
   const handleCollapseClick = () => {

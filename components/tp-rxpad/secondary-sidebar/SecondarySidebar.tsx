@@ -46,7 +46,7 @@ interface SecondarySidebarProps {
 
 export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect }: SecondarySidebarProps) {
   const [activeId, setActiveId] = useState<NavItemId | null>("pastVisits");
-  const { lastSignal, publishSignal, acknowledgeHistoricalSection, activeVoiceModule, voiceActive } = useRxPadSync()
+  const { lastSignal, publishSignal, acknowledgeHistoricalSection, activeVoiceModule } = useRxPadSync()
   const lastSignalIdRef = useRef<number>(0)
 
   useEffect(() => {
@@ -75,12 +75,11 @@ export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect
   const voiceActiveSection = activeVoiceModule ? activeId : null
 
   function handleSelect(id: NavItemId) {
-    // While ANY voice flow is recording (Dr. Agent voice OR a per-
-    // section dictation) the sidebar is locked to its current section
-    // — switching tabs in the middle of a recording would orphan the
-    // active recorder. The global voice-lock surfaces a tooltip so the
-    // doctor sees why the click was ignored.
-    if (voiceActive || activeVoiceModule) return
+    // While a per-section sidebar dictation is recording, the sidebar
+    // is locked to its current section — switching tabs mid-recording
+    // would orphan the active recorder. The global VoiceRx FAB flow
+    // does NOT block sidebar navigation; it lives in its own panel.
+    if (activeVoiceModule) return
     setActiveId((prev) => {
       if (prev === id && activeVoiceModule) return prev
       const next = prev === id ? null : id

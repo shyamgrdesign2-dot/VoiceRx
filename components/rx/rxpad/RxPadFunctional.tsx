@@ -1300,31 +1300,7 @@ function EditableTableModule({
       saveDisabled={!hasAnyData}
       onVoiceClick={onVoiceClick}
       voiceActive={voiceActive}
-      headerBadge={(() => {
-        const nodes: React.ReactNode[] = []
-        if (groundedKey && ungroundedRowIds && ungroundedRowIds.size > 0) {
-          const count = rows.reduce(
-            (acc, r) => (ungroundedRowIds.has(r.id) ? acc + 1 : acc),
-            0,
-          )
-          if (count > 0) {
-            nodes.push(
-              <TPTooltip
-                key="verify"
-                title={`${count} ${count === 1 ? "entry was" : "entries were"} filled from voice — pick a match from the ${title.toLowerCase()} list to verify each row`}
-                placement="top"
-                arrow
-              >
-                <span className="ml-[6px] inline-flex h-[22px] items-center gap-[5px] rounded-full bg-[rgba(217,119,6,0.12)] px-[8px] text-[12px] font-semibold uppercase tracking-[0.04em] text-[#B45309]">
-                  <Info size={11} strokeWidth={2.2} />
-                  {count} to verify
-                </span>
-              </TPTooltip>
-            )
-          }
-        }
-        return nodes.length ? <>{nodes}</> : null
-      })()}
+      headerBadge={null}
     >
       <div ref={moduleRootRef} data-rx-module-root="true" className="space-y-[18px]">
         {rows.length > 0 ? (
@@ -2348,6 +2324,8 @@ export function RxPadFunctional({ patientId = "__patient__", sectionConfig }: { 
       advice: "Avoid prolonged screen time. Maintain good posture while working at the desk. Follow up in one week if the symptoms persist.",
       lab: "Order a complete blood count, renal function test including KFT, and serum electrolytes to evaluate overall metabolic health.",
       surgery: "Schedule a fundoscopy examination to assess retinal health given the hypertension finding.",
+      additionalNotes: "Patient is anxious about the elevated blood pressure reading. Explained that a single reading is not diagnostic. Reassured and advised home monitoring.",
+      followUp: "Follow up in one week to recheck blood pressure and review lab results. If headache persists, consider referral to neurology.",
     }
     const mockTranscript = MOCK_TRANSCRIPTS[moduleId] ?? _transcript
     setVoiceModuleProcessing({ moduleId, transcript: mockTranscript })
@@ -2362,6 +2340,8 @@ export function RxPadFunctional({ patientId = "__patient__", sectionConfig }: { 
         advice: "Advice",
         lab: "Lab Investigations",
         surgery: "Procedures",
+        additionalNotes: "Additional Notes",
+        followUp: "Follow-up",
       }
 
       switch (moduleId) {
@@ -2428,6 +2408,12 @@ export function RxPadFunctional({ patientId = "__patient__", sectionConfig }: { 
             ...prev,
             { id: getRowId("surgery"), name: "Fundoscopy", note: "" },
           ])
+          break
+        case "additionalNotes":
+          setAdditionalNotes((prev) => prev ? `${prev}\n${mockTranscript}` : mockTranscript)
+          break
+        case "followUp":
+          setFollowUpNotes((prev) => prev ? `${prev}\n${mockTranscript}` : mockTranscript)
           break
       }
 
@@ -3320,21 +3306,56 @@ export function RxPadFunctional({ patientId = "__patient__", sectionConfig }: { 
           title="Additional Notes"
           icon={<Notepad2 size={24} variant="Bulk" color="var(--tp-violet-500)" />}
           showHeaderActions={false}
+          onVoiceClick={() => handleVoiceToggle("additionalNotes")}
+          voiceActive={voiceModuleId === "additionalNotes"}
         >
-          <textarea
-            value={additionalNotes}
-            onChange={(event) => setAdditionalNotes(event.currentTarget.value)}
-            rows={5}
-            className="w-full rounded-[10px] border border-tp-slate-300 bg-white px-3 py-2 text-[14px] font-['Inter',sans-serif] text-tp-slate-700 placeholder:text-tp-slate-400 transition-colors hover:border-tp-slate-400 focus:border-tp-blue-500 focus:outline-none focus:ring-2 focus:ring-tp-blue-500/20"
-            placeholder="Enter additional notes"
-          />
+          {voiceModuleId === "additionalNotes" ? (
+            <VoiceRxModuleRecorder
+              sectionLabel="Additional Notes"
+              onCancel={() => setVoiceModuleId(null)}
+              onSubmit={(transcript) => {
+                setVoiceModuleId(null)
+                handleVoiceSubmit("additionalNotes", transcript)
+              }}
+              radiusClassName="rounded-[14px]"
+            />
+          ) : null}
+          {voiceModuleProcessing?.moduleId === "additionalNotes" ? (
+            <VoiceRxSectionProcessing transcript={voiceModuleProcessing.transcript} sectionLabel="Additional Notes" />
+          ) : null}
+          <div className={voiceModuleId === "additionalNotes" || voiceModuleProcessing?.moduleId === "additionalNotes" ? "hidden" : ""}>
+            <textarea
+              value={additionalNotes}
+              onChange={(event) => setAdditionalNotes(event.currentTarget.value)}
+              rows={5}
+              className="w-full rounded-[10px] border border-tp-slate-300 bg-white px-3 py-2 text-[14px] font-['Inter',sans-serif] text-tp-slate-700 placeholder:text-tp-slate-400 transition-colors hover:border-tp-slate-400 focus:border-tp-blue-500 focus:outline-none focus:ring-2 focus:ring-tp-blue-500/20"
+              placeholder="Enter additional notes"
+            />
+          </div>
         </TPRxPadSection>
 
         <TPRxPadSection
           title="Follow-up"
           icon={<Calendar2 size={24} variant="Bulk" color="var(--tp-violet-500)" />}
           showHeaderActions={false}
+          onVoiceClick={() => handleVoiceToggle("followUp")}
+          voiceActive={voiceModuleId === "followUp"}
         >
+          {voiceModuleId === "followUp" ? (
+            <VoiceRxModuleRecorder
+              sectionLabel="Follow-up"
+              onCancel={() => setVoiceModuleId(null)}
+              onSubmit={(transcript) => {
+                setVoiceModuleId(null)
+                handleVoiceSubmit("followUp", transcript)
+              }}
+              radiusClassName="rounded-[14px]"
+            />
+          ) : null}
+          {voiceModuleProcessing?.moduleId === "followUp" ? (
+            <VoiceRxSectionProcessing transcript={voiceModuleProcessing.transcript} sectionLabel="Follow-up" />
+          ) : null}
+          <div className={voiceModuleId === "followUp" || voiceModuleProcessing?.moduleId === "followUp" ? "hidden" : ""}>
           <div className="space-y-2">
             <input
               type="date"
@@ -3367,6 +3388,7 @@ export function RxPadFunctional({ patientId = "__patient__", sectionConfig }: { 
                 </button>
               ))}
             </div>
+          </div>
           </div>
         </TPRxPadSection>
       </div>
