@@ -44,21 +44,11 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
     symptomCollectorData: {
       reportedAt: "Today, 10:15 AM",
       symptoms: [
-        { name: "Fever", duration: "3 days", severity: "High", notes: "Evening spikes" },
-        { name: "Dry Cough", duration: "2 days", severity: "Moderate", notes: "Night worsening" },
+        { name: "Fever", duration: "3 days", severity: "High" },
+        { name: "Dry Cough", duration: "2 days", severity: "Moderate" },
       ],
-      medicalHistory: ["Hypertension (3yr)", "Diabetes (2yr)"],
-      familyHistory: ["Diabetes (Father)"],
-      allergies: ["Dust (3yr)", "Gastric discomfort (2yr)"],
-      lifestyle: ["Smoking (2yr)", "Drinking (2yr)"],
-      questionsToDoctor: [
-        "Is my blood sugar level concerning?",
-        "Should I get a chest X-ray for the cough?",
-      ],
-      currentMedications: ["Telma 20mg (Twice daily)", "Metsmall 500mg (Once daily)"],
-      suggestedMeds: ["Paracetamol 650mg", "Azithromycin 500mg"],
-      lastVisitSummary: "last visited on 27 Jan'26 with fever, diagnosed Viral fever and Conjunctivitis, suggested Paracetamol 650mg and Azithromycin 500mg",
-      isNewPatient: false,
+      medicalHistory: ["Diabetes (2yr)"],
+      allergies: ["NSAID sensitivity"],
     },
   },
 
@@ -181,18 +171,6 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
       { name: "Vitamin D", value: "18", unit: "ng/mL", flag: "low", refRange: "30-100" },
     ],
     dueAlerts: [],
-    symptomCollectorData: {
-      reportedAt: "Today, 09:45 AM",
-      symptoms: [
-        { name: "Headache", duration: "4 days", severity: "Moderate", notes: "Frontal, throbbing" },
-        { name: "Photophobia", duration: "2 days", severity: "Mild" },
-      ],
-      medicalHistory: ["Migraine (episodic)"],
-      currentMedications: ["Sumatriptan 50mg (As needed)"],
-      suggestedMeds: ["Naproxen 250mg", "Vitamin D 60K"],
-      lastVisitSummary: "last visited on 15 Jan'26 with headache and photophobia, diagnosed Migraine without aura, suggested Naproxen 250mg and Vitamin D 60K",
-      isNewPatient: false,
-    },
     gynecData: {
       menarche: "13 years",
       lmp: "10 Feb'26",
@@ -243,14 +221,6 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
       { name: "Triglycerides", value: "195", unit: "mg/dL", flag: "high", refRange: "<150" },
     ],
     dueAlerts: ["ECG pending", "Lipid recheck overdue"],
-    symptomCollectorData: {
-      reportedAt: "Today, 08:15 AM",
-      symptoms: [
-        { name: "Fatigue", duration: "2 weeks", severity: "Moderate", notes: "" },
-        { name: "Poor Sleep quality", duration: "2 weeks", severity: "Mild", notes: "" },
-        { name: "Late meals", duration: "ongoing", severity: "Mild", notes: "" },
-      ],
-    },
     ophthalData: {
       vaRight: "6/9",
       vaLeft: "6/9",
@@ -292,10 +262,11 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
     symptomCollectorData: {
       reportedAt: "Today, 09:00 AM",
       symptoms: [
-        { name: "Pedal Edema", duration: "3 days", severity: "Mild", notes: "" },
-        { name: "Back Pain", duration: "2 days", severity: "Moderate", notes: "" },
-        { name: "Braxton-Hicks contractions", duration: "occasional", severity: "Mild", notes: "" },
+        { name: "Pedal Edema", duration: "3 days", severity: "Mild" },
+        { name: "Back Pain", duration: "2 days", severity: "Moderate" },
       ],
+      medicalHistory: ["Hypothyroid (2yr)"],
+      allergies: ["Sulfa drugs"],
     },
     obstetricData: {
       gravida: 1, para: 0, living: 0, abortion: 0, ectopic: 0,
@@ -352,9 +323,11 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
     symptomCollectorData: {
       reportedAt: "Today, 10:30 AM",
       symptoms: [
-        { name: "Dry Cough", duration: "3 days", severity: "Mild", notes: "" },
-        { name: "Reduced Appetite", duration: "1 week", severity: "Moderate", notes: "" },
+        { name: "Dry Cough", duration: "3 days", severity: "Mild" },
+        { name: "Reduced Appetite", duration: "1 week", severity: "Moderate" },
       ],
+      medicalHistory: ["Recurrent wheezing episodes (6mo)"],
+      allergies: ["Egg allergy"],
     },
     pediatricsData: {
       ageDisplay: "4 years",
@@ -404,10 +377,11 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
     symptomCollectorData: {
       reportedAt: "Today, 11:00 AM",
       symptoms: [
-        { name: "Heavy Menstrual Bleeding", duration: "6 months", severity: "Moderate", notes: "" },
-        { name: "Fatigue", duration: "6 months", severity: "Moderate", notes: "" },
-        { name: "Irregular Cycles", duration: "35-40 days", severity: "Mild", notes: "" },
+        { name: "Heavy Menstrual Bleeding", duration: "6 months", severity: "Moderate" },
+        { name: "Fatigue", duration: "6 months", severity: "Moderate" },
       ],
+      medicalHistory: ["Hypothyroid (on Thyronorm 75mcg)"],
+      allergies: ["Ibuprofen"],
     },
     gynecData: {
       menarche: "13 years",
@@ -434,24 +408,6 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
     labFlagCount: 0,
     keyLabs: [],
     dueAlerts: [],
-    symptomCollectorData: {
-      reportedAt: "Today, 09:30 AM",
-      symptoms: [
-        { name: "Knee Pain", duration: "1 week", severity: "Moderate", notes: "Right knee, worse on climbing stairs" },
-        { name: "Morning Stiffness", duration: "3 days", severity: "Mild", notes: "Lasts about 15-20 minutes" },
-      ],
-      medicalHistory: [
-        "Childhood asthma (resolved)",
-        "Appendectomy (2018)",
-      ],
-      allergies: ["Sulfonamides"],
-      currentMedications: [
-        "Vit D3 60K (weekly)",
-        "Calcium 500mg (daily)",
-      ],
-      lastVisitSummary: undefined,
-      isNewPatient: true,
-    },
   },
 
   // ═══════════════ 8. SURESH NAIR — Returning patient, NO symptom collector ═══════════════
@@ -655,21 +611,12 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
     symptomCollectorData: {
       reportedAt: "15 Mar'26, 09:12 AM",
       symptoms: [
-        { name: "Mild pedal oedema", duration: "1 week", severity: "mild" },
+        { name: "Pedal oedema", duration: "1 week", severity: "mild" },
         { name: "Fatigue", duration: "2 weeks", severity: "moderate" },
-        { name: "Reduced appetite", duration: "1 week", severity: "mild" },
       ],
-      medicalHistory: [
-        "CKD Stage 5 on peritoneal dialysis since Jan 2024",
-        "Type 2 Diabetes for 18 years (on insulin)",
-        "Heart attack in 2021 (stent placed)",
-        "High blood pressure (on medications)",
-      ],
-      familyHistory: ["Father had kidney disease", "Mother and brother have diabetes"],
-      allergies: ["Iodinated contrast dye (severe reaction)", "Cannot take Metformin (kidney)"],
-      lifestyle: ["Vegetarian, follows renal diet", "Dialysis at home (4 exchanges daily)"],
-      questionsToDoctor: ["Is my kidney function getting worse?", "Do I need to change my dialysis?", "Should I see a heart doctor?"],
-      currentMedications: ["Insulin injections", "Blood pressure pills", "EPO injections", "Phosphate binders", "Cholesterol tablet"],
+      medicalHistory: ["Type 2 Diabetes (18yr)"],
+      allergies: ["Sulfa drugs"],
+      questionsToDoctor: ["Is my kidney function getting worse?", "Do I need to change my dialysis?"],
     },
   },
 }

@@ -43,7 +43,7 @@ export function VoiceRxInPanelLoader({ modeLabel = "Conversation Mode", transcri
 
   return (
     <div className="relative flex h-full w-full flex-col bg-white">
-      <div className="shrink-0 flex items-center justify-between gap-2 px-3 pt-3 pb-2.5">
+      <div className="shrink-0 flex items-center justify-between gap-2 px-3 pt-[4px] pb-2.5">
         <span className={cn("vrx-rt-mode-pill inline-flex items-center gap-[7px] rounded-[10px] py-[5px] pl-[10px] pr-[12px]")}>
           <span className="text-[14px] font-semibold leading-none text-tp-slate-700" style={{ letterSpacing: "0.1px" }}>{modeLabel}</span>
         </span>

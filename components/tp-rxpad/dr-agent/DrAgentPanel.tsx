@@ -77,7 +77,6 @@ import { AgentHeader } from "./shell/AgentHeader"
 import { SessionHistoryDrawer } from "./shell/SessionHistoryDrawer"
 import { PatientSelector } from "./shell/PatientSelector"
 import { ChatThread } from "./chat/ChatThread"
-import { WelcomeScreen, type PageContext } from "./chat/WelcomeScreen"
 import { PillBar } from "./chat/PillBar"
 import { ChatInput } from "./chat/ChatInput"
 import { AttachPanel } from "./chat/AttachPanel"
@@ -643,6 +642,9 @@ interface DrAgentPanelProps {
   onVoiceCaptureModeChange?: (mode: VoiceConsultKind | null) => void
   /** Gradient header title override (e.g. VoiceRx) */
   headerBrandTitle?: string
+  /** When true, skip the welcome screen and auto-open the voice mode
+   *  bottom sheet on first render (Scenario 1: no symptom collector data). */
+  autoOpenBottomSheet?: boolean
 }
 
 const HOMEPAGE_COMMON_ID = "__homepage_common__"
@@ -676,6 +678,7 @@ export function DrAgentPanel({
   voiceRxMode = false,
   onVoiceCaptureModeChange,
   headerBrandTitle,
+  autoOpenBottomSheet = false,
 }: DrAgentPanelProps) {
   // ── Patient Context ──
   // In homepage mode with no patient, use a special common ID for operational context
@@ -728,6 +731,15 @@ export function DrAgentPanel({
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [voiceRxDialogOpen, setVoiceRxDialogOpen] = useState(false)
+  const autoOpenedRef = useRef(false)
+  const scFlowStartedRef = useRef<Set<string>>(new Set())
+  useEffect(() => {
+    if (autoOpenBottomSheet && isPanelVisible && voiceRxMode && !autoOpenedRef.current) {
+      autoOpenedRef.current = true
+      const timer = setTimeout(() => setVoiceRxDialogOpen(true), 800)
+      return () => clearTimeout(timer)
+    }
+  }, [autoOpenBottomSheet, isPanelVisible, voiceRxMode])
   const [voiceRxDialogChoice, setVoiceRxDialogChoice] = useState<VoiceConsultKind>("ambient_consultation")
   const [voiceRxRecording, setVoiceRxRecording] = useState(false)
   /** Scripted-demo transcript — used only as a fallback when the browser has no Web Speech API. */
@@ -1096,7 +1108,10 @@ export function DrAgentPanel({
   const voiceFirstTimeMode = voiceRxMode && !voiceHasFirstSubmission && !voiceRxRecording && !voiceRxAwaitingResponse
   // Centered greeting + inline CTA + canned card. Only shown when nothing
   // has been seeded into the thread yet.
-  const voiceEmptyState = voiceFirstTimeMode && messages.length === 0
+  // SKIP the welcome screen when symptom collector data exists — the doctor
+  // should see the auto-loaded patient report immediately (with loader).
+  const hasSymptomData = !!summary.symptomCollectorData?.symptoms?.length
+  const voiceEmptyState = voiceFirstTimeMode && messages.length === 0 && !hasSymptomData && !isTyping
 
   /** Glance intro still has inline pills under the bubble — hide context PillBar until cleared */
   const glanceInlinePillsActive = useMemo(
@@ -1170,23 +1185,66 @@ export function DrAgentPanel({
   // Note: we track whether messages exist for the current patient using a ref-derived flag
   // to avoid putting messagesByPatient in the dep array (which would cause infinite loops
   // since this effect itself sets messagesByPatient).
-  const hasMessagesForPatient = !!messagesByPatient[selectedPatientId]
+  const hasMessagesForPatient = (messagesByPatient[selectedPatientId]?.length ?? 0) > 0
   useEffect(() => {
     if (!hasMessagesForPatient) {
       let introMessages: RxAgentChatMessage[]
       if (voiceRxMode) {
-        // VoiceRx first-time experience: no canned intro. The doctor sees ONLY a
-        // "Start Consultation" CTA until they submit their first voice transcript.
-        introMessages = []
+        if (summary.symptomCollectorData?.symptoms?.length) {
+          introMessages = []
+          const scData = summary.symptomCollectorData
+          const patientName = patient.label
+          const pid = selectedPatientId
+          if (scFlowStartedRef.current.has(pid)) return
+          scFlowStartedRef.current.add(pid)
+
+          // Phase 1: SC card message immediately with shimmer text reveal
+          const nowIso = new Date().toISOString()
+          setMessagesByPatient((prev) => ({
+            ...prev,
+            [pid]: [
+              {
+                id: uid(),
+                role: "assistant" as const,
+                text: `${patientName} has shared pre-visit details via Symptom Collector.`,
+                rxOutput: { kind: "symptom_collector", data: scData },
+                createdAt: nowIso,
+                feedbackGiven: null,
+                shimmerReveal: true,
+              },
+            ],
+          }))
+
+          // Phase 2 (2.5s): follow-up message after card + feedback row have revealed
+          window.setTimeout(() => {
+            const replyIso = new Date().toISOString()
+            setMessagesByPatient((prev) => ({
+              ...prev,
+              [pid]: [
+                ...(prev[pid] || []),
+                {
+                  id: uid(),
+                  role: "assistant" as const,
+                  text: "Start consultation by **dictating** or having a **natural conversation** with the patient.\nTap **Start with Voice** below to begin.",
+                  createdAt: replyIso,
+                  feedbackGiven: null,
+                  hideFeedback: true,
+                  shimmerReveal: true,
+                },
+              ],
+            }))
+          }, 2500)
+          return
+        } else {
+          introMessages = []
+        }
       } else if (mode === "homepage" && selectedPatientId === HOMEPAGE_COMMON_ID) {
-        // Homepage — no intro messages; WelcomeScreen handles the first-time experience
         introMessages = []
       } else if (
         mode === "homepage" &&
         selectedPatientId !== HOMEPAGE_COMMON_ID &&
         autoMessage?.trim() === QUICK_CLINICAL_SNAPSHOT_PROMPT
       ) {
-        // Appointment-row AI icon: parent auto-sends quick snapshot — skip intro so we don't duplicate the glance card
         return
       } else {
         introMessages = buildIntroMessages(summary, patient, showDoctorViewSelector ? doctorViewType : undefined, intakeMode, mode)
@@ -1975,12 +2033,8 @@ export function DrAgentPanel({
               </div>
 
               {/* ── Bottom zone: glassy "View patient shared details"
-                  pill anchored to the base of the empty state + a
-                  one-line trust marker beneath it. The pill is always
-                  rendered; clicking it surfaces the symptom-collector
-                  card if intake data exists, otherwise sends a canned
-                  "Reported by patient" query. ──────────────────────── */}
-              <div className="relative z-[1] flex flex-col items-center gap-[10px] w-full">
+                  pill — only shown when SC data exists ────────────── */}
+              {summary.symptomCollectorData && <div className="relative z-[1] flex flex-col items-center gap-[10px] w-full">
                 {/* Tooltip wrapper — group/chip provides the hover target
                     so the tooltip can live outside the overflow-hidden button */}
                 <div className="group/chip relative">
@@ -2048,33 +2102,40 @@ export function DrAgentPanel({
                         },
                       ],
                     }))
-                    setIsTyping(true)
+                    const replyIso = new Date().toISOString()
+                    setMessagesByPatient((prev) => ({
+                      ...prev,
+                      [selectedPatientId]: [
+                        ...(prev[selectedPatientId] || []),
+                        {
+                          id: uid(),
+                          role: "assistant" as const,
+                          text: "Here's what the patient reported via the symptom collector.",
+                          rxOutput: { kind: "symptom_collector" as const, data: summary.symptomCollectorData },
+                          createdAt: replyIso,
+                          feedbackGiven: null,
+                          shimmerReveal: true,
+                        },
+                      ],
+                    }))
                     window.setTimeout(() => {
-                      const replyIso = new Date().toISOString()
+                      const followUpIso = new Date().toISOString()
                       setMessagesByPatient((prev) => ({
                         ...prev,
                         [selectedPatientId]: [
                           ...(prev[selectedPatientId] || []),
                           {
                             id: uid(),
-                            role: "assistant",
-                            text: "Here's what the patient reported via the symptom collector.",
-                            rxOutput: { kind: "symptom_collector", data: summary.symptomCollectorData },
-                            createdAt: replyIso,
-                            feedbackGiven: null,
-                          },
-                          {
-                            id: uid(),
-                            role: "assistant",
+                            role: "assistant" as const,
                             text: "Start your consultation by dictating or having a natural conversation with the patient.",
-                            createdAt: replyIso,
+                            createdAt: followUpIso,
                             feedbackGiven: null,
                             hideFeedback: true,
+                            shimmerReveal: true,
                           },
                         ],
                       }))
-                      setIsTyping(false)
-                    }, 2400)
+                    }, 2500)
                   }}
                   className="vrx-patient-chip group relative flex items-center gap-[6px] overflow-hidden"
                   style={{
@@ -2167,7 +2228,7 @@ export function DrAgentPanel({
                   </svg>
                   Data stays private · shared only with you
                 </p>
-              </div>
+              </div>}
 
               <style>{`
                 @keyframes vrxEmptySparkRotate {
@@ -2205,18 +2266,6 @@ export function DrAgentPanel({
                 }
               `}</style>
             </div>
-          ) : messages.length === 0 && !isTyping && !voiceRxAwaitingResponse ? (
-            <WelcomeScreen
-              context={
-                mode === "homepage"
-                  ? (selectedPatientId === HOMEPAGE_COMMON_ID ? "homepage" : "patient_detail")
-                  : "rxpad"
-              }
-              patientName={selectedPatientId !== HOMEPAGE_COMMON_ID ? patient?.label : undefined}
-              hasIntake={!!summary.symptomCollectorData}
-              summary={selectedPatientId !== HOMEPAGE_COMMON_ID ? summary : undefined}
-              onActionClick={(msg) => handleSend(msg)}
-            />
           ) : (
             /* Chat messages. `isTyping || voiceRxAwaitingResponse` so the
                same in-chat TypingIndicator (rotating AI icon + carousel)

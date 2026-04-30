@@ -502,6 +502,7 @@ function ListSection({
         <CopyAffordance
           onCopy={onCopySection}
           className="ml-auto"
+          showOnHover={false}
           hideOnTouch
           copyHint={`Fill ${sectionDescriptions[title] ?? "all items"} to RxPad`}
           copiedLabel={`${title} copied to RxPad`}
@@ -567,6 +568,7 @@ function AdviceSection({
         <CopyAffordance
           onCopy={onCopy}
           className="ml-auto"
+          showOnHover={false}
           hideOnTouch
           copiedLabel="Advice copied to RxPad"
         />
@@ -606,6 +608,7 @@ function FollowUpSection({
         <CopyAffordance
           onCopy={onCopy}
           className="ml-auto"
+          showOnHover={false}
           hideOnTouch
           copiedLabel="Follow-up copied to RxPad"
         />

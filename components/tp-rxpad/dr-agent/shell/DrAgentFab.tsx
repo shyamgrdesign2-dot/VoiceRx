@@ -5,49 +5,24 @@ import { cn } from "@/lib/utils"
 
 interface DrAgentFabProps {
   onClick: () => void
-  /** Kept for API compat — the FAB intentionally no longer renders a
-   *  nudge dot (the chip itself is the nudge; a separate red pulse was
-   *  competing visually). Callers can keep passing this without effect. */
   hasNudge?: boolean
-  /** Kept for API compatibility — the FAB is NEVER rendered while recording
-   *  (the voice-consult MiniFab portals its own richer controller), so this
-   *  prop is effectively ignored. */
   isRecording?: boolean
-  /** Whether the parent agent panel is currently open. Used to coordinate
-   *  a smooth slide/fade exit animation so the FAB feels linked to the panel. */
   isPanelOpen?: boolean
-  /** When a per-module VoiceRxModuleRecorder is actively recording in a
-   *  sidebar section, the FAB switches to a "recording" treatment so the
-   *  doctor sees voice is still capturing even when focused elsewhere. */
   isModuleRecording?: boolean
 }
 
-/**
- * Reference organic-dome path — identical to the VoiceRx MiniFab (430×115
- * viewBox). Reusing the exact path + filter + gradient keeps the two
- * floating surfaces visually consistent — they read as the SAME family,
- * the MiniFab is just a scaled-up "expanded" sibling of this idle chip.
- */
-/** White 4-point spark — same AI glyph family used in the chat bubble &
- *  agent brand tag, with a subtle shimmer so the idle FAB feels alive. */
-function WhiteSparkIcon({ size = 36 }: { size?: number }) {
+function BrandSparkIcon({ size = 42 }: { size?: number }) {
   return (
     <svg
       width={size}
       height={size}
-      viewBox="4 4 16 16"
+      viewBox="0 0 375 375"
       fill="none"
       aria-hidden="true"
-      className="animate-[sparkShimmer_4s_ease-in-out_infinite]"
+      className="vrx-fab-spark-icon"
     >
-      <style>{`
-        @keyframes sparkShimmer {
-          0%, 100% { opacity: 0.88; transform: scale(1) rotate(0deg); }
-          50% { opacity: 1; transform: scale(1.12) rotate(15deg); }
-        }
-      `}</style>
       <path
-        d="M18.0841 11.612C18.4509 11.6649 18.4509 12.3351 18.0841 12.388C14.1035 12.9624 12.9624 14.1035 12.388 18.0841C12.3351 18.4509 11.6649 18.4509 11.612 18.0841C11.0376 14.1035 9.89647 12.9624 5.91594 12.388C5.5491 12.3351 5.5491 11.6649 5.91594 11.612C9.89647 11.0376 11.0376 9.89647 11.612 5.91594C11.6649 5.5491 12.3351 5.5491 12.388 5.91594C12.9624 9.89647 14.1035 11.0376 18.0841 11.612Z"
+        d="M290.387 195.649C240.198 200.476 200.481 240.165 195.649 290.32L187.497 375L179.351 290.326C174.521 240.179 134.803 200.478 84.6131 195.642L0 187.503L84.6199 179.358C134.807 174.53 174.519 134.834 179.351 84.6805L187.503 0L195.649 84.6737C200.479 134.821 240.197 174.522 290.387 179.358L375 187.497L290.387 195.649Z"
         fill="white"
       />
     </svg>
@@ -57,22 +32,6 @@ function WhiteSparkIcon({ size = 36 }: { size?: number }) {
 const FAB_PATH =
   "M395.24 23.6125C381.35 31.5666 366.81 41.5232 360.83 55.4195C352.63 74.3548 341.13 86.7689 319.47 86.769H110.53C88.87 86.7689 77.37 74.3548 69.17 55.4195C63.19 41.5232 48.62 31.5666 34.73 23.6125L28.43 20H401.32L395.24 23.6125Z"
 
-/**
- * DrAgentFab — idle floating chip on the right viewport edge, shown when
- * the VoiceRx panel is closed. Shares the SAME organic dome SVG family
- * as the VoiceRx MiniFab, scaled ~1.5× smaller and carrying only the
- * brand affordance: the animated chevron + "VoiceRx" label.
- *
- * Layout:
- *   • Outer  — fixed vertical box (SHELL_H × SHELL_W after rotation).
- *   • Inner  — rotated 90° so the horizontal dome reads vertical.
- *   • SVG    — dome path + drop-shadow + gradient (#D565EA → #673AAC → #1A1994).
- *   • HTML   — native overlay scaled in viewBox coords (the same trick
- *              used by the MiniFab) so the icon + label sit exactly
- *              inside the dome interior on every browser including iPad.
- *
- * Click reopens the panel via `onClick`.
- */
 function RecordingMicIcon({ size = 36 }: { size?: number }) {
   return (
     <svg
@@ -96,34 +55,34 @@ function RecordingMicIcon({ size = 36 }: { size?: number }) {
   )
 }
 
-export function DrAgentFab({ onClick, isPanelOpen, isModuleRecording }: DrAgentFabProps) {
-  // 1.5× smaller than the MiniFab's 346×100. Kept as integers so the
-  // browser doesn't introduce subpixel rounding artefacts on the shell.
+export function DrAgentFab({ onClick, hasNudge, isPanelOpen, isModuleRecording }: DrAgentFabProps) {
   const SHELL_W = 230
   const SHELL_H = 66
-  // The HTML overlay lives in raw viewBox (430×115) coordinates and is
-  // scaled to match the rendered shell. preserveAspectRatio="xMidYMid
-  // meet" centers the 92.5-px-tall path vertically inside the 66-px
-  // display, so we offset the HTML by the same amount.
-  const VB_H_SCALED = SHELL_W * (115 / 430)   // rendered path height
+  const VB_H_SCALED = SHELL_W * (115 / 430)
   const MEET_OFFSET_Y = (SHELL_H - VB_H_SCALED) / 2
   const SCALE = SHELL_W / 430
 
   const uid = useId()
   const shadowId = `${uid}-fab-shadow`
   const shellId = `${uid}-fab-shell`
+  const sheenId = `${uid}-fab-sheen`
+
+  const showShimmer = hasNudge && !isPanelOpen && !isModuleRecording
 
   return (
     <div
       className={cn(
         "group pointer-events-auto fixed z-40 cursor-pointer transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-        isPanelOpen ? "translate-x-[110%] opacity-0 pointer-events-none" : "translate-x-0 opacity-100"
+        isPanelOpen ? "opacity-0 pointer-events-none" : "opacity-100"
       )}
       style={{
-        bottom: 32,
+        top: "50%",
         right: 0,
-        width: SHELL_H,   // after 90° rotation, height-of-dome becomes visual width
-        height: SHELL_W,  // width-of-dome becomes visual height
+        width: SHELL_H,
+        height: SHELL_W,
+        transform: isPanelOpen
+          ? "translateY(-50%) translateX(110%)"
+          : "translateY(-50%)",
       }}
       role="button"
       tabIndex={0}
@@ -141,8 +100,6 @@ export function DrAgentFab({ onClick, isPanelOpen, isModuleRecording }: DrAgentF
         </div>
       </div>
 
-      {/* Inner rotated container — horizontal dome rotated 90° so it reads
-          vertically on the viewport edge. */}
       <div
         className="dr-agent-fab-inner absolute"
         style={{
@@ -154,7 +111,6 @@ export function DrAgentFab({ onClick, isPanelOpen, isModuleRecording }: DrAgentF
           transformOrigin: "center center",
         }}
       >
-        {/* SVG shell — path + drop shadow + gradient fill, identical to MiniFab */}
         <svg
           aria-hidden
           className="block overflow-visible"
@@ -197,23 +153,56 @@ export function DrAgentFab({ onClick, isPanelOpen, isModuleRecording }: DrAgentF
               <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow" />
               <feBlend in="SourceGraphic" in2="effect1_dropShadow" mode="normal" result="shape" />
             </filter>
-            {/* TP AI brand gradient — LEFT→RIGHT sweep across the dome's
-                long axis (pink → violet → indigo). */}
             <linearGradient id={shellId} x1="28.43" x2="401.32" y1="53" y2="53" gradientUnits="userSpaceOnUse">
-              <stop offset="0" stopColor="#D565EA" />
-              <stop offset="0.5" stopColor="#673AAC" />
-              <stop offset="1" stopColor="#1A1994" />
+              <stop offset="0" stopColor="#D565EA">
+                <animate attributeName="stop-color" values="#D565EA;#E88BF5;#D565EA" dur="6s" repeatCount="indefinite" />
+              </stop>
+              <stop offset="0.5" stopColor="#673AAC">
+                <animate attributeName="stop-color" values="#673AAC;#8B5CF6;#673AAC" dur="6s" repeatCount="indefinite" />
+              </stop>
+              <stop offset="1" stopColor="#1A1994">
+                <animate attributeName="stop-color" values="#1A1994;#3730A3;#1A1994" dur="6s" repeatCount="indefinite" />
+              </stop>
             </linearGradient>
+            {showShimmer && (
+              <>
+                <linearGradient id={sheenId} x1="0" y1="20" x2="430" y2="80" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stopColor="white" stopOpacity="0" />
+                  <stop offset="0.42" stopColor="white" stopOpacity="0" />
+                  <stop offset="0.5" stopColor="white" stopOpacity="0.22" />
+                  <stop offset="0.58" stopColor="white" stopOpacity="0" />
+                  <stop offset="1" stopColor="white" stopOpacity="0" />
+                </linearGradient>
+                <linearGradient id={`${sheenId}-b`} x1="0" y1="20" x2="430" y2="80" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stopColor="white" stopOpacity="0" />
+                  <stop offset="0.38" stopColor="white" stopOpacity="0" />
+                  <stop offset="0.5" stopColor="white" stopOpacity="0.14" />
+                  <stop offset="0.62" stopColor="white" stopOpacity="0" />
+                  <stop offset="1" stopColor="white" stopOpacity="0" />
+                </linearGradient>
+              </>
+            )}
           </defs>
 
           <g filter={`url(#${shadowId})`}>
             <path d={FAB_PATH} fill={`url(#${shellId})`} />
           </g>
+          {showShimmer && (
+            <>
+              <path
+                d={FAB_PATH}
+                fill={`url(#${sheenId})`}
+                className="vrx-fab-sheen"
+              />
+              <path
+                d={FAB_PATH}
+                fill={`url(#${sheenId}-b)`}
+                className="vrx-fab-sheen-b"
+              />
+            </>
+          )}
         </svg>
 
-        {/* HTML interior in viewBox coordinates, uniformly scaled to match
-            the SVG display. The chevron + label land precisely inside the
-            dome interior this way, on every browser (iPad included). */}
         <div
           style={{
             position: "absolute",
@@ -237,7 +226,13 @@ export function DrAgentFab({ onClick, isPanelOpen, isModuleRecording }: DrAgentF
               padding: "16px 60px 26px",
             }}
           >
-            {isModuleRecording ? <RecordingMicIcon size={42} /> : <WhiteSparkIcon size={42} />}
+            {isModuleRecording ? (
+              <RecordingMicIcon size={42} />
+            ) : (
+              <span className={showShimmer ? "vrx-fab-spark-pulse" : undefined}>
+                <BrandSparkIcon size={42} />
+              </span>
+            )}
             <span
               style={{
                 color: "white",
@@ -256,19 +251,54 @@ export function DrAgentFab({ onClick, isPanelOpen, isModuleRecording }: DrAgentF
       </div>
 
       <style>{`
-        @keyframes drAgentFabIn {
-          from { opacity: 0; transform: translateY(12px) scale(0.96); }
-          to   { opacity: 1; transform: translateY(0) scale(1); }
-        }
-        /* Hover: NO scale / translate. A subtle brightness lift instead,
-           so the chip doesn't "pop out" of the viewport edge the way the
-           old 1.06× scale made it. */
         .dr-agent-fab-inner {
           filter: brightness(1);
           transition: filter 180ms ease;
         }
         .group:hover .dr-agent-fab-inner {
           filter: brightness(1.12);
+        }
+
+        @keyframes vrxFabSheen {
+          0%   { transform: translateX(-140%); }
+          50%  { transform: translateX(140%); }
+          100% { transform: translateX(140%); }
+        }
+        .vrx-fab-sheen {
+          animation: vrxFabSheen 2.4s ease-in-out infinite;
+        }
+        .vrx-fab-sheen-b {
+          animation: vrxFabSheen 2.4s ease-in-out infinite;
+          animation-delay: 0.8s;
+        }
+
+        @keyframes vrxFabSparkPulse {
+          0%, 100% { opacity: 0.82; transform: scale(1); }
+          50%      { opacity: 1;    transform: scale(1.18); }
+        }
+        .vrx-fab-spark-pulse {
+          display: inline-flex;
+          animation: vrxFabSparkPulse 2.4s ease-in-out infinite;
+        }
+
+        @keyframes vrxFabSparkSpin {
+          0%   { transform: scale(1)    rotate(0deg);   opacity: 0.8;  filter: brightness(1); }
+          15%  { transform: scale(1.18) rotate(8deg);   opacity: 1;    filter: brightness(1.15); }
+          30%  { transform: scale(0.95) rotate(-3deg);  opacity: 0.85; filter: brightness(1); }
+          50%  { transform: scale(1.14) rotate(-6deg);  opacity: 1;    filter: brightness(1.1); }
+          65%  { transform: scale(1)    rotate(2deg);   opacity: 0.9;  filter: brightness(1); }
+          80%  { transform: scale(1.1)  rotate(5deg);   opacity: 1;    filter: brightness(1.12); }
+          100% { transform: scale(1)    rotate(0deg);   opacity: 0.8;  filter: brightness(1); }
+        }
+        .vrx-fab-spark-icon {
+          animation: vrxFabSparkSpin 3s ease-in-out infinite;
+          transform-origin: center;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .vrx-fab-sheen, .vrx-fab-sheen-b { animation: none; }
+          .vrx-fab-spark-pulse { animation: none; }
+          .vrx-fab-spark-icon { animation: none; }
         }
       `}</style>
     </div>

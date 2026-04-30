@@ -70,8 +70,17 @@ export function RxPadSection({
   voiceActive = false,
   headerBadge,
 }: RxPadSectionProps) {
-  const { micUnavailable, micUnavailableReason } = useRxPadSync()
+  const { micUnavailable, micUnavailableReason, voiceActive: globalVoiceActive } = useRxPadSync()
   const micDisabled = micUnavailable && !voiceActive
+  const globalLocked = globalVoiceActive && !voiceActive
+
+  const tooltipText = globalLocked
+    ? "VoiceRx is active — submit or close VoiceRx to use section dictation"
+    : micDisabled
+      ? (micUnavailableReason ?? "Microphone unavailable")
+      : voiceActive ? "Stop dictation" : `Dictate ${title.toLowerCase()} by voice`
+
+  const iconDisabled = micDisabled || globalLocked
 
   const voiceIconButton = onVoiceClick ? (
     <Tooltip>
@@ -82,21 +91,19 @@ export function RxPadSection({
             ? { "data-voice-allow": true }
             : { "data-voice-block": true })}
           className={`inline-flex h-[36px] w-[36px] items-center justify-center transition-transform ${
-            micDisabled
+            iconDisabled
               ? "opacity-30 cursor-not-allowed"
               : "hover:scale-[1.06] active:scale-[0.94]"
           }`}
-          aria-label={micDisabled ? (micUnavailableReason ?? "Microphone unavailable") : voiceActive ? "Stop dictation" : "Dictate into this section"}
-          aria-disabled={micDisabled}
-          onClick={micDisabled ? undefined : onVoiceClick}
+          aria-label={tooltipText}
+          aria-disabled={iconDisabled}
+          onClick={iconDisabled ? undefined : onVoiceClick}
         >
           <span className="tp-voice-wave-icon" />
         </button>
       </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={6} className="rounded-[6px] border-0 bg-tp-slate-900 px-2.5 py-1.5 text-[12px] leading-[1.45] text-white shadow-[0_8px_20px_-10px_rgba(15,23,42,0.45)]">
-        {micDisabled
-          ? (micUnavailableReason ?? "Microphone unavailable")
-          : voiceActive ? "Stop dictation" : `Dictate ${title.toLowerCase()} by voice`}
+      <TooltipContent side="top" sideOffset={6} className="max-w-[240px] rounded-[6px] border-0 bg-tp-slate-900 px-2.5 py-1.5 text-[12px] leading-[1.45] text-white shadow-[0_8px_20px_-10px_rgba(15,23,42,0.45)]">
+        {tooltipText}
       </TooltipContent>
     </Tooltip>
   ) : null

@@ -33,6 +33,7 @@ import {
 import { Heart, DocumentText1, Warning2, People, Notepad2, Calendar1 } from "iconsax-reactjs"
 
 import { AiBrandSparkIcon, AI_GRADIENT_SOFT } from "@/components/doctor-agent/ai-brand"
+import { SMART_SUMMARY_BY_CONTEXT as PANEL_SUMMARY_BY_CONTEXT } from "./dr-agent/mock-data"
 import {
   type AgentPatientContext,
   type AgentDynamicOutput,
@@ -612,12 +613,9 @@ const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
       symptoms: [
         { name: "Fever", duration: "3d", severity: "High" },
         { name: "Headache", duration: "2d" },
-        { name: "Body ache" },
       ],
-      medicalHistory: ["Diabetes 2 yrs (on medication, name unknown)"],
-      familyHistory: ["Father: Diabetes"],
-      allergies: ["Dust", "NSAID sensitivity"],
-      lifestyle: ["Sleep reduced ~5 hrs for 1 week", "Frequent outside food during travel"],
+      medicalHistory: ["Diabetes (2yr)"],
+      allergies: ["NSAID sensitivity"],
     },
     ophthalData: {
       vaRight: "6/9",
@@ -774,10 +772,9 @@ const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
       symptoms: [
         { name: "Pedal edema", duration: "3d", severity: "Mild" },
         { name: "Lower back pain", duration: "2d", severity: "Moderate" },
-        { name: "Morning nausea" },
       ],
-      medicalHistory: [],
-      familyHistory: ["Mother: Gestational diabetes"],
+      medicalHistory: ["Hypothyroid (2yr)"],
+      allergies: ["Shellfish"],
     },
     gynecData: {
       menarche: 13,
@@ -861,8 +858,8 @@ const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
         { name: "Dry cough", duration: "3d", severity: "Mild" },
         { name: "Reduced appetite", duration: "2d" },
       ],
-      medicalHistory: ["URTI last month"],
-      familyHistory: ["Father: Asthma"],
+      medicalHistory: ["Recurrent wheezing episodes (6mo)"],
+      allergies: ["Egg allergy"],
     },
     pediatricsData: {
       ageDisplay: "4 years",
@@ -941,10 +938,9 @@ const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
       symptoms: [
         { name: "Heavy menstrual bleeding", duration: "6 months", severity: "Severe" },
         { name: "Fatigue", duration: "3 months", severity: "Moderate" },
-        { name: "Lower abdominal pain", duration: "during periods", severity: "Moderate" },
       ],
-      medicalHistory: ["PCOS diagnosed 2018", "Thyroidectomy 2020 (partial)"],
-      familyHistory: ["Mother (Diabetes)", "Sister (PCOS)"],
+      medicalHistory: ["Hypothyroid (on Thyronorm 75mcg)"],
+      allergies: ["Ibuprofen"],
     },
     gynecData: {
       cycleRegularity: "Irregular",
@@ -973,6 +969,111 @@ const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
     keyLabs: [],
     lastVisit: undefined,
   },
+  "apt-ramesh-ckd": {
+    specialtyTags: ["Nephrology", "Internal Medicine"],
+    followUpOverdueDays: 12,
+    patientNarrative:
+      "I have been feeling more tired than usual in the past two weeks. My legs are swollen in the evenings and I feel short of breath when I climb stairs. I have been taking my medicines regularly.",
+    familyHistory: ["Father: Chronic Kidney Disease", "Mother: Hypertension"],
+    lifestyleNotes: ["Low-salt diet", "Walking 20 min/day"],
+    allergies: ["Sulfa drugs"],
+    chronicConditions: ["CKD Stage 3b", "Hypertension", "Type 2 Diabetes"],
+    receptionistIntakeNotes: [
+      "Nephrology follow-up — routine CKD monitoring.",
+      "Patient reports increased fatigue and pedal edema.",
+    ],
+    lastVisit: {
+      date: "15 Jan'26",
+      vitals: "BP 142/88, Pulse 72, SpO2 96%, Temp 98.4 F",
+      symptoms: "Mild pedal edema, fatigue",
+      examination: "Bilateral pedal edema +1, lungs clear",
+      diagnosis: "CKD Stage 3b — stable, Hypertension — suboptimal control",
+      medication: "Telmisartan 40mg 1-0-0, Amlodipine 5mg 0-0-1, Metformin 500mg 1-0-1, Erythropoietin 4000IU weekly",
+      labTestsSuggested: "Serum Creatinine, eGFR, Urine ACR, Electrolytes",
+      followUp: "2 weeks",
+    },
+    labFlagCount: 4,
+    todayVitals: {
+      bp: "135/85",
+      pulse: "68",
+      spo2: "98%",
+      temp: "98.6 F",
+      bmi: "23.0",
+    },
+    activeMeds: ["Telmisartan 40mg 1-0-0", "Amlodipine 5mg 0-0-1", "Metformin 500mg 1-0-1", "EPO 4000IU weekly"],
+    keyLabs: [
+      { name: "Creatinine", value: "2.4", flag: "high" },
+      { name: "eGFR", value: "38", flag: "low" },
+      { name: "Potassium", value: "5.3", flag: "high" },
+      { name: "HbA1c", value: "7.1", flag: "high" },
+    ],
+    dueAlerts: ["Follow-up review overdue by 12 days", "Renal function panel due"],
+    symptomCollectorData: {
+      reportedAt: "Today 9:45 AM",
+      symptoms: [
+        { name: "Fatigue", duration: "2 weeks", severity: "Moderate" },
+        { name: "Pedal edema", duration: "1 week", severity: "Moderate" },
+      ],
+      medicalHistory: ["Type 2 Diabetes (18yr)"],
+      allergies: ["Sulfa drugs"],
+      questionsToDoctor: ["Is my kidney function getting worse?", "Do I need to change my dialysis?"],
+    },
+  },
+  "apt-neha": {
+    specialtyTags: ["General Medicine", "Endocrinology"],
+    followUpOverdueDays: 0,
+    patientNarrative:
+      "I have been having headaches and dizziness for the past week, especially in the mornings. I also feel very thirsty and have been urinating more frequently. My mother has diabetes and I'm worried.",
+    familyHistory: ["Mother: Type 2 Diabetes", "Father: Coronary artery disease"],
+    lifestyleNotes: ["Sedentary desk job", "Irregular meals", "Occasional alcohol"],
+    allergies: ["Penicillin"],
+    chronicConditions: ["PCOS"],
+    receptionistIntakeNotes: [
+      "Symptom collector filled — headaches, dizziness, polyuria, polydipsia.",
+      "Family history of diabetes flagged.",
+    ],
+    lastVisit: {
+      date: "10 Jan'26",
+      vitals: "BP 118/76, Pulse 82, SpO2 99%, Temp 98.2 F",
+      symptoms: "Routine PCOS follow-up",
+      examination: "NAD",
+      diagnosis: "PCOS — stable on current management",
+      medication: "Metformin 500mg 1-0-1, Myo-inositol 2g/day",
+      labTestsSuggested: "FBS, PPBS, HbA1c",
+      followUp: "1 month",
+    },
+    labFlagCount: 2,
+    todayVitals: {
+      bp: "122/78",
+      pulse: "84",
+      spo2: "99%",
+      temp: "98.4 F",
+      bmi: "27.2",
+    },
+    activeMeds: ["Metformin 500mg 1-0-1", "Myo-inositol 2g/day"],
+    keyLabs: [
+      { name: "FBS", value: "142", flag: "high" },
+      { name: "HbA1c", value: "6.8", flag: "high" },
+    ],
+    dueAlerts: ["New symptoms reported via symptom collector"],
+    symptomCollectorData: {
+      reportedAt: "Today 9:30 AM",
+      symptoms: [
+        { name: "Headache", duration: "1 week", severity: "Moderate" },
+        { name: "Dizziness", duration: "1 week", severity: "Mild" },
+      ],
+      medicalHistory: ["PCOS (2yr, on Metformin)"],
+      allergies: ["Penicillin"],
+    },
+  },
+}
+
+export function patientHasSymptomCollectorData(patientId: string): boolean {
+  const local = SMART_SUMMARY_BY_CONTEXT[patientId]
+  if (local?.symptomCollectorData?.symptoms?.length) return true
+  const panel = PANEL_SUMMARY_BY_CONTEXT[patientId]
+  if (panel?.symptomCollectorData?.symptoms?.length) return true
+  return false
 }
 
 function summarizeNarrative(text?: string, maxLen = 150) {

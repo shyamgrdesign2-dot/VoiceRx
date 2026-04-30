@@ -816,6 +816,9 @@ export interface RxAgentChatMessage {
    *  "Start your consultation by dictating..." nudge after the
    *  patient-shared-details card). */
   hideFeedback?: boolean
+  /** When true, text renders word-by-word with a shimmer blur-in animation
+   *  instead of the default character-by-character typewriter. */
+  shimmerReveal?: boolean
   /** Inline suggestion chips shown below the message text (e.g. guardrail redirects) */
   suggestions?: Array<{ label: string; message: string }>
 }

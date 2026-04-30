@@ -56,13 +56,13 @@ export function VoiceRxBottomSheet({
       <div
         className="absolute inset-0"
         onClick={onClose}
-        style={{ background: "rgba(15,23,42,0.45)", animation: "docFadeIn 150ms ease-out" }}
+        style={{ background: "rgba(15,23,42,0.65)", animation: "docFadeIn 200ms ease-out" }}
       />
 
       {/* Bottom Sheet */}
       <div
         className="relative z-10 flex h-auto flex-col overflow-hidden rounded-t-[20px] bg-white pb-6 shadow-2xl"
-        style={{ animation: "docSlideUp 220ms cubic-bezier(0.22,1,0.36,1)" }}
+        style={{ animation: "docSlideUp 450ms cubic-bezier(0.22,1,0.36,1)" }}
       >
         {/* Drag handle */}
         <div className="flex justify-center pt-[8px] pb-[4px]">

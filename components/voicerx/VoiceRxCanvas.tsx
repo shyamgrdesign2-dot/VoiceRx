@@ -143,7 +143,7 @@ export function VoiceRxCanvas({
     <div className="vrx-canvas vrx-canvas--enter relative flex h-full w-full flex-col bg-white">
       {/* Header — mirrors VoiceRxResultTabs so the surface reads
           consistently across the two flows that share the same panel. */}
-      <div className="shrink-0 flex items-center justify-between gap-2 px-3 pt-3 pb-[12px]">
+      <div className="shrink-0 flex items-center justify-between gap-2 px-3 pt-[4px] pb-[12px]">
         <span className="vrx-cn-mode-pill inline-flex items-center gap-[4px] rounded-[10px] px-[8px] py-[6px]">
           <button
             type="button"

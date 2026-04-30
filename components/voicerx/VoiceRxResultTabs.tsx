@@ -125,7 +125,7 @@ export function VoiceRxResultTabs({
       {/* Top bar — mirrors the recorder's header so the surface reads
           consistently. Back arrow returns to chat; minimize collapses the
           rail. The mode label sits as a chip on the left. */}
-      <div className="shrink-0 flex items-center justify-between gap-2 px-3 pt-3 pb-[12px]">
+      <div className="shrink-0 flex items-center justify-between gap-2 px-3 pt-[4px] pb-[12px]">
         <span className="vrx-rt-mode-pill inline-flex items-center gap-[7px] rounded-[10px] p-[5px]">
           <button
             type="button"

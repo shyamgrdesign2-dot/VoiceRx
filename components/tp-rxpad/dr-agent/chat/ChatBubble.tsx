@@ -728,27 +728,36 @@ export function ChatBubble({
 
   // ── Track whether this is a "new" message (just appeared) for streaming ──
   const isNewRef = useRef(true)
-  const shouldStream = isNewRef.current && !isUser && !!message.text
+  const isNew = isNewRef.current
+  const shouldStream = isNew && !isUser && !!message.text && !message.shimmerReveal
+  const shouldShimmer = isNew && !isUser && !!message.text && !!message.shimmerReveal
   useEffect(() => { isNewRef.current = false }, [])
 
-  // ── Typewriter for assistant text ──
+  // ── Typewriter for assistant text (skipped when shimmerReveal) ──
   const { displayText, isDone: textDone } = useTypewriter(
     message.text || "",
     shouldStream,
     16, // ~60 chars/sec
   )
 
-  // ── Phased card reveal: card fades in after text finishes streaming ──
+  // ── Phased card reveal: card fades in after text finishes streaming/shimmering ──
   const [cardRevealed, setCardRevealed] = useState(false)
   const hasCard = !!message.rxOutput
   useEffect(() => {
     if (!hasCard || isUser) { setCardRevealed(true); return }
-    if (shouldStream && !textDone) return // Wait for text to finish
-    // Small delay after text completes, then reveal card
+    if (shouldStream && !textDone) return
+    if (shouldShimmer) {
+      const words = (message.text || "").split(/\s+/).length
+      const shimmerDuration = words * 70 + 600 + 200
+      const t = setTimeout(() => setCardRevealed(true), shimmerDuration)
+      return () => clearTimeout(t)
+    }
     const delay = message.text ? 150 : 80
     const t = setTimeout(() => setCardRevealed(true), delay)
     return () => clearTimeout(t)
-  }, [hasCard, isUser, message.text, shouldStream, textDone])
+  }, [hasCard, isUser, message.text, shouldStream, shouldShimmer, textDone])
+
+  const feedbackRevealed = !hasCard || isUser || cardRevealed
 
   // ---- USER bubble ----
   if (isUser) {
@@ -839,10 +848,35 @@ export function ChatBubble({
               className="mt-[1px] shrink-0"
             />
 
-            {/* Plain text with streaming reveal */}
-            <p className="text-[14px] leading-[18px] text-tp-slate-700 whitespace-pre-wrap break-words">
-              {renderAssistantMarkdown(shouldStream ? displayText : message.text, onPillTap)}
-              {shouldStream && !textDone && <span className="inline-block w-[2px] h-[14px] bg-tp-violet-400 ml-[1px] align-middle animate-pulse" />}
+            {/* Plain text with streaming reveal or shimmer word-by-word */}
+            <p className="text-[14px] leading-[22px] text-tp-slate-700 whitespace-pre-wrap break-words">
+              {shouldShimmer ? (
+                (() => {
+                  let wordIdx = 0
+                  return message.text.split(/(\n)/).map((line, li) => {
+                    if (line === "\n") return <br key={`br-${li}`} />
+                    return line.split(/(\*\*[^*]+\*\*|\s+)/).filter(Boolean).map((token, ti) => {
+                      if (/^\s+$/.test(token)) {
+                        return <span key={`${li}-${ti}`} className="da-shimmer-word" style={{ animationDelay: `${wordIdx * 70}ms` }}>{token}</span>
+                      }
+                      const isBold = /^\*\*(.+)\*\*$/.test(token)
+                      const text = isBold ? token.slice(2, -2) : token
+                      const delay = wordIdx * 70
+                      wordIdx++
+                      return isBold ? (
+                        <strong key={`${li}-${ti}`} className="da-shimmer-word font-semibold text-tp-slate-900" style={{ animationDelay: `${delay}ms` }}>{text}</strong>
+                      ) : (
+                        <span key={`${li}-${ti}`} className="da-shimmer-word" style={{ animationDelay: `${delay}ms` }}>{text}</span>
+                      )
+                    })
+                  })
+                })()
+              ) : (
+                <>
+                  {renderAssistantMarkdown(shouldStream ? displayText : message.text, onPillTap)}
+                  {shouldStream && !textDone && <span className="inline-block w-[2px] h-[14px] bg-tp-violet-400 ml-[1px] align-middle animate-pulse" />}
+                </>
+              )}
             </p>
           </div>
         )}
@@ -863,10 +897,10 @@ export function ChatBubble({
         {message.rxOutput && (
           <div
             className={cn(
-              "ml-[30px] mt-[6px] w-[calc(100%-30px)] transition-all duration-[400ms] ease-out",
+              "ml-[30px] mt-[12px] w-[calc(100%-30px)] transition-all duration-[600ms] ease-out overflow-hidden",
               cardRevealed
-                ? "opacity-100 translate-y-0 scale-100"
-                : "opacity-0 translate-y-[8px] scale-[0.98]",
+                ? "opacity-100 translate-y-0 max-h-[2000px]"
+                : "opacity-0 translate-y-[8px] max-h-0",
             )}
           >
             <CardRenderer
@@ -884,7 +918,12 @@ export function ChatBubble({
             Suppressed entirely when `message.hideFeedback` is true (used
             for short conversational nudges that aren't real responses). */}
         {!message.hideFeedback && (
-        <div className="ml-[30px] mt-[2px] flex items-center gap-[6px]">
+        <div className={cn(
+          "ml-[30px] mt-[2px] flex items-center gap-[6px] transition-all duration-[400ms] ease-out",
+          feedbackRevealed
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-[6px]",
+        )}>
           {onFeedback ? (
             <FeedbackRow
               messageId={message.id}

@@ -79,7 +79,7 @@ export function ChatThread({
         // Spacing: 6px between same-role, 16px between different roles for clear separation
         const prevMessage = index > 0 ? messages[index - 1] : null
         const isSameRole = prevMessage?.role === message.role
-        const spacing = index === 0 ? "" : isSameRole ? "mt-[10px]" : "mt-[22px]"
+        const spacing = index === 0 ? "" : isSameRole ? "mt-[24px]" : "mt-[28px]"
 
         // Stream-in animation: only for NEW assistant messages WITHOUT text.
         // Text-bearing messages use the typewriter hook in ChatBubble instead,
@@ -169,6 +169,17 @@ export function ChatThread({
         .chat-voice-in {
           animation: chatVoiceIn 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
           transform-origin: 95% 100%;
+        }
+        @keyframes daShimmerWordIn {
+          0%   { opacity: 0; transform: translateY(8px); filter: blur(5px); }
+          60%  { opacity: 0.8; transform: translateY(1px); filter: blur(1px); }
+          100% { opacity: 1; transform: translateY(0);   filter: blur(0); }
+        }
+        .da-shimmer-word {
+          opacity: 0;
+          transform: translateY(8px);
+          filter: blur(5px);
+          animation: daShimmerWordIn 600ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
         .da-suggestion-scroll::-webkit-scrollbar { height: 0; display: none; }
         .da-suggestion-scroll { scrollbar-width: none; -ms-overflow-style: none; }

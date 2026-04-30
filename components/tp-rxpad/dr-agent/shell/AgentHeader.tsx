@@ -136,7 +136,7 @@ export function AgentHeader({
     <div className={cn("relative z-20", className)}>
       {/* Header — transparent, floating tags (no bar, no divider). */}
       <div
-        className="relative flex items-center justify-between px-[14px]"
+        className="relative flex items-center justify-between px-[14px] pt-[4px]"
         style={{ height: 52, background: "transparent" }}
       >
         {/* Left: Dr. Agent brand tag — floating liquid-glass card with 10px radius */}

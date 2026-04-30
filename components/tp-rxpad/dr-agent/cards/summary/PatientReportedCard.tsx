@@ -159,11 +159,16 @@ const SECTION_DEFS: SectionDef[] = [
   },
   {
     id: "medicalHistory",
-    tpIconName: "medical-service",
-    title: "Chronic Conditions",
-    copyTooltip: "Fill chronic conditions to History",
+    tpIconName: "clipboard-activity",
+    title: "Medical History",
+    copyTooltip: "Fill medical history to History",
     copyDest: "history",
-    getItems: (d) => d.medicalHistory?.map((item) => parseCondition(item)),
+    getItems: (d) => {
+      const conditions = d.medicalHistory?.map((item) => parseCondition(item)) ?? []
+      const allergies = d.allergies?.map((a) => ({ name: `Allergy: ${a}` })) ?? []
+      const combined = [...conditions, ...allergies]
+      return combined.length > 0 ? combined : undefined
+    },
   },
   {
     id: "currentMedications",
@@ -337,7 +342,7 @@ export function PatientReportedCard({ data, onCopy, onPillTap, defaultCollapsed 
                     Filled
                   </span>
                 ) : (
-                  <span className={cn("transition-opacity", isTouch ? "opacity-70" : "opacity-0 group-hover/section-header:opacity-100")}>
+                  <span className="transition-opacity opacity-70">
                     <ActionableTooltip
                       label={section.copyTooltip}
                       onAction={() => handleCopySection(section)}

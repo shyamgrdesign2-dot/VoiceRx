@@ -13,6 +13,7 @@ import { FlashSnackbar } from "@/components/tp-ui/flash-snackbar"
 import { RxPad } from "@/components/rx/rxpad/RxPad"
 import { RxPadSyncProvider, useRxPadSync } from "@/components/tp-rxpad/rxpad-sync-context"
 import { RX_CONTEXT_OPTIONS } from "@/components/tp-rxpad/dr-agent/constants"
+import { patientHasSymptomCollectorData } from "@/components/tp-rxpad/RxPadFloatingAgent"
 import {
   TPRxPadSecondarySidebar,
   TPRxPadShell,
@@ -32,9 +33,14 @@ function VoiceRxFlowInner() {
   )
 
   const { lastSignal, setVoiceActive, aiFillInProgress, activeVoiceModule, copyAllAuraActive, copyOverlayActive } = useRxPadSync()
-  const [isVoicePanelOpen, setIsVoicePanelOpen] = useState(true)
+  const hasSymptomData = useMemo(() => patientHasSymptomCollectorData(patientId), [patientId])
+  // Scenario 1 (no symptom data, e.g. Ramesh Kumar): panel starts collapsed,
+  //   Past Visits sidebar expanded, FAB visible. Clicking FAB opens bottom sheet directly.
+  // Scenario 2 (has symptom data, e.g. Neha Gupta): panel opens immediately
+  //   with intro message showing symptom collector data + "Start consultation".
+  const [isVoicePanelOpen, setIsVoicePanelOpen] = useState(hasSymptomData)
   const [voicePanelOffset, setVoicePanelOffset] = useState(0)
-  const [hasNudge, setHasNudge] = useState(false)
+  const [hasNudge, setHasNudge] = useState(true)
   const [voiceCaptureMode, setVoiceCaptureMode] = useState<VoiceConsultKind | null>(null)
   // Back-button confirm dialog state. While a voice session is live, the
   // top-nav back arrow opens this dialog instead of navigating directly —
@@ -317,6 +323,7 @@ function VoiceRxFlowInner() {
               voiceRxMode
               headerBrandTitle="VoiceRx"
               onVoiceCaptureModeChange={setVoiceCaptureMode}
+              autoOpenBottomSheet={!hasSymptomData}
             />
           </div>
         </div>

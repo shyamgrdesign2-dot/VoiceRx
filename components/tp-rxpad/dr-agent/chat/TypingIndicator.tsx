@@ -161,7 +161,7 @@ export function TypingIndicator({ className, queryHint }: TypingIndicatorProps) 
   const displayText = messages[idx] ?? ""
 
   return (
-    <div className={cn("flex items-start gap-[8px]", className)}>
+    <div className={cn("flex items-center gap-[8px]", className)}>
       {/* Quirky front-back coin-flip spark with a soft AI gradient halo behind it */}
       <span className="da-spark-loader relative mt-[1px] inline-flex shrink-0 items-center justify-center" aria-hidden>
         <span className="da-spark-halo" />

@@ -187,7 +187,7 @@ const queueAppointments: AppointmentRow[] = [
     hasVideo: true,
     status: "queue",
     dateKey: "today",
-    // No hasSymptoms — patient did NOT fill symptom collector
+    hasSymptoms: true,
   },
   {
     id: "apt-zerodata",
@@ -203,7 +203,6 @@ const queueAppointments: AppointmentRow[] = [
     hasVideo: false,
     status: "queue",
     dateKey: "today",
-    hasSymptoms: true,
   },
   {
     id: "__patient__",
@@ -235,7 +234,6 @@ const queueAppointments: AppointmentRow[] = [
     hasVideo: true,
     status: "queue",
     dateKey: "today",
-    hasSymptoms: true,
   },
   {
     id: "apt-vikram",
@@ -266,6 +264,7 @@ const queueAppointments: AppointmentRow[] = [
     hasVideo: true,
     status: "queue",
     dateKey: "today",
+    hasSymptoms: true,
   },
   {
     id: "apt-arjun",
@@ -281,6 +280,7 @@ const queueAppointments: AppointmentRow[] = [
     hasVideo: false,
     status: "queue",
     dateKey: "today",
+    hasSymptoms: true,
   },
   {
     id: "apt-lakshmi",
@@ -297,6 +297,7 @@ const queueAppointments: AppointmentRow[] = [
     status: "queue",
     dateKey: "today",
     starred: true,
+    hasSymptoms: true,
   },
   // ── Finished patients ──────────────────────────────────────────
   {
@@ -1305,7 +1306,7 @@ export function DrAgentPage() {
                                         {row.name}
                                       </button>
                                       {row.hasSymptoms && (
-                                        <SymptomTooltip onClick={() => openAgentForPatient(row)}>
+                                        <SymptomTooltip>
                                           <TPMedicalIcon name="virus" variant="bulk" size={13} color="var(--tp-success-500)" />
                                         </SymptomTooltip>
                                       )}
@@ -2164,7 +2165,7 @@ function CommonFilterPanel({
 
 // ─── Symptom Tooltip (portal-based, z-index safe) ────────────────────────────
 
-function SymptomTooltip({ children, onClick }: { children: React.ReactNode; onClick: () => void }) {
+function SymptomTooltip({ children }: { children: React.ReactNode }) {
   const [visible, setVisible] = useState(false)
   const [style, setStyle] = useState<React.CSSProperties>({})
   const triggerRef = useRef<HTMLSpanElement | null>(null)
@@ -2193,23 +2194,19 @@ function SymptomTooltip({ children, onClick }: { children: React.ReactNode; onCl
         ref={triggerRef}
         onMouseEnter={show}
         onMouseLeave={hide}
-        className="inline-flex cursor-pointer"
+        className="inline-flex"
       >
-        <button
-          type="button"
-          onClick={(e) => { e.stopPropagation(); onClick() }}
-          className="inline-flex flex-shrink-0 items-center justify-center transition-opacity hover:opacity-70"
-        >
+        <span className="inline-flex flex-shrink-0 items-center justify-center">
           {children}
-        </button>
+        </span>
       </span>
       {visible && mounted &&
         createPortal(
           <div
             style={style}
-            className="whitespace-nowrap rounded-[6px] bg-tp-slate-800 px-[8px] py-[4px] text-[10px] font-medium text-white shadow-md"
+            className="max-w-[220px] whitespace-normal rounded-[6px] bg-tp-slate-800 px-[8px] py-[4px] text-[10px] font-medium leading-[14px] text-white shadow-md"
           >
-            Symptoms collected — Click to view
+            This patient has submitted symptom collector data — start consultation to view it
             <span className="absolute left-1/2 top-full -translate-x-1/2 border-[3px] border-transparent border-t-tp-slate-800" />
           </div>,
           document.body,

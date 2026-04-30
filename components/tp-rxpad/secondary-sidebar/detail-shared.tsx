@@ -104,6 +104,7 @@ export function ActionButton({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const rxSync = useRxPadSync();
   const micDisabled = rxSync.micUnavailable && !isVoiceActive;
+  const globalLocked = rxSync.voiceActive && !isVoiceActive;
 
   const overlayActive = isVoiceActive || !!voiceProcessingTranscript;
   useEffect(() => {
@@ -249,16 +250,28 @@ export function ActionButton({
       {handleVoice ? (
         <button
           type="button"
-          onClick={micDisabled ? undefined : handleVoice}
-          aria-label={micDisabled ? (rxSync.micUnavailableReason ?? "Microphone unavailable") : `Dictate ${label}`}
-          title={micDisabled ? (rxSync.micUnavailableReason ?? "Microphone unavailable") : "Dictate"}
+          onClick={(micDisabled || globalLocked) ? undefined : handleVoice}
+          aria-label={
+            globalLocked
+              ? "VoiceRx is active — submit or close VoiceRx to use section dictation"
+              : micDisabled
+                ? (rxSync.micUnavailableReason ?? "Microphone unavailable")
+                : `Dictate ${label}`
+          }
+          title={
+            globalLocked
+              ? "VoiceRx is active — submit or close VoiceRx to use section dictation"
+              : micDisabled
+                ? (rxSync.micUnavailableReason ?? "Microphone unavailable")
+                : "Dictate"
+          }
           {...(isVoiceActive
             ? { "data-voice-allow": true }
             : { "data-voice-block": true })}
-          aria-disabled={micDisabled || isVoiceActive || !!voiceProcessingTranscript}
+          aria-disabled={micDisabled || globalLocked || isVoiceActive || !!voiceProcessingTranscript}
           className={clsx(
             "inline-flex h-[36px] w-[36px] shrink-0 items-center justify-center transition-all",
-            micDisabled
+            (micDisabled || globalLocked)
               ? "opacity-30 cursor-not-allowed"
               : isVoiceActive || voiceProcessingTranscript
                 ? "opacity-25 pointer-events-none"
