@@ -1,18 +1,18 @@
 "use client"
 
 import { useState } from "react"
-import { Copy } from "iconsax-reactjs"
+import { Copy, CopySuccess } from "iconsax-reactjs"
 import { cn } from "@/lib/utils"
-import { useTouchDevice } from "@/hooks/use-touch-device"
 
 interface CopyIconProps {
   size?: number
   onClick?: (e: React.MouseEvent) => void
   className?: string
+  /** External copied state — when true, renders the green CopySuccess icon. */
+  copied?: boolean
 }
 
-export function CopyIcon({ size = 14, onClick, className }: CopyIconProps) {
-  const _isTouch = useTouchDevice()
+export function CopyIcon({ size = 14, onClick, className, copied = false }: CopyIconProps) {
   const [hovered, setHovered] = useState(false)
 
   return (
@@ -23,15 +23,19 @@ export function CopyIcon({ size = 14, onClick, className }: CopyIconProps) {
       onMouseLeave={() => setHovered(false)}
       className={cn(
         "flex-shrink-0 cursor-pointer transition-colors",
-        // Neutral default — slate-700 reads as a quiet inline affordance.
-        // Hover lifts to slate-900 instead of jumping to TP blue, keeping
-        // the chrome calm. Card-specific accents stay free for actual
-        // primary CTAs.
-        hovered ? "text-tp-slate-900" : "text-tp-slate-700",
+        copied
+          ? "text-tp-success-600"
+          : hovered
+            ? "text-tp-blue-600"
+            : "text-tp-blue-500",
         className,
       )}
     >
-      <Copy size={size} variant={hovered || _isTouch ? "Bulk" : "Linear"} />
+      {copied ? (
+        <CopySuccess size={size} variant="Bulk" />
+      ) : (
+        <Copy size={size} variant={hovered ? "Bulk" : "Linear"} />
+      )}
     </button>
   )
 }

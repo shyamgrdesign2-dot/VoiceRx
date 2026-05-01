@@ -149,7 +149,7 @@ const SECTION_DEFS: SectionDef[] = [
     id: "symptoms",
     tpIconName: "virus",
     title: "Symptoms Reported",
-    copyTooltip: "Fill all symptoms to Symptoms",
+    copyTooltip: "Click to fill all symptoms to RxPad",
     copyDest: "symptoms",
     getItems: (d) =>
       d.symptoms?.map((s) => ({
@@ -161,7 +161,7 @@ const SECTION_DEFS: SectionDef[] = [
     id: "medicalHistory",
     tpIconName: "clipboard-activity",
     title: "Medical History",
-    copyTooltip: "Fill medical history to History",
+    copyTooltip: "Click to fill all medical history to RxPad",
     copyDest: "history",
     getItems: (d) => {
       const conditions = d.medicalHistory?.map((item) => parseCondition(item)) ?? []
@@ -174,7 +174,7 @@ const SECTION_DEFS: SectionDef[] = [
     id: "currentMedications",
     tpIconName: "pill",
     title: "Current Medications",
-    copyTooltip: "Fill medications to RxPad",
+    copyTooltip: "Click to fill all medications to RxPad",
     copyDest: "medications",
     getItems: (d) => d.currentMedications?.map((item) => parseMedication(item)),
   },
@@ -182,7 +182,7 @@ const SECTION_DEFS: SectionDef[] = [
     id: "questionsToDoctor",
     tpIconName: "Diagnosis",
     title: "Questions to Doctor",
-    copyTooltip: "Fill questions",
+    copyTooltip: "Click to fill all questions to RxPad",
     copyDest: "notes",
     getItems: (d) => d.questionsToDoctor?.map((q) => ({ name: q })),
   },
@@ -334,23 +334,18 @@ export function PatientReportedCard({ data, onCopy, onPillTap, defaultCollapsed 
                   : undefined
               }
               trailing={
-                copiedKey === `section-${section.id}` ? (
-                  <span className="vrx-filled-flash inline-flex items-center gap-[3px] text-[12px] font-semibold text-tp-success-500">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
-                      <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                    Filled
-                  </span>
-                ) : (
-                  <span className="transition-opacity opacity-70">
-                    <ActionableTooltip
-                      label={section.copyTooltip}
-                      onAction={() => handleCopySection(section)}
-                    >
-                      <CopyIcon size={14} onClick={() => handleCopySection(section)} />
-                    </ActionableTooltip>
-                  </span>
-                )
+                <span className="transition-opacity opacity-100">
+                  <ActionableTooltip
+                    label={section.copyTooltip}
+                    onAction={() => handleCopySection(section)}
+                  >
+                    <CopyIcon
+                      size={14}
+                      copied={copiedKey === `section-${section.id}`}
+                      onClick={() => handleCopySection(section)}
+                    />
+                  </ActionableTooltip>
+                </span>
               }
             />
 
@@ -399,24 +394,16 @@ export function PatientReportedCard({ data, onCopy, onPillTap, defaultCollapsed 
                     )}
                     {!isTouch && (
                       <span className={cn("flex-shrink-0 transition-opacity", copiedKey === itemKey ? "opacity-100" : "opacity-0 group-hover/reported-item:opacity-100")}>
-                        {copiedKey === itemKey ? (
-                          <span className="vrx-filled-flash inline-flex items-center gap-[3px] text-[12px] font-semibold text-tp-success-500">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
-                              <path d="M5 12.5l4.5 4.5L19 7.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                            Filled
-                          </span>
-                        ) : (
-                          <ActionableTooltip
-                            label={`Fill "${item.name}" to RxPad`}
-                            onAction={() => handleCopyItem(section.id, item, itemKey)}
-                          >
-                            <CopyIcon
-                              size={14}
-                              onClick={() => handleCopyItem(section.id, item, itemKey)}
-                            />
-                          </ActionableTooltip>
-                        )}
+                        <ActionableTooltip
+                          label={`Click to fill "${item.name}" to RxPad`}
+                          onAction={() => handleCopyItem(section.id, item, itemKey)}
+                        >
+                          <CopyIcon
+                            size={14}
+                            copied={copiedKey === itemKey}
+                            onClick={() => handleCopyItem(section.id, item, itemKey)}
+                          />
+                        </ActionableTooltip>
                       </span>
                     )}
                   </li>

@@ -10,6 +10,7 @@ import {
   ArrowSquareUp,
   Calendar2,
   Copy as CopyIcon,
+  CopySuccess,
   Eye,
   Import,
   Printer,
@@ -41,6 +42,7 @@ import { getMockPatientHistory } from "@/lib/digitization/mock-payload"
 import { useHistoricalSectionHighlights } from "../HistoricalInlineUpdates"
 import { FreshUpdateChip } from "../FreshUpdateChip"
 import { useRxPadSync, type RxPadCopyPayload } from "@/components/tp-rxpad/rxpad-sync-context"
+import { ActionableTooltip } from "@/components/tp-rxpad/dr-agent/cards/ActionableTooltip"
 
 type RxTab = "digital" | "written"
 
@@ -190,27 +192,22 @@ function CopyAffordance({
         className,
       )}
     >
-      <CopyIcon
-        size={14}
-        color={copied ? "var(--tp-success-600)" : "var(--tp-blue-500)"}
-        variant="Linear"
-      />
+      {copied ? (
+        <CopySuccess size={14} color="var(--tp-success-600)" variant="Bulk" />
+      ) : (
+        <CopyIcon
+          size={14}
+          color="var(--tp-blue-500)"
+          variant={hovered ? "Bulk" : "Linear"}
+        />
+      )}
     </button>
   )
 
-  if (isTouchLike) {
-    return <div className="inline-flex items-center">{button}</div>
-  }
-
   return (
-    <div className="inline-flex items-center">
-      <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
-        <TooltipContent side="top" sideOffset={4} className="rounded-lg bg-tp-slate-900 px-2 py-1 text-[12px] text-white">
-          {copied ? copiedLabel : copyHint}
-        </TooltipContent>
-      </Tooltip>
-    </div>
+    <ActionableTooltip label={copyHint} onAction={runCopy}>
+      {button}
+    </ActionableTooltip>
   )
 }
 

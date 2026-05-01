@@ -904,9 +904,17 @@ export function DrAgentPanel({
     resetLiveTranscript()
     setVoiceRxAwaitingResponse(false)
     setVoiceRxRecording(true)
+    // Only clear prior voice result messages (user voice transcripts +
+    // assistant voice-rx outputs). KEEP the symptom-collector intro card
+    // and the assistant follow-up so that if the doctor cancels recording
+    // and returns to the panel, they don't see a blank screen.
     setMessagesByPatient((prev) => ({
       ...prev,
-      [selectedPatientId]: [],
+      [selectedPatientId]: (prev[selectedPatientId] || []).filter((m) => {
+        if (m.role === "user" && m.voiceTranscript) return false
+        if (m.role === "assistant" && m.rxOutput?.kind === "voice_structured_rx") return false
+        return true
+      }),
     }))
   }, [voiceRxDialogChoice, onVoiceCaptureModeChange, selectedPatientId, setMessagesByPatient, activeVoiceModule, resetLiveTranscript])
 
@@ -2490,7 +2498,7 @@ export function DrAgentPanel({
             // eating wheel events intended for the chat scroll underneath.
             // Explicit pointer-events:none + visibility:hidden when the
             // card is in its front state bullet-proofs scroll handling.
-            !isFlipped && "pointer-events-none invisible",
+            (!isFlipped || !isPanelVisible) && "pointer-events-none invisible",
           )}
           style={{
             backfaceVisibility: "hidden",

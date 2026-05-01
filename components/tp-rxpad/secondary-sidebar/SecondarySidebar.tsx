@@ -112,7 +112,7 @@ export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect
       {activeId && !collapseExpandedOnly ? (
         <ContentPanel
           activeId={activeId}
-          onClose={() => setActiveId(null)}
+          onClose={() => { setActiveId(null); onSectionSelect?.(null) }}
           onSwipeNavigate={handleSwipeNavigate}
         />
       ) : null}

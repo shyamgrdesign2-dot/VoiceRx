@@ -2,8 +2,7 @@
 
 import { useEffect, useState, type ReactNode } from "react"
 import { MoreVertical, X } from "lucide-react"
-import { Copy as CopyGlyph, InfoCircle, Microphone2, Health } from "iconsax-reactjs"
-import { VoiceRxIcon } from "@/components/voicerx/voice-consult-icons"
+import { Copy as CopyGlyph, InfoCircle, Microphone2, DocumentText } from "iconsax-reactjs"
 import { DictationTranscript } from "./VoiceTranscriptProcessingCard"
 import { cn } from "@/lib/utils"
 import type { Feedback } from "@/lib/voicerx-session-store"
@@ -134,10 +133,6 @@ export function VoiceRxCanvas({
     if (coachmarkVisible) dismissCoachmark()
     onCopyToRx?.()
   }
-  const handleAddDetailsByVoice = () => {
-    if (coachmarkVisible) dismissCoachmark()
-    onAddDetailsByVoice?.()
-  }
 
   return (
     <div className="vrx-canvas vrx-canvas--enter relative flex h-full w-full flex-col bg-white">
@@ -254,7 +249,7 @@ export function VoiceRxCanvas({
                 : "text-tp-slate-600",
             )}
           >
-            <Health size={15} variant={activeTab === "emr" ? "Bulk" : "Linear"} color="currentColor" /> TP EMR
+            <DocumentText size={15} variant={activeTab === "emr" ? "Bulk" : "Linear"} color="currentColor" /> Clinical Notes
           </button>
         </div>
       </div>
@@ -302,10 +297,9 @@ export function VoiceRxCanvas({
         )}
       </div>
 
-      {/* Footer — coachmark (one-time) + CTAs. The coachmark sits ABOVE
-          the CTA row so the explanation is right next to the action it
-          describes. Pinned outside the scroll area so it stays visible
-          while the doctor reviews the sections. */}
+      {/* Footer — Clinical Notes tab gets a single secondary "Copy all to EMR"
+          CTA. Transcript tab hides the footer entirely. */}
+      {activeTab === "emr" && (
       <div className="shrink-0 border-t border-tp-slate-200 bg-white px-3 py-3">
         {coachmarkVisible && (
           <div
@@ -331,7 +325,7 @@ export function VoiceRxCanvas({
             </span>
             <p className="min-w-0 flex-1 text-[12px] leading-[1.5] text-tp-slate-700">
               <span className="font-semibold text-amber-700">Heads up. </span>
-              Notes aren&apos;t always perfect. Copy to your RxPad and fine-tune, or use Quick Edit to re-record.
+              Notes aren&apos;t always perfect. Copy to your RxPad and fine-tune as needed.
             </p>
             <button
               type="button"
@@ -344,43 +338,25 @@ export function VoiceRxCanvas({
           </div>
         )}
         <TooltipProvider delayDuration={200}>
-          <div className="flex items-center gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={handleCopyToRx}
-                  disabled={!onCopyToRx}
-                  className="vrx-cn-primary flex h-[42px] flex-1 items-center justify-center gap-2 rounded-[10px] px-3 text-[14px] font-semibold text-white transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <CopyGlyph size={16} variant="Linear" color="currentColor" />
-                  Copy all to EMR
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" sideOffset={6} className={tooltipDarkCls}>
-                Fill all of these structured EMR sections into the active Rx
-              </TooltipContent>
-            </Tooltip>
-
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={handleAddDetailsByVoice}
-                  disabled={!onAddDetailsByVoice}
-                  className="vrx-cn-voice-cta-outline flex h-[42px] flex-1 items-center justify-center gap-2 rounded-[10px] px-3 text-[14px] font-semibold transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <VoiceRxIcon size={24} color="#673AAC" className="shrink-0" />
-                  <span className="vrx-cn-voice-cta-outline__label">Quick Edit</span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" sideOffset={6} className={tooltipDarkCls}>
-                Open the recorder above this canvas and merge the new details in place
-              </TooltipContent>
-            </Tooltip>
-          </div>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={handleCopyToRx}
+                disabled={!onCopyToRx}
+                className="vrx-cn-secondary-blue flex h-[42px] w-full items-center justify-center gap-2 rounded-[10px] px-3 text-[14px] font-semibold transition-colors active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <CopyGlyph size={16} variant="Linear" color="currentColor" />
+                Copy all to EMR
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="top" sideOffset={6} className={tooltipDarkCls}>
+              Fill all of these structured EMR sections into the active Rx
+            </TooltipContent>
+          </Tooltip>
         </TooltipProvider>
       </div>
+      )}
 
       <style>{`
         .vrx-canvas--enter { animation: vrxCanvasIn 220ms ease-out both; }
@@ -403,31 +379,14 @@ export function VoiceRxCanvas({
         /* .vrx-cn-back and .vrx-cn-glossy were removed when the back /
            kebab / minimize chips were stripped to naked 16px SVGs. */
 
-        .vrx-cn-primary {
-          background: var(--tp-blue-500, #4B4AD5);
-          box-shadow: 0 4px 10px -4px rgba(75, 74, 213, 0.40), inset 0 1px 0 rgba(255,255,255,0.30);
+        .vrx-cn-secondary-blue {
+          background: #ffffff;
+          color: var(--tp-blue-600, #3A39C0);
+          border: 1px solid var(--tp-blue-500, #4B4AD5);
         }
-        .vrx-cn-primary:hover:not(:disabled) {
-          background: var(--tp-blue-600, #3A39C0);
-          box-shadow: 0 6px 14px -4px rgba(75, 74, 213, 0.50), inset 0 1px 0 rgba(255,255,255,0.32);
-        }
-        .vrx-cn-voice-cta-outline {
-          background:
-            linear-gradient(#ffffff, #ffffff) padding-box,
-            linear-gradient(135deg, #D565EA 0%, #673AAC 55%, #1A1994 100%) border-box;
-          border: 1px solid transparent;
-        }
-        .vrx-cn-voice-cta-outline:hover:not(:disabled) {
-          background:
-            linear-gradient(#FAF5FF, #FAF5FF) padding-box,
-            linear-gradient(135deg, #D565EA 0%, #673AAC 55%, #1A1994 100%) border-box;
-        }
-        .vrx-cn-voice-cta-outline__label {
-          background: linear-gradient(135deg, #D565EA 0%, #673AAC 55%, #1A1994 100%);
-          -webkit-background-clip: text;
-          background-clip: text;
-          -webkit-text-fill-color: transparent;
-          color: transparent;
+        .vrx-cn-secondary-blue:hover:not(:disabled) {
+          background: #eff6ff;
+          border-color: var(--tp-blue-600, #3A39C0);
         }
       `}</style>
     </div>

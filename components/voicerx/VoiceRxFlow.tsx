@@ -196,10 +196,13 @@ function VoiceRxFlowInner() {
         return
       }
       if (bothOpen) {
-        setVoicePanelOffset(300)
+        // Both open — dynamic: min 300px on small screens, grows proportionally, max 380px on large screens
+        const clamped = Math.min(Math.max(width * 0.28, 300), 380)
+        setVoicePanelOffset(Math.round(clamped))
         return
       }
-      const clamped = Math.min(Math.max(width * 0.32, 300), 360)
+      // Solo — same 32vw proportion as before, max bumped to 400px
+      const clamped = Math.min(Math.max(width * 0.32, 300), 400)
       setVoicePanelOffset(Math.round(clamped))
     }
 
@@ -233,9 +236,9 @@ function VoiceRxFlowInner() {
   // Matches the panel container's `w-[clamp(330px,38vw,360px)]`
   // tablet width and `xl:w-[400px]`.
   const agentRailPad = bothOpen
-    ? "pr-[300px]"
+    ? "pr-[clamp(300px,28vw,380px)]"
     : isVoicePanelOpen
-      ? "md:pr-[300px] xl:pr-[360px]"
+      ? "pr-[clamp(300px,32vw,400px)]"
       : ""
 
   return (
@@ -304,7 +307,7 @@ function VoiceRxFlowInner() {
           data-voice-scope="dragent"
           className={cn(
             "pointer-events-none fixed right-0 top-[62px] z-[135] hidden h-[calc(100vh-62px)] overflow-hidden md:block transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]",
-            bothOpen ? "w-[300px]" : "w-[clamp(300px,32vw,360px)]",
+            bothOpen ? "w-[clamp(300px,28vw,380px)]" : "w-[clamp(300px,32vw,400px)]",
             isVoicePanelOpen ? "translate-x-0" : "translate-x-[110%]",
           )}
           aria-hidden={!isVoicePanelOpen}

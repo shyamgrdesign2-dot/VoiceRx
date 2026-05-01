@@ -260,16 +260,17 @@ export function DrAgentFab({ onClick, hasNudge, isPanelOpen, isModuleRecording }
         }
 
         @keyframes vrxFabSheen {
-          0%   { transform: translateX(-140%); }
-          50%  { transform: translateX(140%); }
-          100% { transform: translateX(140%); }
+          0%   { transform: translateX(-120%); opacity: 0; }
+          18%  { opacity: 0.55; }
+          55%  { opacity: 0.55; }
+          100% { transform: translateX(320%); opacity: 0; }
         }
         .vrx-fab-sheen {
-          animation: vrxFabSheen 2.4s ease-in-out infinite;
+          animation: vrxFabSheen 3.6s ease-in-out infinite;
         }
         .vrx-fab-sheen-b {
-          animation: vrxFabSheen 2.4s ease-in-out infinite;
-          animation-delay: 0.8s;
+          animation: vrxFabSheen 3.6s ease-in-out infinite;
+          animation-delay: 1.4s;
         }
 
         @keyframes vrxFabSparkPulse {

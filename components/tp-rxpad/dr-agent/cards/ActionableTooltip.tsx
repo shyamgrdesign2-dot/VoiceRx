@@ -199,7 +199,17 @@ export function ActionableTooltip({
               ) : (
                 <>
                   <Copy size={14} variant="Bulk" className="flex-shrink-0 opacity-70" />
-                  <span>{label}</span>
+                  <span>
+                    {(() => {
+                      // Touch: prefix with "Click to " (no hover, so the
+                      // user needs an explicit instruction). Desktop:
+                      // strip the prefix — the tooltip itself surfaced
+                      // on hover already implies the action.
+                      const stripped = label.replace(/^Click to\s+/i, "")
+                      const desktopLabel = stripped.charAt(0).toUpperCase() + stripped.slice(1)
+                      return isTouch ? `Click to ${stripped}` : desktopLabel
+                    })()}
+                  </span>
                 </>
               )}
             </span>
