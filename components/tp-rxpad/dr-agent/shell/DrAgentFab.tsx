@@ -165,22 +165,13 @@ export function DrAgentFab({ onClick, hasNudge, isPanelOpen, isModuleRecording }
               </stop>
             </linearGradient>
             {showShimmer && (
-              <>
-                <linearGradient id={sheenId} x1="0" y1="20" x2="430" y2="80" gradientUnits="userSpaceOnUse">
-                  <stop offset="0" stopColor="white" stopOpacity="0" />
-                  <stop offset="0.42" stopColor="white" stopOpacity="0" />
-                  <stop offset="0.5" stopColor="white" stopOpacity="0.22" />
-                  <stop offset="0.58" stopColor="white" stopOpacity="0" />
-                  <stop offset="1" stopColor="white" stopOpacity="0" />
-                </linearGradient>
-                <linearGradient id={`${sheenId}-b`} x1="0" y1="20" x2="430" y2="80" gradientUnits="userSpaceOnUse">
-                  <stop offset="0" stopColor="white" stopOpacity="0" />
-                  <stop offset="0.38" stopColor="white" stopOpacity="0" />
-                  <stop offset="0.5" stopColor="white" stopOpacity="0.14" />
-                  <stop offset="0.62" stopColor="white" stopOpacity="0" />
-                  <stop offset="1" stopColor="white" stopOpacity="0" />
-                </linearGradient>
-              </>
+              <linearGradient id={sheenId} x1="0" y1="20" x2="430" y2="80" gradientUnits="userSpaceOnUse">
+                <stop offset="0" stopColor="white" stopOpacity="0" />
+                <stop offset="0.30" stopColor="white" stopOpacity="0" />
+                <stop offset="0.50" stopColor="white" stopOpacity="0.55" />
+                <stop offset="0.70" stopColor="white" stopOpacity="0" />
+                <stop offset="1" stopColor="white" stopOpacity="0" />
+              </linearGradient>
             )}
           </defs>
 
@@ -188,18 +179,11 @@ export function DrAgentFab({ onClick, hasNudge, isPanelOpen, isModuleRecording }
             <path d={FAB_PATH} fill={`url(#${shellId})`} />
           </g>
           {showShimmer && (
-            <>
-              <path
-                d={FAB_PATH}
-                fill={`url(#${sheenId})`}
-                className="vrx-fab-sheen"
-              />
-              <path
-                d={FAB_PATH}
-                fill={`url(#${sheenId}-b)`}
-                className="vrx-fab-sheen-b"
-              />
-            </>
+            <path
+              d={FAB_PATH}
+              fill={`url(#${sheenId})`}
+              className="vrx-fab-sheen"
+            />
           )}
         </svg>
 
@@ -268,10 +252,6 @@ export function DrAgentFab({ onClick, hasNudge, isPanelOpen, isModuleRecording }
         .vrx-fab-sheen {
           animation: vrxFabSheen 3.6s ease-in-out infinite;
         }
-        .vrx-fab-sheen-b {
-          animation: vrxFabSheen 3.6s ease-in-out infinite;
-          animation-delay: 1.4s;
-        }
 
         @keyframes vrxFabSparkPulse {
           0%, 100% { opacity: 0.82; transform: scale(1); }
@@ -297,7 +277,7 @@ export function DrAgentFab({ onClick, hasNudge, isPanelOpen, isModuleRecording }
         }
 
         @media (prefers-reduced-motion: reduce) {
-          .vrx-fab-sheen, .vrx-fab-sheen-b { animation: none; }
+          .vrx-fab-sheen { animation: none; }
           .vrx-fab-spark-pulse { animation: none; }
           .vrx-fab-spark-icon { animation: none; }
         }

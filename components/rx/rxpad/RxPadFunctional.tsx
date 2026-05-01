@@ -2685,10 +2685,11 @@ export function RxPadFunctional({ patientId = "__patient__", sectionConfig }: { 
     }
 
     const histBatch = buildHistoricalUpdatesFromPayload(payload)
-    if (Object.keys(histBatch).length) {
+    const histBatchKeys = Object.keys(histBatch) as NavItemId[]
+    if (histBatchKeys.length) {
       const copyId = lastCopyRequest.id
       const enriched: HistoricalUpdateBatch = {}
-      for (const key of Object.keys(histBatch) as NavItemId[]) {
+      for (const key of histBatchKeys) {
         const arr = histBatch[key]
         if (!arr) continue
         enriched[key] = arr.map((c) => ({
@@ -2698,6 +2699,17 @@ export function RxPadFunctional({ patientId = "__patient__", sectionConfig }: { 
         }))
       }
       pushHistoricalUpdates(enriched)
+
+      // Per-section copy (NOT a bulk Copy-all): pop the corresponding
+      // sidebar tab open so the doctor lands on the section that just
+      // received new content. Bobble + red dot get ~700ms to play
+      // before the focus signal acknowledges and clears them.
+      if (!copyAllAuraActiveRef.current && histBatchKeys.length === 1) {
+        const targetNav = histBatchKeys[0]
+        window.setTimeout(() => {
+          publishSignal({ type: "section_focus", sectionId: targetNav })
+        }, 700)
+      }
     }
 
     // Brief AI-gradient pulse on each filled section — gives the
@@ -2739,7 +2751,7 @@ export function RxPadFunctional({ patientId = "__patient__", sectionConfig }: { 
     }
 
     setToastMessage(`Filled in your Rx from ${payload.sourceDateLabel}`)
-  }, [lastCopyRequest, pushHistoricalUpdates])
+  }, [lastCopyRequest, pushHistoricalUpdates, publishSignal])
 
   // ── Consume pending copies from sessionStorage (homepage → RxPad navigation) ──
   const pendingCopyConsumedRef = useRef(false)

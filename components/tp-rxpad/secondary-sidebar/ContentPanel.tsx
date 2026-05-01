@@ -234,14 +234,34 @@ function useTransitionDirection(activeId: NavItemId): "next" | "prev" | null {
 }
 
 export function ContentPanel({ activeId, onClose, onSwipeNavigate }: Props) {
-  const { acknowledgeHistoricalSection, isHistoricalSectionUnseen } = useRxPadSync()
+  const { acknowledgeHistoricalSection, isHistoricalSectionUnseen, historicalUpdates } = useRxPadSync()
   const unseenHere = isHistoricalSectionUnseen(activeId)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const transitionDir = useTransitionDirection(activeId)
+  const [fillFlash, setFillFlash] = useState(false)
 
   useEffect(() => {
     if (unseenHere) acknowledgeHistoricalSection(activeId)
   }, [activeId, unseenHere, acknowledgeHistoricalSection])
+
+  // ── Flash the panel when content was just synced into this section ──
+  // Reuses the RxPad's `tp-module-just-filled` aura recipe so a
+  // doctor sees the same "AI just touched this surface" affordance
+  // whether the data lands in an RxPad module or here in the
+  // secondary-sidebar panel. Triggers on mount (auto-navigate from a
+  // copy) and on any new chunk arriving while the panel is open.
+  const chunks = historicalUpdates[activeId]
+  const latestAt = chunks && chunks.length ? chunks[chunks.length - 1].at : 0
+  const lastSeenAtRef = useRef(0)
+  useEffect(() => {
+    if (!latestAt) return
+    if (latestAt === lastSeenAtRef.current) return
+    lastSeenAtRef.current = latestAt
+    if (Date.now() - latestAt > 2500) return
+    setFillFlash(true)
+    const t = window.setTimeout(() => setFillFlash(false), 2000)
+    return () => window.clearTimeout(t)
+  }, [activeId, latestAt])
 
   useEdgeSwipeNavigation({
     containerRef,
@@ -277,7 +297,7 @@ export function ContentPanel({ activeId, onClose, onSwipeNavigate }: Props) {
       {/* flex-[1_0_0] + min-h-px → constrains height so inner overflow-y-auto works.
           overflow-hidden on the absolute layer prevents the slide animation from
           spilling outside the panel during the transition. */}
-      <div className="flex-[1_0_0] min-h-px min-w-px relative w-full overflow-hidden">
+      <div className={`flex-[1_0_0] min-h-px min-w-px relative w-full overflow-hidden ${fillFlash ? "tp-section-just-filled" : ""}`}>
         <div className="absolute inset-0 flex flex-col">
           {/* `key={activeId}` forces React to remount on section change so the
               animation re-plays. */}

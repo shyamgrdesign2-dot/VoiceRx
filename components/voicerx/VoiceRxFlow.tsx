@@ -41,6 +41,13 @@ function VoiceRxFlowInner() {
   const [isVoicePanelOpen, setIsVoicePanelOpen] = useState(hasSymptomData)
   const [voicePanelOffset, setVoicePanelOffset] = useState(0)
   const [hasNudge, setHasNudge] = useState(true)
+  // RxPad horizontal-scroll edge fades. Driven by the inner scroll
+  // container's scrollLeft / scrollWidth so the user gets a soft
+  // shadow on whichever side has clipped content underneath the
+  // adjacent rails (secondary sidebar on the left, VoiceRx on the
+  // right).
+  const rxScrollRef = useRef<HTMLDivElement | null>(null)
+  const [scrollFade, setScrollFade] = useState({ left: false, right: false })
   const [voiceCaptureMode, setVoiceCaptureMode] = useState<VoiceConsultKind | null>(null)
   // Back-button confirm dialog state. While a voice session is live, the
   // top-nav back arrow opens this dialog instead of navigating directly —
@@ -211,6 +218,26 @@ function VoiceRxFlowInner() {
     return () => window.removeEventListener("resize", updateOffset)
   }, [bothOpen])
 
+  useEffect(() => {
+    const el = rxScrollRef.current
+    if (!el) return
+    const update = () => {
+      const { scrollLeft, scrollWidth, clientWidth } = el
+      setScrollFade({
+        left: scrollLeft > 1,
+        right: scrollLeft + clientWidth < scrollWidth - 1,
+      })
+    }
+    update()
+    el.addEventListener("scroll", update, { passive: true })
+    const ro = new ResizeObserver(update)
+    ro.observe(el)
+    return () => {
+      el.removeEventListener("scroll", update)
+      ro.disconnect()
+    }
+  }, [])
+
   const handleSidebarSectionSelect = useCallback(
     (sectionId: string | null) => {
       setIsSidebarExpanded(!!sectionId && sectionId !== "drAgent")
@@ -295,14 +322,34 @@ function VoiceRxFlowInner() {
         />
       }
     >
-      <div className="relative flex h-[calc(100vh-62px)] min-h-0 min-w-0 overflow-x-auto">
-        <div className={cn(
-          "flex min-h-0 flex-1 flex-col overflow-y-auto bg-tp-slate-100",
-          bothOpen ? "min-w-[900px]" : "min-w-0",
-          agentRailPad,
-        )}>
-          <RxPad patientId={patientId} />
+      <div className="relative flex h-[calc(100vh-62px)] min-h-0 min-w-0">
+        <div
+          ref={rxScrollRef}
+          className="flex min-h-0 min-w-0 flex-1 overflow-x-auto"
+        >
+          <div className={cn(
+            "flex min-h-0 flex-1 flex-col overflow-y-auto bg-tp-slate-100",
+            bothOpen ? "min-w-[900px]" : "min-w-0",
+            agentRailPad,
+          )}>
+            <RxPad patientId={patientId} />
+          </div>
         </div>
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-y-0 left-0 z-[5] w-[18px] bg-gradient-to-r from-tp-slate-900/[0.10] to-transparent transition-opacity duration-200",
+            scrollFade.left ? "opacity-100" : "opacity-0",
+          )}
+        />
+        <div
+          aria-hidden
+          className={cn(
+            "pointer-events-none absolute inset-y-0 z-[5] w-[18px] bg-gradient-to-l from-tp-slate-900/[0.10] to-transparent transition-opacity duration-200",
+            scrollFade.right ? "opacity-100" : "opacity-0",
+          )}
+          style={{ right: isVoicePanelOpen ? voicePanelOffset : 0 }}
+        />
         <div
           data-voice-scope="dragent"
           className={cn(

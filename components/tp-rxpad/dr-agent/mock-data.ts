@@ -47,8 +47,12 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
         { name: "Fever", duration: "3 days", severity: "High" },
         { name: "Dry Cough", duration: "2 days", severity: "Moderate" },
       ],
-      medicalHistory: ["Diabetes (2yr)"],
+      medicalHistory: ["Diabetes (2yr)", "Hypertension (6mo)"],
       allergies: ["NSAID sensitivity"],
+      questionsToDoctor: [
+        "Is this fever serious?",
+        "Can I continue my diabetes meds while sick?",
+      ],
     },
   },
 
@@ -91,7 +95,19 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
     dueAlerts: ["PEFR recheck due", "TSH recheck (quarterly)", "NT Scan due (11-14wk)", "First trimester screening", "Td/TT vaccine due"],
     recordAlerts: ["Allergy testing report from City Chest Hospital uploaded", "USG confirmation of pregnancy (8wk) uploaded"],
     concernTrend: { label: "SpO₂", values: [98, 97, 97, 96], labels: ["Dec'25", "Jan'26", "Feb'26", "Mar'26"], unit: "%", tone: "amber" },
-    // NOTE: No symptomCollectorData — master patient for testing ALL card types without intake form
+    symptomCollectorData: {
+      reportedAt: "Today, 09:45 AM",
+      symptoms: [
+        { name: "Nocturnal cough", duration: "1 week", severity: "Moderate" },
+        { name: "Wheezing on exertion", duration: "5 days", severity: "Mild" },
+      ],
+      medicalHistory: ["Bronchial Asthma (childhood)", "Hypothyroid (3yr)", "Pregnancy 12wk"],
+      allergies: ["Aspirin", "Penicillin"],
+      questionsToDoctor: [
+        "Are my inhalers safe in pregnancy?",
+        "Should I increase my thyroid dose?",
+      ],
+    },
     gynecData: {
       menarche: "13 years",
       lmp: "28 Dec'25",
@@ -171,6 +187,19 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
       { name: "Vitamin D", value: "18", unit: "ng/mL", flag: "low", refRange: "30-100" },
     ],
     dueAlerts: [],
+    symptomCollectorData: {
+      reportedAt: "Today, 11:20 AM",
+      symptoms: [
+        { name: "Headache", duration: "4 days", severity: "Moderate" },
+        { name: "Eye strain", duration: "1 week", severity: "Mild" },
+      ],
+      medicalHistory: ["Migraine without aura (3yr)"],
+      allergies: [],
+      questionsToDoctor: [
+        "Why are migraines worse this week?",
+        "Can I switch to a stronger painkiller?",
+      ],
+    },
     gynecData: {
       menarche: "13 years",
       lmp: "10 Feb'26",
@@ -221,6 +250,19 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
       { name: "Triglycerides", value: "195", unit: "mg/dL", flag: "high", refRange: "<150" },
     ],
     dueAlerts: ["ECG pending", "Lipid recheck overdue"],
+    symptomCollectorData: {
+      reportedAt: "Today, 08:30 AM",
+      symptoms: [
+        { name: "Fatigue", duration: "2 weeks", severity: "Moderate" },
+        { name: "Poor sleep", duration: "3 weeks", severity: "Moderate" },
+      ],
+      medicalHistory: ["Hypertension (3yr)", "Dyslipidemia (1yr)"],
+      allergies: ["Sulfa drugs"],
+      questionsToDoctor: [
+        "Is my BP under control?",
+        "Do I need a stress test?",
+      ],
+    },
     ophthalData: {
       vaRight: "6/9",
       vaLeft: "6/9",
@@ -267,6 +309,10 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
       ],
       medicalHistory: ["Hypothyroid (2yr)"],
       allergies: ["Sulfa drugs"],
+      questionsToDoctor: [
+        "Is my swelling normal at 38 weeks?",
+        "When should we plan delivery?",
+      ],
     },
     obstetricData: {
       gravida: 1, para: 0, living: 0, abortion: 0, ectopic: 0,
@@ -328,6 +374,10 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
       ],
       medicalHistory: ["Recurrent wheezing episodes (6mo)"],
       allergies: ["Egg allergy"],
+      questionsToDoctor: [
+        "Why is he eating less than before?",
+        "Is the cough due to allergy or infection?",
+      ],
     },
     pediatricsData: {
       ageDisplay: "4 years",
@@ -382,6 +432,10 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
       ],
       medicalHistory: ["Hypothyroid (on Thyronorm 75mcg)"],
       allergies: ["Ibuprofen"],
+      questionsToDoctor: [
+        "Is this perimenopause?",
+        "Will my anaemia improve with iron supplements?",
+      ],
     },
     gynecData: {
       menarche: "13 years",
@@ -408,6 +462,20 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
     labFlagCount: 0,
     keyLabs: [],
     dueAlerts: [],
+    symptomCollectorData: {
+      reportedAt: "Today, 09:30 AM",
+      symptoms: [
+        { name: "Joint Pain", duration: "1 week", severity: "Moderate" },
+        { name: "Morning stiffness", duration: "1 week", severity: "Mild" },
+      ],
+      medicalHistory: [],
+      allergies: ["Sulfonamides"],
+      isNewPatient: true,
+      questionsToDoctor: [
+        "Is this arthritis?",
+        "Do I need any tests today?",
+      ],
+    },
   },
 
   // ═══════════════ 8. SURESH NAIR — Returning patient, NO symptom collector ═══════════════
@@ -443,8 +511,19 @@ export const SMART_SUMMARY_BY_CONTEXT: Record<string, SmartSummaryData> = {
     dueAlerts: ["ECG due (annual)", "Echo follow-up (post-angioplasty)"],
     recordAlerts: ["Angioplasty records from City Heart Hospital (2024) uploaded"],
     concernTrend: { label: "LDL", values: [142, 128, 118], labels: ["Jun 25", "Oct 25", "Feb 26"], unit: "mg/dL", tone: "teal" },
-    // NOTE: No symptomCollectorData — patient came directly without filling intake form
-    // Agent must generate summary from historical data only
+    symptomCollectorData: {
+      reportedAt: "Today, 10:00 AM",
+      symptoms: [
+        { name: "Mild chest discomfort on exertion", duration: "5 days", severity: "Mild" },
+        { name: "Easy fatigability", duration: "1 week", severity: "Mild" },
+      ],
+      medicalHistory: ["Ischemic Heart Disease (2yr)", "Post-angioplasty (2024)", "Hypertension (5yr)"],
+      allergies: ["Aspirin (GI intolerance)"],
+      questionsToDoctor: [
+        "Should I worry about this discomfort?",
+        "Is my dual antiplatelet still needed?",
+      ],
+    },
   },
 
   // ═══════════════ CKD STAGE 5 — SBAR/POMR/PARTIAL DATA DEMO ═══════════════
