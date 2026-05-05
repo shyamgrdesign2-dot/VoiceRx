@@ -654,7 +654,6 @@ function WrittenRxPreviewCard({
       <div className="flex items-center justify-between gap-3 px-[10px] py-[8px]">
         <div className="min-w-0">
           <p className="truncate font-sans text-[14px] font-semibold leading-[20px] text-tp-slate-700">{document.title}</p>
-          <p className="truncate font-sans text-[14px] leading-[20px] text-tp-slate-400">{document.description}</p>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

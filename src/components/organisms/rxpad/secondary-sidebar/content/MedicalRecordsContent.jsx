@@ -4,7 +4,7 @@
  */
 import Image from "next/image";
 import React, { useState } from "react";
-import { DocumentDownload, Eye, Import, Printer, Trash } from "iconsax-reactjs";
+import { DocumentDownload, Edit2, Eye, Import, Printer, Trash } from "iconsax-reactjs";
 import { MoreVertical } from "@/src/components/atoms/icons/lucide";
 import { AiTriggerIcon } from "@/src/components/organisms/rxpad/dr-agent/shared/AiTriggerIcon";
 import { HistoricalNewDataBanner } from "../HistoricalNewDataBanner";
@@ -149,6 +149,7 @@ function ReportIcon({ size = 14, color = "var(--tp-slate-500)" }) {
 // use `MoreVertical` (kebab) as the affordance.
 const RECORD_ACTIONS = [
 { id: "view", label: "View", icon: Eye },
+{ id: "edit", label: "Edit notes", icon: Edit2 },
 { id: "download", label: "Download", icon: Import },
 { id: "delete", label: "Delete", icon: Trash }];
 
@@ -189,14 +190,16 @@ function RecordCard({
   date,
   note,
   onAction
-
-
-
-
-
 }) {
   return (
-    <div className="group content-stretch flex flex-col items-start relative shrink-0 w-full overflow-hidden rounded-[10px] border border-tp-slate-100 bg-white">
+    <div
+      role="button"
+      tabIndex={0}
+      onClick={() => onAction?.("view")}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onAction?.("view"); }
+      }}
+      className="group content-stretch flex flex-col items-start relative shrink-0 w-full overflow-hidden rounded-[10px] border border-tp-slate-100 bg-white cursor-pointer transition-shadow hover:shadow-[0_2px_12px_rgba(15,23,42,0.08)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-tp-blue-400">
       {/* Thumbnail */}
       <div className="h-[82px] relative rounded-tl-[10px] rounded-tr-[10px] shrink-0 w-full overflow-clip">
         <div
@@ -235,19 +238,19 @@ function RecordCard({
           </div>
         }
         {/* AI summarize icon — top-left of thumbnail, always visible */}
-        <div className="absolute left-[10px] top-[10px]">
+        <div className="absolute left-[10px] top-[10px]" onClick={(e) => e.stopPropagation()}>
           <AiTriggerIcon
             tooltip={`Summarize this ${label.toLowerCase()}`}
             signalLabel={`Summarize uploaded document: ${label} (${date})`}
             sectionId="medicalRecords" />
-          
+
         </div>
         {/* Quick-note tooltip uses the TP-design-system `HoverTooltip`
              atom — anchored via `getBoundingClientRect()` so the
              popover lands directly above this icon, not at the
              top-bar (which was happening with the Radix Portal +
              stacking-context interaction). */}
-        <span className="absolute right-[10px] top-[10px]">
+        <span className="absolute right-[10px] top-[10px]" onClick={(e) => e.stopPropagation()}>
           <HoverTooltip content={note} side="top" align="end">
             <button
               type="button"
@@ -271,7 +274,7 @@ function RecordCard({
               <p className="font-sans font-semibold leading-[20px] relative shrink-0 text-[14px]">{label}</p>
               <p className="font-sans font-normal leading-[20px] relative shrink-0 text-[14px] text-tp-slate-500">{date}</p>
             </div>
-            <div className="flex items-center justify-center relative shrink-0">
+            <div className="flex items-center justify-center relative shrink-0" onClick={(e) => e.stopPropagation()}>
               <RecordActionMenu onAction={onAction} />
             </div>
           </div>
@@ -279,6 +282,82 @@ function RecordCard({
       </div>
     </div>);
 
+}
+
+// ─── Notes card (sidebar header strip above the document preview) ───────────
+//
+// Doctors often add a free-text note while uploading a record (e.g.
+// findings, follow-up plan). The card surfaces that note prominently
+// at the top of the sidebar in a soft grey container, and lets the
+// doctor edit it inline. Re-keyed off `record.id` so opening another
+// record always starts from that record's saved note.
+
+function RecordNotesCard({ record, initiallyEditing = false }) {
+  const [editing, setEditing] = useState(initiallyEditing);
+  const [draft, setDraft] = useState(record.note ?? "");
+
+  React.useEffect(() => {
+    setDraft(record.note ?? "");
+    setEditing(initiallyEditing);
+  }, [record.id, initiallyEditing, record.note]);
+
+  function handleSave() {
+    // Demo: persist via toast — real wire-up would push back to the
+    // record store. The card keeps the in-flight draft locally.
+    toast.success("Notes saved");
+    setEditing(false);
+  }
+
+  return (
+    <section className="rounded-[12px] bg-tp-slate-100/80 p-[14px] ring-1 ring-tp-slate-200">
+      <div className="mb-[8px] flex items-center justify-between">
+        <p className="font-sans text-[12px] font-semibold uppercase tracking-[0.6px] text-tp-slate-500">
+          Doctor&apos;s notes
+        </p>
+        {editing ? (
+          <div className="flex items-center gap-[8px]">
+            <button
+              type="button"
+              onClick={() => { setDraft(record.note ?? ""); setEditing(false); }}
+              className="font-sans text-[13px] font-medium text-tp-slate-500 hover:text-tp-slate-700">
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSave}
+              className="inline-flex h-[28px] items-center justify-center rounded-[8px] bg-tp-blue-500 px-[12px] font-sans text-[13px] font-semibold text-white transition-colors hover:bg-tp-blue-600">
+              Save
+            </button>
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setEditing(true)}
+            aria-label="Edit notes"
+            className="inline-flex h-[28px] items-center gap-[6px] rounded-[8px] bg-white px-[10px] font-sans text-[13px] font-medium text-tp-slate-700 ring-1 ring-tp-slate-200 transition-colors hover:bg-tp-slate-50">
+            <Edit2 color="currentColor" size={14} strokeWidth={1.5} variant="Linear" />
+            Edit
+          </button>
+        )}
+      </div>
+      {editing ? (
+        <textarea
+          id="tp-record-notes-textarea"
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          rows={4}
+          autoFocus
+          placeholder="Add findings, recommendations, or follow-up plan…"
+          className="w-full resize-y rounded-[10px] border border-tp-slate-200 bg-white px-[12px] py-[8px] font-sans text-[14px] leading-[20px] text-tp-slate-700 placeholder:text-tp-slate-400 focus:border-tp-blue-300 focus:outline-none focus:ring-2 focus:ring-tp-blue-100" />
+      ) : (
+        <p className="whitespace-pre-wrap font-sans text-[14px] leading-[20px] text-tp-slate-700">
+          {draft || (
+            <span className="italic text-tp-slate-400">No notes added yet — click Edit to write findings or follow-up plan.</span>
+          )}
+        </p>
+      )}
+    </section>
+  );
 }
 
 // ─── Public export ────────────────────────────────────────────────────────────
@@ -293,11 +372,11 @@ const RECORD_PREVIEW_BY_TYPE = {
 };
 
 const RECORDS = [
-  { id: "rec-1", type: "pathology-img", label: "Pathology", date: "10 Aug'26", note: "Uploaded by Dr. Shyam: pathology panel from last follow-up." },
-  { id: "rec-2", type: "prescription-img", label: "Prescription", date: "10 Aug'26", note: "Scanned written prescription shared by patient at intake." },
-  { id: "rec-3", type: "pdf", label: "Prescription", date: "10 Aug'26", note: "Digitized PDF export generated from hospital EMR." },
-  { id: "rec-4", type: "pathology-blank", label: "Pathology", date: "10 Aug'26", note: "Follow-up pathology receipt uploaded by front desk." },
-  { id: "rec-5", type: "pathology-img", label: "Pathology", date: "10 Aug'26", note: "Previous lab copy attached for trend comparison." },
+  { id: "rec-1", type: "pathology-img", label: "Pathology", date: "10 Aug'26", note: "Fasting glucose elevated at 180 mg/dL; HbA1c trending up to 8.2. Patient reports irregular metformin compliance over the last 3 weeks. Plan: reinforce adherence + repeat panel in 6 weeks." },
+  { id: "rec-2", type: "prescription-img", label: "Prescription", date: "10 Aug'26", note: "Patient brought original handwritten Rx from previous OPD. Refilled metformin 500mg BD; added ramipril 2.5mg OD for borderline BP." },
+  { id: "rec-3", type: "pdf", label: "Prescription", date: "10 Aug'26", note: "EMR export of last hospitalization discharge summary. Reconcile with current chart — confirm anti-diabetics list still active." },
+  { id: "rec-4", type: "pathology-blank", label: "Pathology", date: "10 Aug'26", note: "Repeat pathology panel — values within reference range. No medication changes required at this visit." },
+  { id: "rec-5", type: "pathology-img", label: "Pathology", date: "10 Aug'26", note: "Earlier lab copy attached for trend comparison. CBC, lipid panel, and LFTs all reviewed against today's reading." },
 ];
 
 export function MedicalRecordsContent() {
@@ -305,8 +384,11 @@ export function MedicalRecordsContent() {
   const [activeRecord, setActiveRecord] = useState(null);
 
   const handleRecordAction = (record, action) => {
-    if (action === "view") {
-      setActiveRecord(record);
+    if (action === "view" || action === "edit") {
+      // Edit opens the same sidebar — the notes block in the body is
+      // the editable surface. View is read-only by default; edit
+      // immediately focuses the notes textarea.
+      setActiveRecord({ ...record, mode: action });
     } else if (action === "download") {
       toast.success(`${record.label} download started`);
     } else if (action === "delete") {
@@ -359,6 +441,19 @@ export function MedicalRecordsContent() {
               <>
                 <button
                   type="button"
+                  aria-label="Edit notes"
+                  onClick={() => {
+                    setActiveRecord((prev) => prev ? { ...prev, mode: "edit" } : prev);
+                    requestAnimationFrame(() => {
+                      const ta = document.getElementById("tp-record-notes-textarea");
+                      ta?.focus();
+                    });
+                  }}
+                  className="inline-flex h-[42px] w-[42px] items-center justify-center rounded-[10px] bg-tp-slate-100 text-tp-slate-700 transition-colors hover:bg-tp-slate-200 active:scale-[0.96]">
+                  <Edit2 color="currentColor" size={20} strokeWidth={1.5} variant="Linear" />
+                </button>
+                <button
+                  type="button"
                   aria-label="Download record"
                   onClick={() => { toast.success(`${activeRecord.label} download started`); }}
                   className="inline-flex h-[42px] w-[42px] items-center justify-center rounded-[10px] bg-tp-slate-100 text-tp-slate-700 transition-colors hover:bg-tp-slate-200 active:scale-[0.96]">
@@ -386,25 +481,32 @@ export function MedicalRecordsContent() {
           />
         }>
         <div className="flex-1 min-h-0 overflow-auto bg-tp-slate-50 p-4">
-          <div className="flex h-full flex-col items-center justify-start">
-            {activeRecord && RECORD_PREVIEW_BY_TYPE[activeRecord.type] ? (
-              <Image
-                alt={activeRecord.label}
-                src={RECORD_PREVIEW_BY_TYPE[activeRecord.type]}
-                width={820}
-                height={1100}
-                className="w-full h-auto max-w-[820px]" />
-            ) : activeRecord ? (
-              <div className="flex h-full w-full max-w-[820px] flex-col items-center justify-center gap-3 rounded-[12px] border border-tp-slate-200 bg-white py-24 text-tp-slate-500">
-                <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
-                  <rect x="6" y="4" width="20" height="24" rx="2" fill="var(--tp-slate-300)" />
-                  <rect x="9" y="9" width="14" height="2" rx="1" fill="white" />
-                  <rect x="9" y="13" width="14" height="2" rx="1" fill="white" />
-                  <rect x="9" y="17" width="8" height="2" rx="1" fill="white" />
-                </svg>
-                <p className="font-sans text-tp-slate-500 text-[14px]">{activeRecord.label} · {activeRecord.date}</p>
-              </div>
+          <div className="mx-auto flex w-full max-w-[820px] flex-col gap-4">
+            {activeRecord ? (
+              <RecordNotesCard
+                record={activeRecord}
+                initiallyEditing={activeRecord.mode === "edit"} />
             ) : null}
+            <div className="flex flex-col items-center justify-start">
+              {activeRecord && RECORD_PREVIEW_BY_TYPE[activeRecord.type] ? (
+                <Image
+                  alt={activeRecord.label}
+                  src={RECORD_PREVIEW_BY_TYPE[activeRecord.type]}
+                  width={820}
+                  height={1100}
+                  className="w-full h-auto max-w-[820px]" />
+              ) : activeRecord ? (
+                <div className="flex h-full w-full max-w-[820px] flex-col items-center justify-center gap-3 rounded-[12px] border border-tp-slate-200 bg-white py-24 text-tp-slate-500">
+                  <svg width="48" height="48" viewBox="0 0 32 32" fill="none">
+                    <rect x="6" y="4" width="20" height="24" rx="2" fill="var(--tp-slate-300)" />
+                    <rect x="9" y="9" width="14" height="2" rx="1" fill="white" />
+                    <rect x="9" y="13" width="14" height="2" rx="1" fill="white" />
+                    <rect x="9" y="17" width="8" height="2" rx="1" fill="white" />
+                  </svg>
+                  <p className="font-sans text-tp-slate-500 text-[14px]">{activeRecord.label} · {activeRecord.date}</p>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
       </Sidebar>
