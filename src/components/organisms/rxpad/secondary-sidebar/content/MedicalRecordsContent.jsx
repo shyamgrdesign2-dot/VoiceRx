@@ -271,8 +271,8 @@ function RecordCard({
         <div className="flex flex-row items-center size-full">
           <div className="content-stretch flex items-center justify-between px-[12px] py-[6px] relative w-full">
             <div className="content-stretch flex flex-col items-start not-italic relative shrink-0 text-tp-slate-700 tracking-[0.1px] w-[103px]">
-              <p className="font-sans font-semibold leading-[20px] relative shrink-0 text-[14px]">{label}</p>
-              <p className="font-sans font-normal leading-[20px] relative shrink-0 text-[14px] text-tp-slate-500">{date}</p>
+              <p className="font-sans font-semibold leading-[20px] relative shrink-0 text-[14px]">{date}</p>
+              <p className="font-sans font-normal leading-[20px] relative shrink-0 text-[14px] text-tp-slate-500">{label}</p>
             </div>
             <div className="flex items-center justify-center relative shrink-0" onClick={(e) => e.stopPropagation()}>
               <RecordActionMenu onAction={onAction} />
