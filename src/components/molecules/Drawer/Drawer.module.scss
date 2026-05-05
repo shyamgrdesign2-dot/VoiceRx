@@ -31,18 +31,20 @@
     &[data-size="full"] { width: 100%; }
   }
 
+  /* Per design call: side drawers have hard square edges — they're
+     full-height panels flush to the viewport edge. The previous 20px
+     left-side rounding ("notched" look) was wrong for the Written Rx
+     drawer and other right-side drawers. Top/bottom drawers can keep
+     their inner-edge rounding because they don't touch the viewport
+     edge perpendicularly. */
   &[data-side="right"] {
     right: 0;
     border-left: 1px solid var(--tp-slate-200, #e2e2ea);
-    border-top-left-radius: 20px;
-    border-bottom-left-radius: 20px;
   }
 
   &[data-side="left"] {
     left: 0;
     border-right: 1px solid var(--tp-slate-200, #e2e2ea);
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
   }
 
   /* ── Vertical sides ── */
