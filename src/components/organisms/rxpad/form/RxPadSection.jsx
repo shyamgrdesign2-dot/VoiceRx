@@ -7,7 +7,7 @@ import {
 
 "@/src/components/atoms/icons/lucide";
 import { Eraser, Grid5, Ram, Trash } from "iconsax-reactjs";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/src/components/atoms/Tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, HoverTooltip } from "@/src/components/atoms/Tooltip";
 import { useRxPadSync } from "@/src/components/organisms/rxpad/rxpad-sync-context";
 
 /**
@@ -86,9 +86,8 @@ export function RxPadSection({
   const iconDisabled = micDisabled || globalLocked;
 
   const voiceIconButton = onVoiceClick ?
-  <Tooltip>
-      <TooltipTrigger asChild>
-        <button
+  <HoverTooltip content={tooltipText} side="top">
+      <button
         type="button"
         {...voiceActive ?
         { "data-voice-allow": true } :
@@ -101,14 +100,10 @@ export function RxPadSection({
         aria-label={tooltipText}
         aria-disabled={iconDisabled}
         onClick={iconDisabled ? undefined : onVoiceClick}>
-        
-          <span className="tp-voice-wave-icon" />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="top" sideOffset={6} className="max-w-[240px] rounded-[6px] border-0 bg-tp-slate-900 px-2.5 py-1.5 text-[12px] leading-[1.45] text-white shadow-[0_8px_20px_-10px_rgba(15,23,42,0.45)]">
-        {tooltipText}
-      </TooltipContent>
-    </Tooltip> :
+
+        <span className="tp-voice-wave-icon" />
+      </button>
+    </HoverTooltip> :
   null;
 
   return (

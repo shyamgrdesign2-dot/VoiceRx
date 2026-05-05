@@ -630,15 +630,17 @@ function FollowUpSection({
 }
 
 function PrescribedByFooter({ doctorName, specialty }) {
-  // Digital Rx renders this as a small inline footer — lighter type
-  // than the Written Rx meta block since the surrounding card already
-  // carries plenty of structure. No icon, no chrome.
+  // Digital Rx footer — sits inside a subtle slate-50 strip so the
+  // doctor stamp parses as its own section ("attended by") rather
+  // than blending into the card body.
   return (
     <div className="px-[10px] pb-[12px] pt-[2px]">
-      <p className="font-sans text-[12px] font-medium leading-[16px] text-tp-slate-600">{doctorName}</p>
-      {specialty ? (
-        <p className="font-sans text-[12px] leading-[16px] text-tp-slate-400">{specialty}</p>
-      ) : null}
+      <div className="rounded-[10px] bg-tp-slate-50 px-[12px] py-[8px]">
+        <p className="font-sans text-[13px] font-semibold leading-[18px] text-tp-slate-700">{doctorName}</p>
+        {specialty ? (
+          <p className="font-sans text-[12px] leading-[16px] text-tp-slate-500">{specialty}</p>
+        ) : null}
+      </div>
     </div>
   );
 }

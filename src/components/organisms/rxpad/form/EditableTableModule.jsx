@@ -31,7 +31,7 @@ import {
 import { VoiceRxModuleRecorder } from "@/src/components/organisms/voicerx/VoiceRxModuleRecorder";
 import { VoiceRxSectionProcessing } from "./VoiceRxSectionProcessing";
 import { useModuleTemplateHandlers } from "@/src/components/organisms/rxpad/templates";
-import { Tooltip as TPTooltip } from "@/src/components/atoms/Tooltip";
+import { Tooltip as TPTooltip, HoverTooltip } from "@/src/components/atoms/Tooltip";
 import { ShineBorder } from "@/src/components/atoms/ShineBorder";
 import { TPRxPadSearchInput } from "@/src/components/organisms/rxpad/RxPadSearchInput";
 import { RxPadSection as TPRxPadSection } from "@/src/components/organisms/rxpad/form/RxPadSection";
@@ -50,9 +50,9 @@ import { RxPadSection as TPRxPadSection } from "@/src/components/organisms/rxpad
 function UngroundedTooltipWrap({ enabled, text, children }) {
   if (!enabled) return children;
   return (
-    <TPTooltip title={text} placement="top" arrow>
+    <HoverTooltip content={text} side="top">
       {children}
-    </TPTooltip>
+    </HoverTooltip>
   );
 }
 
@@ -1117,32 +1117,35 @@ function EditableTableModule({
                                    active. Click to dictate directly into this
                                    cell; click again or blur to stop. */}
                           {showCellMic ?
-                              <button
-                                type="button"
-                                data-voice-allow
-                                aria-label={isCellRecording ? "Stop dictation" : "Dictate notes here"}
-                                title={isCellRecording ? "Stop dictation" : "Dictate notes here"}
-                                onMouseDown={(event) => {
-                                  // Prevent input blur before we toggle.
-                                  event.preventDefault();
-                                }}
-                                onClick={() => {
-                                  if (isCellRecording) {
-                                    stopCellRecording();
-                                  } else {
-                                    startCellRecording(row.id, column.key);
-                                  }
-                                }}
-                                className={`absolute right-[6px] top-1/2 z-30 -translate-y-1/2 inline-flex h-[30px] w-[30px] items-center justify-center rounded-full transition-transform active:scale-[0.92] ${
-                                isCellRecording ? "bg-tp-blue-50 ring-2 ring-tp-blue-500/40" : "hover:bg-tp-slate-100"}`
-                                }>
-                                <Microphone2
-                                  size={18}
-                                  variant={isCellRecording ? "Bold" : "Linear"}
-                                  color={isCellRecording ? "var(--tp-blue-600)" : "var(--tp-slate-600)"}
-                                  strokeWidth={1.6} />
-                              </button> :
-                              null}
+                            <span className="absolute right-[6px] top-1/2 z-30 -translate-y-1/2">
+                              <HoverTooltip content={isCellRecording ? "Stop dictation" : "Dictate notes here"} side="top">
+                                <button
+                                  type="button"
+                                  data-voice-allow
+                                  aria-label={isCellRecording ? "Stop dictation" : "Dictate notes here"}
+                                  onMouseDown={(event) => {
+                                    // Prevent input blur before we toggle.
+                                    event.preventDefault();
+                                  }}
+                                  onClick={() => {
+                                    if (isCellRecording) {
+                                      stopCellRecording();
+                                    } else {
+                                      startCellRecording(row.id, column.key);
+                                    }
+                                  }}
+                                  className={`inline-flex h-[30px] w-[30px] items-center justify-center rounded-full transition-transform active:scale-[0.92] ${
+                                  isCellRecording ? "bg-tp-blue-50 ring-2 ring-tp-blue-500/40" : "hover:bg-tp-slate-100"}`
+                                  }>
+                                  <Microphone2
+                                    size={18}
+                                    variant={isCellRecording ? "Bold" : "Linear"}
+                                    color={isCellRecording ? "var(--tp-blue-600)" : "var(--tp-slate-600)"}
+                                    strokeWidth={1.6} />
+                                </button>
+                              </HoverTooltip>
+                            </span> :
+                            null}
                           {/* Per-row "needs verification" glyph — only on
                                    the grounded cell when this row was filled
                                    from voice and the doctor hasn't picked a
