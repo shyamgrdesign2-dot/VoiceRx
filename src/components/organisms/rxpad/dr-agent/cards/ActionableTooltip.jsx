@@ -119,12 +119,11 @@ export function ActionableTooltip({
   }, [isCopied]);
 
   const handleClick = useCallback(() => {
+    // Per design call: don't show the in-place "Filled!" confirmation
+    // — the global toast surfaces success. Just fire the action and
+    // dismiss the hover tooltip so we never double-confirm.
     onAction();
-    setIsCopied(true);
-    setTimeout(() => {
-      setIsCopied(false);
-      setIsVisible(false);
-    }, 1000);
+    setIsVisible(false);
   }, [onAction]);
 
   /* ── Touch: tap-to-toggle + outside-tap-to-close ─── */
