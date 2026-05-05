@@ -117,15 +117,19 @@ export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect
   const sidebarVoiceLocked = voiceActiveSection !== null;
 
   function performSwitch(id) {
-    setActiveId((prev) => {
-      const next = prev === id ? null : id;
-      if (next) {
-        publishSignal({ type: "section_focus", sectionId: next });
-        acknowledgeHistoricalSection(next);
-      }
-      onSectionSelect?.(next);
-      return next;
-    });
+    // Compute the next value BEFORE calling setActiveId so the side
+    // effects (publishSignal / acknowledgeHistoricalSection /
+    // onSectionSelect) don't fire inside the updater function — React
+    // 19 flags setState-in-render when a state-setter is invoked
+    // during another setter's reducer.
+    const prev = activeIdRef.current;
+    const next = prev === id ? null : id;
+    setActiveId(next);
+    if (next) {
+      publishSignal({ type: "section_focus", sectionId: next });
+      acknowledgeHistoricalSection(next);
+    }
+    onSectionSelect?.(next);
   }
 
   function handleSelect(id) {

@@ -158,7 +158,8 @@ const queueAppointments = [
   slotDate: "9 Mar'26",
   hasVideo: false,
   status: "queue",
-  dateKey: "today"
+  dateKey: "today",
+  hasSymptoms: true
 },
 {
   id: "__patient__",
