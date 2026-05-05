@@ -11,6 +11,7 @@ import {
   Calendar2,
   Copy as CopyIcon,
   CopySuccess,
+  DocumentDownload,
   Eye,
   Import,
   Printer } from
@@ -33,7 +34,7 @@ import {
   DrawerTitle as TPDrawerTitle } from
 "@/src/components/molecules/Drawer";
 import { TPMedicalIcon } from "@/src/components/atoms/MedicalIcon";
-import { Snackbar as TPSnackbar } from "@/src/components/molecules/Snackbar";
+import { toast } from "@/src/components/molecules/Toaster";
 import { SidebarHeader } from "@/src/components/molecules/SidebarHeader";
 import { CloseSquareIcon } from "@/src/components/organisms/rxpad/templates/shared";
 import { TPButton } from "@/src/components/atoms/Button/button-system";
@@ -672,8 +673,8 @@ function WrittenRxPreviewCard({
                 event.preventDefault();
                 onPreview(document);
               }}>
-              
-              <Eye color="currentColor" size={14} variant="Linear" />
+
+              <Eye color="currentColor" size={18} variant="Linear" />
               Preview
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -681,8 +682,11 @@ function WrittenRxPreviewCard({
                 event.preventDefault();
                 onDownload(document);
               }}>
-              
-              <Import color="currentColor" size={14} variant="Linear" />
+
+              {/* DocumentDownload reads more clearly as "save this
+                  document" than the generic Import (down-arrow) glyph,
+                  and matches sizing of Eye/Printer at 18px. */}
+              <DocumentDownload color="currentColor" size={18} variant="Linear" />
               Download
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -690,8 +694,8 @@ function WrittenRxPreviewCard({
                 event.preventDefault();
                 onPrint(document);
               }}>
-              
-              <Printer color="currentColor" size={14} variant="Linear" />
+
+              <Printer color="currentColor" size={18} variant="Linear" />
               Print
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -729,10 +733,9 @@ export function PastVisitsContent() {
 
 
     null);
-  const [snackbar, setSnackbar] = useState(null);
-
+  // Single global toast — no inline snackbar in the expanded view.
   const showCopySnackbar = (message) => {
-    setSnackbar({ id: Date.now(), message });
+    toast.success(message);
   };
 
   const openDocument = (dateLabel, document) => {
@@ -956,30 +959,24 @@ export function PastVisitsContent() {
             title={activeDocument?.document.title ?? "Written Rx PDF"}
             actions={activeDocument ? (
               <>
-                <TPButton
-                  variant="outline"
-                  theme="neutral"
-                  size="sm"
-                  leftIcon={<Eye color="currentColor" size={14} strokeWidth={1.5} variant="Linear" />}
-                  onClick={() => showCopySnackbar("Preview is open")}>
-                  Preview
-                </TPButton>
-                <TPButton
-                  variant="outline"
-                  theme="neutral"
-                  size="sm"
-                  leftIcon={<Import color="currentColor" size={14} strokeWidth={1.5} variant="Linear" />}
-                  onClick={() => handleDownload(activeDocument.document)}>
-                  Download
-                </TPButton>
-                <TPButton
-                  variant="outline"
-                  theme="neutral"
-                  size="sm"
-                  leftIcon={<Printer color="currentColor" size={14} strokeWidth={1.5} variant="Linear" />}
-                  onClick={() => handlePrint(activeDocument.document)}>
-                  Print
-                </TPButton>
+                {/* Icon-only chip CTAs — same glazed slate-100
+                    background as the RxpadHeader Customisation /
+                    Settings chips. No "Preview" CTA per design call;
+                    only Download + Print. */}
+                <button
+                  type="button"
+                  aria-label="Download written Rx"
+                  onClick={() => handleDownload(activeDocument.document)}
+                  className="inline-flex h-[42px] w-[42px] items-center justify-center rounded-[10px] bg-tp-slate-100 text-tp-slate-700 transition-colors hover:bg-tp-slate-200 active:scale-[0.96]">
+                  <DocumentDownload color="currentColor" size={20} strokeWidth={1.5} variant="Linear" />
+                </button>
+                <button
+                  type="button"
+                  aria-label="Print written Rx"
+                  onClick={() => handlePrint(activeDocument.document)}
+                  className="inline-flex h-[42px] w-[42px] items-center justify-center rounded-[10px] bg-tp-slate-100 text-tp-slate-700 transition-colors hover:bg-tp-slate-200 active:scale-[0.96]">
+                  <Printer color="currentColor" size={20} strokeWidth={1.5} variant="Linear" />
+                </button>
               </>
             ) : null}
           />
@@ -1003,19 +1000,6 @@ export function PastVisitsContent() {
           </div>
         </TPDrawerContent>
       </TPDrawer>
-
-      <TPSnackbar
-        key={snackbar?.id ?? 0}
-        open={Boolean(snackbar)}
-        message={snackbar?.message ?? ""}
-        severity="success"
-        autoHideDuration={1800}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        onClose={(_, reason) => {
-          if (reason === "clickaway") return;
-          setSnackbar(null);
-        }} />
-      
     </>);
 
 }
