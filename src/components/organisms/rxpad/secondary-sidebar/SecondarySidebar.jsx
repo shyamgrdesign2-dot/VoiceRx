@@ -9,6 +9,7 @@ import { NavPanel } from "./NavPanel";
 import { ContentPanel } from "./ContentPanel";
 
 import { useRxPadSync } from "@/src/components/organisms/rxpad/rxpad-sync-context";
+import { ConfirmDialog as TPConfirmDialog } from "@/src/components/molecules/ConfirmDialog";
 import { SECTIONS_WITH_DATA, SECTIONS_EMPTY } from "./types";
 
 /** All valid NavItemIds for validation */
@@ -50,7 +51,10 @@ function neighbourSection(current, dir) {
 
 export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect }) {
   const [activeId, setActiveId] = useState("pastVisits");
-  const { lastSignal, publishSignal, acknowledgeHistoricalSection, activeVoiceModule } = useRxPadSync();
+  const { lastSignal, publishSignal, acknowledgeHistoricalSection, activeVoiceModule, setActiveVoiceModule } = useRxPadSync();
+  // Pending nav target while a sidebar voice recording is active —
+  // we ask "discard?" before switching sections.
+  const [pendingNavTarget, setPendingNavTarget] = useState(null);
   const lastSignalIdRef = useRef(0);
 
   // Note: collapseExpandedOnly is no longer used — both sidebars can
@@ -112,13 +116,8 @@ export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect
   // here so the doctor can still browse the historical sidebar.
   const sidebarVoiceLocked = voiceActiveSection !== null;
 
-  function handleSelect(id) {
-    // Only block sidebar tab switching when the voice module that's
-    // recording belongs to a sidebar section — the global VoiceRx FAB
-    // flow and per-RxPad-module recorders both keep sidebar nav free.
-    if (sidebarVoiceLocked) return;
+  function performSwitch(id) {
     setActiveId((prev) => {
-      if (prev === id && sidebarVoiceLocked) return prev;
       const next = prev === id ? null : id;
       if (next) {
         publishSignal({ type: "section_focus", sectionId: next });
@@ -127,6 +126,19 @@ export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect
       onSectionSelect?.(next);
       return next;
     });
+  }
+
+  function handleSelect(id) {
+    // If a sidebar-section voice recording is live, prompt the doctor
+    // to discard before switching tabs. The previous behaviour was a
+    // silent no-op which read as a broken click. Per design call we
+    // surface a TPConfirmDialog ("Discard recording?") and only
+    // proceed if the doctor confirms.
+    if (sidebarVoiceLocked) {
+      setPendingNavTarget(id);
+      return;
+    }
+    performSwitch(id);
   }
 
   const activeIdRef = useRef(activeId);
@@ -157,6 +169,31 @@ export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect
         onSwipeNavigate={handleSwipeNavigate} /> :
 
       null}
+
+      {/* Discard-recording confirm. Primary CTA (right, blue) is the
+          SAFE action ("Keep recording"); secondary (left, red link) is
+          the destructive option ("Discard & switch") per the existing
+          ConfirmDialog convention. */}
+      <TPConfirmDialog
+        open={Boolean(pendingNavTarget)}
+        onOpenChange={(o) => { if (!o) setPendingNavTarget(null); }}
+        title="Voice recording is active"
+        warning={
+          activeVoiceModule
+            ? `Voice dictation for ${activeVoiceModule} is in progress. Switching sections will discard the in-progress transcript.`
+            : "Switching sections will discard the in-progress transcript."
+        }
+        primaryLabel="Keep recording"
+        onPrimary={() => setPendingNavTarget(null)}
+        secondaryLabel="Discard & switch"
+        secondaryTone="destructive"
+        onSecondary={() => {
+          const target = pendingNavTarget;
+          setActiveVoiceModule(null);
+          setPendingNavTarget(null);
+          if (target != null) performSwitch(target);
+        }}
+      />
     </div>);
 
 }

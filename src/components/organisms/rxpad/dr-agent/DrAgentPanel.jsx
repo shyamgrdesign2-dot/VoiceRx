@@ -3,6 +3,7 @@
 import { cn } from "@/src/hooks/utils";
 
 import { TPSnackbar } from "@/src/components/molecules/Snackbar";
+import { useRxPadSync } from "@/src/components/organisms/rxpad/rxpad-sync-context";
 import { VoiceRxBottomSheet } from "@/src/components/organisms/voicerx/VoiceRxBottomSheet";
 import { AgentHeader } from "./shell/AgentHeader";
 import { SessionHistoryDrawer } from "./shell/SessionHistoryDrawer";
@@ -104,6 +105,11 @@ export function DrAgentPanel({
     pushHistoricalUpdates
   } = useDrAgentPanel({ voiceRxMode, onVoiceCaptureModeChange, initialPatientId, isPanelVisible, autoOpenBottomSheet, onClose, onOpen });
 
+  // True when any other mic / mini-recorder is already running. Used
+  // to disable both "Start with Voice" CTAs (FooterBar + VoiceEmptyState).
+  const { activeVoiceModule } = useRxPadSync();
+  const voiceLocked = !!activeVoiceModule;
+
   return (
     <div
       id="dr-agent-panel-root"
@@ -202,7 +208,8 @@ export function DrAgentPanel({
                 <VoiceEmptyState
                   onStartVoice={() => setVoiceRxDialogOpen(true)}
                   onViewPatientDetails={handleViewPatientDetails}
-                  hasSymptomCollectorData={!!summary.symptomCollectorData} /> : (
+                  hasSymptomCollectorData={!!summary.symptomCollectorData}
+                  voiceLocked={voiceLocked} /> : (
 
 
                 /* Chat messages. `isTyping || voiceRxAwaitingResponse` so the
@@ -255,7 +262,8 @@ export function DrAgentPanel({
               onSend={() => {setIsPrefilled(false);handleSend();}}
               onAttach={handleAttach}
               onVoiceTranscription={handleVoiceTranscription}
-              onLockedChipClick={handleLockedChipClick} />
+              onLockedChipClick={handleLockedChipClick}
+              voiceLocked={voiceLocked} />
             
 
       {/* ── Document Bottom Sheet — overlays entire panel ── */}
@@ -297,22 +305,13 @@ export function DrAgentPanel({
                  the in-chat typing indicator now carries the loading feedback;
                  an additional top-of-page snackbar was redundant and noisy. */}
 
-      {/* Blocked-voice nudge — surfaces when the clinician tries to start
-                 a full Dr. Agent consultation while an inline module recorder
-                 is still running. Points them at the active module so they
-                 know exactly what to close. Top-center severity=warning so
-                 it reads as "hey, one thing first" rather than an error. */}
-      <TPSnackbar
-              open={blockedVoiceToast !== null}
-              message={blockedVoiceToast ?? ""}
-              severity="warning"
-              anchorOrigin={{ vertical: "top", horizontal: "center" }}
-              autoHideDuration={3800}
-              onClose={(_, reason) => {
-                if (reason === "clickaway") return;
-                setBlockedVoiceToast(null);
-              }} />
-            
+      {/* Blocked-voice nudge moved to the global Toaster — the
+          previous inline TPSnackbar was nested inside DrAgentPanel's
+          transform ancestor, so its `position: fixed` clamped inside
+          the panel instead of centring on the viewport. The
+          centralised toast fires from useDrAgentPanel via
+          toast.warning(...) and lands at the true page top-center
+          like every other transient. */}
 
         </div> {/* END inner overflow-clip wrapper */}
         </div> {/* END FRONT FACE */}

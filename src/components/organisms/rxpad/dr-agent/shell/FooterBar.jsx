@@ -56,7 +56,12 @@ export function FooterBar({
   onSend,
   onAttach,
   onVoiceTranscription,
-  onLockedChipClick
+  onLockedChipClick,
+  // True when any other mic / mini-recorder is already running.
+  // Disables the "Start with Voice" CTA so the doctor can't even
+  // attempt to start a second voice session — matches the per-mic
+  // voice-lock invariant.
+  voiceLocked = false,
 }) {
   return (
     <div
@@ -88,9 +93,12 @@ export function FooterBar({
           <button
           type="button"
           onClick={onStartVoice}
-          className="vrx-ai-cta group relative flex w-full items-center justify-center gap-[10px] h-[48px] overflow-hidden rounded-[12px] px-[18px] text-[14px] font-bold tracking-wide text-white transition-all hover:brightness-105 active:scale-[0.98]"
+          disabled={voiceLocked}
+          aria-disabled={voiceLocked || undefined}
+          title={voiceLocked ? "Another mic is active. Close that dictation first." : undefined}
+          className="vrx-ai-cta group relative flex w-full items-center justify-center gap-[10px] h-[48px] overflow-hidden rounded-[12px] px-[18px] text-[14px] font-bold tracking-wide text-white transition-all hover:brightness-105 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:grayscale disabled:hover:brightness-100 disabled:active:scale-100"
           style={{ background: "linear-gradient(135deg, #D565EA 0%, #673AAC 55%, #1A1994 100%)" }}>
-          
+
             <span aria-hidden className="vrx-ai-cta-sheen pointer-events-none absolute inset-y-0 left-0 z-0 w-[40%]" />
             <VoiceRxIcon size={32} color="#FFFFFF" className="relative z-[1]" />
             <span className="relative z-[1]">Start with Voice</span>

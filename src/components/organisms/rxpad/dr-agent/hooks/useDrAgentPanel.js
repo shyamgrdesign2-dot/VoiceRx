@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { useRxPadSync } from "@/src/components/organisms/rxpad/rxpad-sync-context";
+import { toast } from "@/src/components/molecules/Toaster";
 
 
 
@@ -248,8 +249,12 @@ export function useDrAgentPanel({
     // lives in the rxpad-sync context; the tooltip on hover uses the
     // same signal so the click + hover paths agree.
     if (activeVoiceModule) {
-      setBlockedVoiceToast(
-        `VoiceRx is already active in ${activeVoiceModule}. Please close that dictation before starting a full consultation.`
+      // Global page-center toast (warning tone) — was previously a
+      // TPSnackbar nested inside DrAgentPanel's transform ancestor,
+      // which clamped it inside the panel instead of true viewport
+      // top-center.
+      toast.warning(
+        `VoiceRx is already active in ${activeVoiceModule}. Close that dictation first.`
       );
       setVoiceRxDialogOpen(false);
       return;
