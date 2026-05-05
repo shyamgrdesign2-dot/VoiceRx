@@ -40,9 +40,20 @@ function add(type, message, opts = {}) {
   return id;
 }
 
+// Two-stage dismiss so the slide-out animation has time to run.
+// Stage 1: flip `leaving = true` on the toast → ToastItem reads it
+// and animates back to translateY(-12px) + opacity 0 over 220ms.
+// Stage 2: 240ms later, actually filter the toast out of the list.
+const EXIT_DURATION_MS = 240;
 export function dismiss(id) {
-  toasts = toasts.filter((t) => t.id !== id);
+  const t = toasts.find((x) => x.id === id);
+  if (!t || t.leaving) return;
+  toasts = toasts.map((x) => (x.id === id ? { ...x, leaving: true } : x));
   emit();
+  setTimeout(() => {
+    toasts = toasts.filter((x) => x.id !== id);
+    emit();
+  }, EXIT_DURATION_MS);
 }
 
 export function subscribe(fn) {
