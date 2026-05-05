@@ -94,6 +94,8 @@ export { EmptyState } from "./EmptyState";
 
 /* ── Data table ── */
 export { Table, TableHead, TableBody, TableRow, TableCell } from "./Table";
+export { DataTable } from "./DataTable";
+export { SidebarHeader } from "./SidebarHeader";
 
 /* ── Composite / feature ── */
 export { DateRangePicker } from "./DateRangePicker";

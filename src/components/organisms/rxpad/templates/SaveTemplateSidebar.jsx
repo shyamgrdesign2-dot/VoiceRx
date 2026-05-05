@@ -10,6 +10,7 @@ import {
 "@/src/components/organisms/rxpad/template-store";
 import { useTemplateSidebars, useTemplatesForModule } from "./template-context";
 import { CloseSquareIcon } from "./shared";
+import { SidebarHeader } from "@/src/components/molecules/SidebarHeader";
 
 const TAB_NEW = "new";
 const TAB_UPDATE = "update";
@@ -126,51 +127,40 @@ export function SaveTemplateSidebar() {
         isVisible ? "translate-x-0" : "translate-x-full"}`
         }>
         
-        {/* Header */}
-        <header className="flex h-[56px] shrink-0 items-stretch justify-between gap-[12px] border-b border-tp-slate-100 px-[16px]">
-          <div className="flex min-w-0 items-stretch gap-[12px]">
-            <button
-              type="button"
-              onClick={closeSidebar}
-              aria-label="Close save template"
-              className="my-auto flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[8px] text-tp-slate-700 transition-colors hover:bg-tp-slate-100 hover:text-tp-slate-900 active:scale-[0.96]">
-
-              <CloseSquareIcon size={24} />
-            </button>
-            <span aria-hidden className="w-px shrink-0 self-stretch bg-tp-slate-200" />
-            <h3 className="truncate text-[16px] font-semibold tracking-[-0.1px] text-tp-slate-800">
-              Save {moduleName} Template
-            </h3>
-          </div>
-          <div className="flex shrink-0 items-center gap-[10px]">
-            <button
-              type="button"
-              onClick={closeSidebar}
-              className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] border border-tp-blue-300 bg-white px-[16px] text-[13px] font-semibold text-tp-blue-500 transition-colors hover:bg-tp-blue-50 active:scale-[0.98]">
-              
-              Cancel
-            </button>
-            {tab === TAB_NEW ?
-            <button
-              type="button"
-              onClick={handleNewSubmit}
-              disabled={!canSubmitNew}
-              className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] bg-tp-blue-500 px-[16px] text-[13px] font-semibold text-white transition-colors hover:bg-tp-blue-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-tp-blue-500">
-              
-                Save Template
-              </button> :
-
-            <button
-              type="button"
-              onClick={handleUpdateSubmit}
-              disabled={!canSubmitUpdate}
-              className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] bg-tp-blue-500 px-[16px] text-[13px] font-semibold text-white transition-colors hover:bg-tp-blue-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-tp-blue-500">
-              
-                Update Template
+        {/* Header — uses shared SidebarHeader molecule. */}
+        <SidebarHeader
+          onClose={closeSidebar}
+          closeAriaLabel="Close save template"
+          closeIcon={<CloseSquareIcon size={24} />}
+          title={`Save ${moduleName} Template`}
+          actions={
+            <>
+              <button
+                type="button"
+                onClick={closeSidebar}
+                className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] border border-tp-blue-300 bg-white px-[16px] text-[13px] font-semibold text-tp-blue-500 transition-colors hover:bg-tp-blue-50 active:scale-[0.98]">
+                Cancel
               </button>
-            }
-          </div>
-        </header>
+              {tab === TAB_NEW ? (
+                <button
+                  type="button"
+                  onClick={handleNewSubmit}
+                  disabled={!canSubmitNew}
+                  className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] bg-tp-blue-500 px-[16px] text-[13px] font-semibold text-white transition-colors hover:bg-tp-blue-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-tp-blue-500">
+                  Save Template
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleUpdateSubmit}
+                  disabled={!canSubmitUpdate}
+                  className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] bg-tp-blue-500 px-[16px] text-[13px] font-semibold text-white transition-colors hover:bg-tp-blue-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-tp-blue-500">
+                  Update Template
+                </button>
+              )}
+            </>
+          }
+        />
 
         {/* Tabs */}
         <div className="relative flex shrink-0 border-b border-tp-slate-100">

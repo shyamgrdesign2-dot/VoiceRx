@@ -14,6 +14,7 @@ import {
   useRxSectionConfig } from
 "@/src/components/organisms/rxpad/customise-context";
 
+import { SidebarHeader } from "@/src/components/molecules/SidebarHeader";
 import { CustomModuleEditor } from "./CustomModuleEditor";
 import { CustomModuleListItem } from "./CustomModuleListItem";
 import { ModuleAtomIcon } from "./ModuleAtomIcon";
@@ -172,45 +173,35 @@ export function CustomModulesDrawer() {
         }>
         
         {/* Header — close X | divider | title | (right) CTAs */}
-        <header className="flex h-[56px] shrink-0 items-stretch justify-between gap-[12px] border-b border-tp-slate-100 px-[16px]">
-          <div className="flex min-w-0 items-stretch gap-[12px]">
-            <button
-              type="button"
-              onClick={closeDrawer}
-              aria-label="Close custom modules drawer"
-              className="my-auto flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[8px] text-tp-slate-700 transition-colors hover:bg-tp-slate-100 hover:text-tp-slate-900 active:scale-[0.96]">
-
-              <CloseSquareIcon size={24} />
-            </button>
-            <span aria-hidden className="w-px shrink-0 self-stretch bg-tp-slate-200" />
-            <span className="inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[8px] bg-tp-blue-50 text-tp-blue-500">
+        <SidebarHeader
+          onClose={closeDrawer}
+          closeAriaLabel="Close custom modules drawer"
+          closeIcon={<CloseSquareIcon size={24} />}
+          titlePrefix={
+            <span className="my-auto inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[8px] bg-tp-blue-50 text-tp-blue-500">
               <ModuleAtomIcon size={18} />
             </span>
-            <h3 className="truncate text-[16px] font-semibold tracking-[-0.1px] text-tp-slate-800">
-              {isEditingMode ? "Edit Custom Module" : "Custom Modules"}
-            </h3>
-          </div>
-          {(isCreatingMode || isEditingMode) &&
-          <div className="flex shrink-0 items-center gap-[10px]">
-              <DrawerGradientDivider />
+          }
+          title={isEditingMode ? "Edit Custom Module" : "Custom Modules"}
+          actionsDivider={(isCreatingMode || isEditingMode) ? <DrawerGradientDivider /> : null}
+          actions={(isCreatingMode || isEditingMode) ? (
+            <>
               <button
-              type="button"
-              onClick={closeDrawer}
-              className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] border border-tp-blue-300 bg-white px-[16px] text-[13px] font-semibold text-tp-blue-500 transition-colors hover:bg-tp-blue-50 active:scale-[0.98]">
-              
+                type="button"
+                onClick={closeDrawer}
+                className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] border border-tp-blue-300 bg-white px-[16px] text-[13px] font-semibold text-tp-blue-500 transition-colors hover:bg-tp-blue-50 active:scale-[0.98]">
                 Cancel
               </button>
               <button
-              type="button"
-              onClick={handleHeaderSubmit}
-              disabled={!editorValid}
-              className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] bg-tp-blue-500 px-[16px] text-[13px] font-semibold text-white transition-colors hover:bg-tp-blue-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-tp-blue-500">
-              
+                type="button"
+                onClick={handleHeaderSubmit}
+                disabled={!editorValid}
+                className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] bg-tp-blue-500 px-[16px] text-[13px] font-semibold text-white transition-colors hover:bg-tp-blue-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-tp-blue-500">
                 {submitLabel}
               </button>
-            </div>
-          }
-        </header>
+            </>
+          ) : null}
+        />
 
         {/* Tabs (hidden in edit mode) — icons + blue selected text + blue divider */}
         {!isEditingMode &&
