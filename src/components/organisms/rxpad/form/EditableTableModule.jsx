@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Trash } from "iconsax-reactjs";
+import { Microphone2, Trash } from "iconsax-reactjs";
 import styles from "./EditableTableModule.module.scss";
 import {
   ChevronDown,
@@ -1120,7 +1120,8 @@ function EditableTableModule({
                               <button
                                 type="button"
                                 data-voice-allow
-                                aria-label={isCellRecording ? "Stop dictation" : "Use Voice AI to fill this cell"}
+                                aria-label={isCellRecording ? "Stop dictation" : "Dictate notes here"}
+                                title={isCellRecording ? "Stop dictation" : "Dictate notes here"}
                                 onMouseDown={(event) => {
                                   // Prevent input blur before we toggle.
                                   event.preventDefault();
@@ -1135,10 +1136,11 @@ function EditableTableModule({
                                 className={`absolute right-[6px] top-1/2 z-30 -translate-y-1/2 inline-flex h-[30px] w-[30px] items-center justify-center rounded-full transition-transform active:scale-[0.92] ${
                                 isCellRecording ? "bg-tp-blue-50 ring-2 ring-tp-blue-500/40" : "hover:bg-tp-slate-100"}`
                                 }>
-                                <span
-                                  aria-hidden
-                                  className="tp-voice-wave-icon"
-                                  style={{ width: 22, height: 22 }} />
+                                <Microphone2
+                                  size={18}
+                                  variant={isCellRecording ? "Bold" : "Linear"}
+                                  color={isCellRecording ? "var(--tp-blue-600)" : "var(--tp-slate-600)"}
+                                  strokeWidth={1.6} />
                               </button> :
                               null}
                           {/* Per-row "needs verification" glyph — only on

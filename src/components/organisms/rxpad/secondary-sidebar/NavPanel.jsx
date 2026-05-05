@@ -10,6 +10,7 @@ import styles from "./NavPanel.module.scss";
 import { ArrowDown2, DocumentText, Eye, Note1, Ruler } from "iconsax-reactjs";
 
 import { TPMedicalIcon } from "@/src/components/atoms/MedicalIcon";
+import { Tooltip as TPTooltip } from "@/src/components/atoms/Tooltip";
 import { useRxPadSync } from "@/src/components/organisms/rxpad/rxpad-sync-context";
 import { useSidebarConfig } from "@/src/components/organisms/rxpad/customise-context";
 
@@ -180,37 +181,36 @@ function NavItem({
   active,
   hasUnseen,
   isVoiceRecording,
+  disabled,
+  disabledReason,
   onClick
-
-
-
-
-
-
-
-
 }) {
   const [hovered, setHovered] = useState(false);
 
   const rowBg = active ?
   rxSidebarTokens.navItemSelectedBg :
-  hovered ?
+  hovered && !disabled ?
   rxSidebarTokens.navItemHoverBg :
   "transparent";
 
-  return (
+  const row = (
     <div
-      className={cn("relative shrink-0 cursor-pointer", styles.navItemRow)}
+      aria-disabled={disabled || undefined}
+      className={cn(
+        "relative shrink-0",
+        disabled ? "cursor-not-allowed opacity-40" : "cursor-pointer",
+        styles.navItemRow,
+      )}
       style={{ backgroundColor: rowBg }}
       data-voice-allow
-      onClick={() => onClick(id)}
+      onClick={() => { if (!disabled) onClick(id); }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}>
-      
+
       <div className="content-stretch flex items-center relative w-full">
         <div
           className={cn("content-stretch flex flex-col items-center relative shrink-0", styles.navItemInner)}>
-          
+
           {icon.kind === "medical" ?
           <MedicalNavIcon active={active} name={icon.name} hasUnseen={hasUnseen} isVoiceRecording={isVoiceRecording} /> :
 
@@ -218,7 +218,7 @@ function NavItem({
           }
           <p
             className={`${rxSidebarTokens.navLabelClass} min-w-full not-italic overflow-hidden relative shrink-0 text-center text-ellipsis text-white w-[min-content] whitespace-pre-wrap`}>
-            
+
             {label}
           </p>
         </div>
@@ -227,6 +227,11 @@ function NavItem({
       {active ? <SelectionArrow /> : null}
     </div>);
 
+  return disabled && disabledReason ? (
+    <TPTooltip title={disabledReason} placement="right" arrow>
+      {row}
+    </TPTooltip>
+  ) : row;
 }
 
 function DrAgentItem({ active, onClick }) {
@@ -270,7 +275,7 @@ function DrAgentItem({ active, onClick }) {
 
 
 
-export function NavPanel({ active, onSelect, voiceActiveSection }) {
+export function NavPanel({ active, onSelect, voiceActiveSection, voiceLockedLabel }) {
   const { isHistoricalSectionUnseen } = useRxPadSync();
   const sidebarConfig = useSidebarConfig();
   const navItems = sidebarConfig.
@@ -318,18 +323,26 @@ export function NavPanel({ active, onSelect, voiceActiveSection }) {
         
         {/* Dr.Agent removed from sidebar nav — lives only in its own panel */}
 
-        {navItems.map(({ id, label, icon }) =>
-        <NavItem
-          key={id}
-          id={id}
-          label={label}
-          icon={icon}
-          active={active === id}
-          hasUnseen={isHistoricalSectionUnseen(id)}
-          isVoiceRecording={voiceActiveSection === id}
-          onClick={onSelect} />
-
-        )}
+        {navItems.map(({ id, label, icon }) => {
+          const isLockedTarget = voiceActiveSection != null && voiceActiveSection !== id;
+          return (
+            <NavItem
+              key={id}
+              id={id}
+              label={label}
+              icon={icon}
+              active={active === id}
+              hasUnseen={isHistoricalSectionUnseen(id)}
+              isVoiceRecording={voiceActiveSection === id}
+              disabled={isLockedTarget}
+              disabledReason={
+                isLockedTarget
+                  ? `Voice dictation in ${voiceLockedLabel ?? "another section"} is active. Stop or submit it before navigating.`
+                  : undefined
+              }
+              onClick={onSelect} />
+          );
+        })}
       </div>
 
       {showScrollHint ?

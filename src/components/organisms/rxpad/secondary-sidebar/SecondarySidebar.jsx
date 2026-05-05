@@ -9,7 +9,6 @@ import { NavPanel } from "./NavPanel";
 import { ContentPanel } from "./ContentPanel";
 
 import { useRxPadSync } from "@/src/components/organisms/rxpad/rxpad-sync-context";
-import { ConfirmDialog as TPConfirmDialog } from "@/src/components/molecules/ConfirmDialog";
 import { SECTIONS_WITH_DATA, SECTIONS_EMPTY } from "./types";
 
 /** All valid NavItemIds for validation */
@@ -51,10 +50,7 @@ function neighbourSection(current, dir) {
 
 export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect }) {
   const [activeId, setActiveId] = useState("pastVisits");
-  const { lastSignal, publishSignal, acknowledgeHistoricalSection, activeVoiceModule, setActiveVoiceModule } = useRxPadSync();
-  // Pending nav target while a sidebar voice recording is active —
-  // we ask "discard?" before switching sections.
-  const [pendingNavTarget, setPendingNavTarget] = useState(null);
+  const { lastSignal, publishSignal, acknowledgeHistoricalSection, activeVoiceModule } = useRxPadSync();
   const lastSignalIdRef = useRef(0);
 
   // Note: collapseExpandedOnly is no longer used — both sidebars can
@@ -133,15 +129,12 @@ export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect
   }
 
   function handleSelect(id) {
-    // If a sidebar-section voice recording is live, prompt the doctor
-    // to discard before switching tabs. The previous behaviour was a
-    // silent no-op which read as a broken click. Per design call we
-    // surface a TPConfirmDialog ("Discard recording?") and only
-    // proceed if the doctor confirms.
-    if (sidebarVoiceLocked) {
-      setPendingNavTarget(id);
-      return;
-    }
+    // If a sidebar-section voice recording is live, block silently —
+    // NavPanel renders the locked-target tooltip ("Voice dictation in
+    // <Section> is active …") so the doctor sees why the click does
+    // nothing. The active section itself (id === voiceActiveSection)
+    // remains clickable so doctors can collapse / re-focus it.
+    if (sidebarVoiceLocked && id !== voiceActiveSection) return;
     performSwitch(id);
   }
 
@@ -165,7 +158,11 @@ export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect
   return (
     // overflow-visible → the white selection arrow on the right edge isn't clipped
     <div className="content-stretch flex items-start relative h-full overflow-visible">
-      <NavPanel active={activeId} onSelect={handleSelect} voiceActiveSection={voiceActiveSection} />
+      <NavPanel
+        active={activeId}
+        onSelect={handleSelect}
+        voiceActiveSection={voiceActiveSection}
+        voiceLockedLabel={activeVoiceModule} />
       {activeId && !collapseExpandedOnly ?
       <ContentPanel
         activeId={activeId}
@@ -173,31 +170,6 @@ export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect
         onSwipeNavigate={handleSwipeNavigate} /> :
 
       null}
-
-      {/* Discard-recording confirm. Primary CTA (right, blue) is the
-          SAFE action ("Keep recording"); secondary (left, red link) is
-          the destructive option ("Discard & switch") per the existing
-          ConfirmDialog convention. */}
-      <TPConfirmDialog
-        open={Boolean(pendingNavTarget)}
-        onOpenChange={(o) => { if (!o) setPendingNavTarget(null); }}
-        title="Voice recording is active"
-        warning={
-          activeVoiceModule
-            ? `Voice dictation for ${activeVoiceModule} is in progress. Switching sections will discard the in-progress transcript.`
-            : "Switching sections will discard the in-progress transcript."
-        }
-        primaryLabel="Keep recording"
-        onPrimary={() => setPendingNavTarget(null)}
-        secondaryLabel="Discard & switch"
-        secondaryTone="destructive"
-        onSecondary={() => {
-          const target = pendingNavTarget;
-          setActiveVoiceModule(null);
-          setPendingNavTarget(null);
-          if (target != null) performSwitch(target);
-        }}
-      />
     </div>);
 
 }

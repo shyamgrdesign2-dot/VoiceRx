@@ -149,7 +149,7 @@ function ReportIcon({ size = 14, color = "var(--tp-slate-500)" }) {
 // use `MoreVertical` (kebab) as the affordance.
 const RECORD_ACTIONS = [
 { id: "view", label: "View", icon: Eye },
-{ id: "edit", label: "Edit notes", icon: Edit2 },
+{ id: "edit", label: "Edit record", icon: Edit2 },
 { id: "download", label: "Download", icon: Import },
 { id: "delete", label: "Delete", icon: Trash }];
 
@@ -441,7 +441,7 @@ export function MedicalRecordsContent() {
               <>
                 <button
                   type="button"
-                  aria-label="Edit notes"
+                  aria-label="Edit record"
                   onClick={() => {
                     setActiveRecord((prev) => prev ? { ...prev, mode: "edit" } : prev);
                     requestAnimationFrame(() => {

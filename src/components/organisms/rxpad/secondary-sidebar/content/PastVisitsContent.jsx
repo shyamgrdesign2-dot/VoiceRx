@@ -631,16 +631,11 @@ function FollowUpSection({
 
 function WrittenRxPreviewCard({
   document,
+  dateLabel,
   onOpen,
   onPreview,
   onDownload,
   onPrint
-
-
-
-
-
-
 }) {
   return (
     <button
@@ -653,7 +648,10 @@ function WrittenRxPreviewCard({
       </div>
       <div className="flex items-center justify-between gap-3 px-[10px] py-[8px]">
         <div className="min-w-0">
-          <p className="truncate font-sans text-[14px] font-semibold leading-[20px] text-tp-slate-700">{document.title}</p>
+          <p className="truncate font-sans text-[14px] font-semibold leading-[20px] text-tp-slate-700">{dateLabel ?? document.title}</p>
+          {document.doctorName ? (
+            <p className="truncate font-sans text-[12px] leading-[18px] text-tp-slate-400">{document.doctorName}</p>
+          ) : null}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -944,6 +942,7 @@ export function PastVisitsContent() {
                       <WrittenRxPreviewCard
                         key={document.id}
                         document={document}
+                        dateLabel={entry.dateLabel}
                         onOpen={(selectedDocument) => openDocument(entry.dateLabel, selectedDocument)}
                         onPreview={(selectedDocument) => {
                           openDocument(entry.dateLabel, selectedDocument);
@@ -980,7 +979,7 @@ export function PastVisitsContent() {
             closeIcon={<CloseSquareIcon size={24} />}
             title={
               activeDocument
-                ? `Written Rx (${activeDocument.dateLabel} · OPD)`
+                ? `Written Rx (${activeDocument.dateLabel})`
                 : "Written Rx"
             }
             actions={activeDocument ? (
