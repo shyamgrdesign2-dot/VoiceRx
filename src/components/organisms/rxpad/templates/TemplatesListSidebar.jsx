@@ -5,6 +5,7 @@ import { ClipboardList, Search, Trash2 } from "@/src/components/atoms/icons/luci
 
 import { deleteTemplate } from "@/src/components/organisms/rxpad/template-store";
 import { ConfirmDialog as TPConfirmDialog } from "@/src/components/molecules/ConfirmDialog";
+import { Sidebar } from "@/src/components/molecules/Sidebar";
 import { SidebarHeader } from "@/src/components/molecules/SidebarHeader";
 
 import { useTemplateSidebars, useTemplatesForModule } from "./template-context";
@@ -17,28 +18,14 @@ export function TemplatesListSidebar() {
   const moduleId = activeModule?.moduleId ?? "";
   const moduleName = activeModule?.moduleName ?? "";
 
-  // ── Mount/animate ────────────────────────────────────────────────────
-  const [isMounted, setIsMounted] = useState(isOpen);
-  const [isVisible, setIsVisible] = useState(isOpen);
+  // ESC closes (the Sidebar shell handles backdrop click + slide
+  // animation; we only need to forward Escape).
   useEffect(() => {
-    if (isOpen) {
-      setIsMounted(true);
-      const id = window.requestAnimationFrame(() => setIsVisible(true));
-      return () => window.cancelAnimationFrame(id);
-    }
-    setIsVisible(false);
-    const id = window.setTimeout(() => setIsMounted(false), 280);
-    return () => window.clearTimeout(id);
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isMounted) return;
-    const handler = (e) => {
-      if (e.key === "Escape") closeSidebar();
-    };
+    if (!isOpen) return;
+    const handler = (e) => { if (e.key === "Escape") closeSidebar(); };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [isMounted, closeSidebar]);
+  }, [isOpen, closeSidebar]);
 
   const templates = useTemplatesForModule(moduleId);
   const [query, setQuery] = useState("");
@@ -69,8 +56,6 @@ export function TemplatesListSidebar() {
     setConfirmDeleteId(null);
   }
 
-  if (!isMounted) return null;
-
   return (
     <>
       {/* Confirm-delete dialog */}
@@ -88,37 +73,25 @@ export function TemplatesListSidebar() {
         onPrimary={handleConfirmDelete}
         secondaryLabel="Cancel"
         onSecondary={() => setConfirmDeleteId(null)} />
-      
 
-      {/* Backdrop */}
-      <div
-        aria-hidden
-        onClick={closeSidebar}
-        className={`fixed inset-0 z-[170] bg-black/35 backdrop-blur-[2px] transition-opacity duration-200 ${
-        isVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`
-        } />
-      
-
-      {/* Slide-in panel */}
-      <aside
-        role="dialog"
-        aria-label={`${moduleName} templates`}
-        aria-hidden={!isVisible}
-        className={`fixed right-0 top-0 z-[171] flex h-full w-[94vw] flex-col bg-white shadow-[-12px_0_40px_rgba(15,23,42,0.22)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] md:w-[75vw] lg:w-[480px] ${
-        isVisible ? "translate-x-0" : "translate-x-full"}`
+      {/* Sidebar shell handles backdrop, slide animation, panel chrome. */}
+      <Sidebar
+        open={isOpen}
+        onClose={closeSidebar}
+        width="min(94vw, 480px)"
+        panelClassName="md:w-[75vw] lg:w-[480px]"
+        header={
+          <SidebarHeader
+            onClose={closeSidebar}
+            closeAriaLabel="Close templates list"
+            closeIcon={<CloseSquareIcon size={24} />}
+            titlePrefix={
+              <span className="my-auto inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[8px] bg-tp-blue-50 text-tp-blue-500">
+                <ClipboardList size={16} strokeWidth={1.5} />
+              </span>
+            }
+            title={`${moduleName} Templates`} />
         }>
-        
-        {/* Header — uses shared SidebarHeader molecule. */}
-        <SidebarHeader
-          onClose={closeSidebar}
-          closeAriaLabel="Close templates list"
-          closeIcon={<CloseSquareIcon size={24} />}
-          titlePrefix={
-            <span className="my-auto inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[8px] bg-tp-blue-50 text-tp-blue-500">
-              <ClipboardList size={16} strokeWidth={1.5} />
-            </span>
-          }
-          title={`${moduleName} Templates`} />
 
         {/* Search */}
         <div className="shrink-0 border-b border-tp-slate-100 px-[20px] py-[14px]">
@@ -191,7 +164,7 @@ export function TemplatesListSidebar() {
             </div>
           }
         </div>
-      </aside>
+      </Sidebar>
     </>);
 
 }

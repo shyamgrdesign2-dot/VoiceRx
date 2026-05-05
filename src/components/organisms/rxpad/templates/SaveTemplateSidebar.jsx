@@ -10,6 +10,7 @@ import {
 "@/src/components/organisms/rxpad/template-store";
 import { useTemplateSidebars, useTemplatesForModule } from "./template-context";
 import { CloseSquareIcon } from "./shared";
+import { Sidebar } from "@/src/components/molecules/Sidebar";
 import { SidebarHeader } from "@/src/components/molecules/SidebarHeader";
 
 const TAB_NEW = "new";
@@ -21,28 +22,13 @@ export function SaveTemplateSidebar() {
   const { openSidebar, activeModule, closeSidebar } = useTemplateSidebars();
   const isOpen = openSidebar === "save" && !!activeModule;
 
-  // ── Mount/animate ────────────────────────────────────────────────────
-  const [isMounted, setIsMounted] = useState(isOpen);
-  const [isVisible, setIsVisible] = useState(isOpen);
+  // Sidebar shell handles mount/animate; we only forward Escape.
   useEffect(() => {
-    if (isOpen) {
-      setIsMounted(true);
-      const id = window.requestAnimationFrame(() => setIsVisible(true));
-      return () => window.cancelAnimationFrame(id);
-    }
-    setIsVisible(false);
-    const id = window.setTimeout(() => setIsMounted(false), 280);
-    return () => window.clearTimeout(id);
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isMounted) return;
-    const handler = (e) => {
-      if (e.key === "Escape") closeSidebar();
-    };
+    if (!isOpen) return;
+    const handler = (e) => { if (e.key === "Escape") closeSidebar(); };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [isMounted, closeSidebar]);
+  }, [isOpen, closeSidebar]);
 
   const moduleId = activeModule?.moduleId ?? "";
   const moduleName = activeModule?.moduleName ?? "";
@@ -108,26 +94,13 @@ export function SaveTemplateSidebar() {
   const canSubmitNew = !newError;
   const canSubmitUpdate = !!updateTargetId;
 
-  if (!isMounted) return null;
-
   return (
-    <>
-      <div
-        aria-hidden
-        onClick={closeSidebar}
-        className={`fixed inset-0 z-[170] bg-black/35 backdrop-blur-[2px] transition-opacity duration-200 ${
-        isVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"}`
-        } />
-      
-      <aside
-        role="dialog"
-        aria-label={`Save ${moduleName} template`}
-        aria-hidden={!isVisible}
-        className={`fixed right-0 top-0 z-[171] flex h-full w-[94vw] flex-col bg-white shadow-[-12px_0_40px_rgba(15,23,42,0.22)] transition-transform duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] md:w-[75vw] lg:w-[480px] ${
-        isVisible ? "translate-x-0" : "translate-x-full"}`
-        }>
-        
-        {/* Header — uses shared SidebarHeader molecule. */}
+    <Sidebar
+      open={isOpen}
+      onClose={closeSidebar}
+      width="min(94vw, 480px)"
+      panelClassName="md:w-[75vw] lg:w-[480px]"
+      header={
         <SidebarHeader
           onClose={closeSidebar}
           closeAriaLabel="Close save template"
@@ -161,6 +134,7 @@ export function SaveTemplateSidebar() {
             </>
           }
         />
+      }>
 
         {/* Tabs */}
         <div className="relative flex shrink-0 border-b border-tp-slate-100">
@@ -214,8 +188,7 @@ export function SaveTemplateSidebar() {
 
           }
         </div>
-      </aside>
-    </>);
+    </Sidebar>);
 
 }
 
