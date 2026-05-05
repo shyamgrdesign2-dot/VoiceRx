@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { useState, useMemo, useCallback } from "react";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { ArrowUp, ArrowDown } from "@/src/components/atoms/icons/lucide";
 import { cn } from "@/src/hooks/utils";
 
 /**

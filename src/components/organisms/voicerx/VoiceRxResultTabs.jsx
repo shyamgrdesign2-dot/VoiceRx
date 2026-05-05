@@ -7,7 +7,7 @@ import {
   MoreVertical,
   Printer } from
 
-"lucide-react";
+"@/src/components/atoms/icons/lucide";
 import { VoiceRxIcon } from "@/src/components/organisms/voicerx/voice-consult-icons";
 import { CopyIcon } from "@/src/components/organisms/rxpad/dr-agent/cards/CopyIcon";
 import { toast } from "@/src/components/molecules/Toaster";

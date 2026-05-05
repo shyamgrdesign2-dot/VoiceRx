@@ -3,7 +3,7 @@
  * Ported directly from Figma designs.
  */
 import React from "react";
-import clsx from "clsx";
+import { cn as clsx } from "@/src/hooks/utils";
 import svgPaths from "./imports/svg-g7iuydxwol";
 import { rxSidebarTokens, tpSectionCardStyle } from "./tokens";
 

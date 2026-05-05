@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { X } from "lucide-react";
+import { X } from "@/src/components/atoms/icons/lucide";
 import { cn } from "@/src/hooks/utils";
 
 /**

@@ -26,7 +26,7 @@ function EndVisitIcon({ size = 18, color = "white" }) {
     </svg>);
 
 }
-import { ChevronLeft, MoreVertical } from "lucide-react";
+import { ChevronLeft, MoreVertical } from "@/src/components/atoms/icons/lucide";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/src/components/molecules/DropdownMenu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/src/components/atoms/Tooltip";
 import { TutorialPlayIcon } from "@/src/components/atoms/TutorialPlayIcon/TutorialPlayIcon";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2 } from "lucide-react";
+import { Building2 } from "@/src/components/atoms/icons/lucide";
 import { Calendar2, Notepad2 } from "iconsax-reactjs";
 
 import { RX_CONTEXT_OPTIONS } from "@/src/components/organisms/rxpad/dr-agent/constants";

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ClipboardList, Info, Pencil, Search } from "lucide-react";
+import { ClipboardList, Info, Pencil, Search } from "@/src/components/atoms/icons/lucide";
 
 import {
   addTemplate,

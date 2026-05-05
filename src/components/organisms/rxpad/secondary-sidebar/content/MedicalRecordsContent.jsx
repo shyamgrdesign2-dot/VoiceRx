@@ -5,7 +5,7 @@
 import Image from "next/image";
 import React, { useState } from "react";
 import { Eye, Import, Trash } from "iconsax-reactjs";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical } from "@/src/components/atoms/icons/lucide";
 import { AiTriggerIcon } from "@/src/components/organisms/rxpad/dr-agent/shared/AiTriggerIcon";
 import { HistoricalNewDataBanner } from "../HistoricalNewDataBanner";
 

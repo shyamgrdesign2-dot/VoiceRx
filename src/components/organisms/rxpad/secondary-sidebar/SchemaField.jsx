@@ -24,7 +24,7 @@
  */
 
 import React from "react";
-import clsx from "clsx";
+import { cn as clsx } from "@/src/hooks/utils";
 
 // ─── Token classes ────────────────────────────────────────────────────────────
 

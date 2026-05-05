@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, Calendar } from "lucide-react";
+import { Eye, Calendar } from "@/src/components/atoms/icons/lucide";
 import { CopyButton } from "./CopyButton";
 import { PanelEmptyState } from "./ExpandedPanel";
 

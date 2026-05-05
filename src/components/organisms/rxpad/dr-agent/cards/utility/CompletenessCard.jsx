@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle, Circle } from "lucide-react";
+import { CheckCircle, Circle } from "@/src/components/atoms/icons/lucide";
 import { CardShell } from "../CardShell";
 
 import { cn } from "@/src/hooks/utils";

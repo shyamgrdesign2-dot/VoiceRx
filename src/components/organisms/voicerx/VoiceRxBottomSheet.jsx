@@ -4,7 +4,7 @@ import React, { useId, useState } from "react";
 import { cn } from "@/src/hooks/utils";
 import styles from "./VoiceRxBottomSheet.module.scss";
 
-import { Info } from "lucide-react";
+import { Info } from "@/src/components/atoms/icons/lucide";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/src/components/atoms/Tooltip";
 
 /** Bottom-sheet row titles (distinct from longer `VOICE_CONSULT_LABELS` elsewhere). */

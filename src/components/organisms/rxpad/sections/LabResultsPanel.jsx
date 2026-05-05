@@ -1,6 +1,6 @@
 "use client";
 
-import { FlaskConical, ArrowUp, ArrowDown } from "lucide-react";
+import { FlaskConical, ArrowUp, ArrowDown } from "@/src/components/atoms/icons/lucide";
 import { CopyButton, CopySectionButton } from "./CopyButton";
 import { PanelEmptyState } from "./ExpandedPanel";
 

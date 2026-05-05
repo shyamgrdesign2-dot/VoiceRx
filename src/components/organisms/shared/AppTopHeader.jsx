@@ -12,7 +12,7 @@
  */
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronDown, Search } from "lucide-react";
+import { ChevronDown, Search } from "@/src/components/atoms/icons/lucide";
 import { Hospital, Notification, TickCircle } from "iconsax-reactjs";
 import { TutorialPlayIcon } from "@/src/components/atoms/TutorialPlayIcon/TutorialPlayIcon";
 import { cn } from "@/src/hooks/utils";

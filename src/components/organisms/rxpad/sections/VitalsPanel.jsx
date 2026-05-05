@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, Calendar, Heart, Wind, Gauge } from "lucide-react";
+import { Activity, Calendar, Heart, Wind, Gauge } from "@/src/components/atoms/icons/lucide";
 import { CopyButton } from "./CopyButton";
 import { PanelEmptyState } from "./ExpandedPanel";
 

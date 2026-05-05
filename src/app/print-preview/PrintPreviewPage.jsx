@@ -2,7 +2,7 @@
 
 import { Suspense, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Printer } from "lucide-react";
+import { ArrowLeft, Printer } from "@/src/components/atoms/icons/lucide";
 
 import { RxPreviewCard } from "@/src/components/organisms/rxpad/dr-agent/cards/action/RxPreviewCard";
 

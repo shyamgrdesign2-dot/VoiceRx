@@ -7,7 +7,7 @@
  * `border` + `border-radius` only.
  */
 import React, { useEffect, useState } from "react";
-import clsx from "clsx";
+import { cn as clsx } from "@/src/hooks/utils";
 import { ArrowSquareDown, ArrowSquareUp } from "iconsax-reactjs";
 import { rxSidebarTokens, tpSectionCardStyle } from "./tokens";
 import { VoiceRxModuleRecorder } from "@/src/components/organisms/voicerx/VoiceRxModuleRecorder";

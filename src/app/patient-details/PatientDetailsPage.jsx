@@ -22,7 +22,7 @@ import {
   Refresh2,
   User } from
 "iconsax-reactjs";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical } from "@/src/components/atoms/icons/lucide";
 
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "@/src/components/molecules/DropdownMenu";
 import { Tooltip as TooltipRoot, TooltipContent, TooltipProvider, TooltipTrigger } from "@/src/components/atoms/Tooltip";

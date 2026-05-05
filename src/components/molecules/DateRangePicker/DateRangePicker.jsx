@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronLeft, ChevronRight } from "@/src/components/atoms/icons/lucide";
 import { cn } from "@/src/hooks/utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────

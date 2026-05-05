@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { GripVertical, MoreHorizontal } from "lucide-react";
+import { GripVertical, MoreHorizontal } from "@/src/components/atoms/icons/lucide";
 import { toast } from "@/src/components/molecules/Toaster";
 
 import { TPMedicalIcon } from "@/src/components/atoms/MedicalIcon";

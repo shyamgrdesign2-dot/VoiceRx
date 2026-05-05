@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, HeartPulse, Award, Pill, ClipboardList, ChevronRight } from "lucide-react";
+import { Calendar, HeartPulse, Award, Pill, ClipboardList, ChevronRight } from "@/src/components/atoms/icons/lucide";
 import { CopyButton, CopySectionButton } from "./CopyButton";
 import { PanelEmptyState } from "./ExpandedPanel";
 

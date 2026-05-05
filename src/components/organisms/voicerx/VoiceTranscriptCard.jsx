@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronUp, Mic } from "lucide-react";
+import { ChevronUp, Mic } from "@/src/components/atoms/icons/lucide";
 
 import { cn } from "@/src/hooks/utils";
 

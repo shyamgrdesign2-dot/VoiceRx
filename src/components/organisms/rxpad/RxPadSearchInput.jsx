@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Search } from "lucide-react";
+import { Search } from "@/src/components/atoms/icons/lucide";
 import { cn } from "@/src/hooks/utils";
 
 

@@ -10,7 +10,7 @@ import {
   Info,
   Plus,
   Search } from
-"lucide-react";
+"@/src/components/atoms/icons/lucide";
 
 
 import {

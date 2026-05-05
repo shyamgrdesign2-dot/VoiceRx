@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronDown, Check, MicOff, WifiOff, Mic, AlertCircle } from "lucide-react";
+import { ChevronDown, Check, MicOff, WifiOff, Mic, AlertCircle } from "@/src/components/atoms/icons/lucide";
 
 import { VoiceRxSiriWaveform } from "@/src/components/organisms/voicerx/VoiceRxSiriWaveform";
 import { useNetConnection } from "@/src/components/organisms/voicerx/use-net-connection";

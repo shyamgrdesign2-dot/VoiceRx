@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Calendar2, Notepad2 } from "iconsax-reactjs";
-import { Plus } from "lucide-react";
+import { Plus } from "@/src/components/atoms/icons/lucide";
 
 import {
   diagnosisSuggestions,

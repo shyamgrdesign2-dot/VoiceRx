@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { LayoutGrid, Plus, Search } from "lucide-react";
+import { LayoutGrid, Plus, Search } from "@/src/components/atoms/icons/lucide";
 
 import {
   CUSTOM_MODULE_CAP } from

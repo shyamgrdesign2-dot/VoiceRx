@@ -1,6 +1,6 @@
 "use client";
 
-import { FolderOpen, FileText, Image, File } from "lucide-react";
+import { FolderOpen, FileText, Image, File } from "@/src/components/atoms/icons/lucide";
 import { CopyButton } from "./CopyButton";
 import { PanelEmptyState } from "./ExpandedPanel";
 

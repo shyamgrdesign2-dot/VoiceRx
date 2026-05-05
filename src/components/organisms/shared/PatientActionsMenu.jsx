@@ -33,7 +33,7 @@ import {
   Eye,
   BellRing,
   MoreVertical,
-} from "lucide-react";
+} from "@/src/components/atoms/icons/lucide";
 
 import {
   DropdownMenu,

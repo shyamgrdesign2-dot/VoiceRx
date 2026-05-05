@@ -1,6 +1,6 @@
 "use client";
 
-import { ShieldCheck, Calendar, CheckCircle, Clock, AlertTriangle } from "lucide-react";
+import { ShieldCheck, Calendar, CheckCircle, Clock, AlertTriangle } from "@/src/components/atoms/icons/lucide";
 import { CopyButton } from "./CopyButton";
 import { PanelSubSection, PanelEmptyState } from "./ExpandedPanel";
 

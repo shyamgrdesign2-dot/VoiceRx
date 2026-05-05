@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Copy, CheckCircle } from "lucide-react";
+import { Copy, CheckCircle } from "@/src/components/atoms/icons/lucide";
 
 
 

@@ -2,7 +2,7 @@
  * Medical History content panel — always-open section cards.
  */
 import React, { useMemo } from "react";
-import clsx from "clsx";
+import { cn as clsx } from "@/src/hooks/utils";
 import { ActionButton, SectionCard } from "../detail-shared";
 import { AiTriggerIcon } from "../../dr-agent/shared/AiTriggerIcon";
 import {

@@ -5,7 +5,7 @@ import {
   Search,
   XCircle } from
 
-"lucide-react";
+"@/src/components/atoms/icons/lucide";
 import { Eraser, Grid5, Ram, Trash } from "iconsax-reactjs";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/src/components/atoms/Tooltip";
 import { useRxPadSync } from "@/src/components/organisms/rxpad/rxpad-sync-context";

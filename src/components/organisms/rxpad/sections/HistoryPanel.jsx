@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, HeartPulse, Scissors, Users } from "lucide-react";
+import { AlertTriangle, HeartPulse, Scissors, Users } from "@/src/components/atoms/icons/lucide";
 import { CopyButton, CopySectionButton } from "./CopyButton";
 import { PanelSubSection } from "./ExpandedPanel";
 

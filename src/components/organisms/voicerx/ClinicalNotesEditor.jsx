@@ -17,7 +17,7 @@ import {
   Heading3,
   Undo2,
   Redo2 } from
-"lucide-react";
+"@/src/components/atoms/icons/lucide";
 
 import { cn } from "@/src/hooks/utils";
 import { useTouchDevice } from "@/src/hooks/use-touch-device";

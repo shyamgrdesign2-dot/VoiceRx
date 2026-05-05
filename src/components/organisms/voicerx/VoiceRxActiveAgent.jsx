@@ -11,7 +11,7 @@ import {
   Mic,
   MicOff,
   WifiOff } from
-"lucide-react";
+"@/src/components/atoms/icons/lucide";
 import { Clock, Setting2 } from "iconsax-reactjs";
 import { CaptionCarousel, VoiceTranscriptProcessingCard } from "./VoiceTranscriptProcessingCard";
 import {

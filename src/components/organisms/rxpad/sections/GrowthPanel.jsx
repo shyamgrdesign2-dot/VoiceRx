@@ -1,6 +1,6 @@
 "use client";
 
-import { Ruler, Calendar, TrendingUp, TrendingDown } from "lucide-react";
+import { Ruler, Calendar, TrendingUp, TrendingDown } from "@/src/components/atoms/icons/lucide";
 import { CopyButton } from "./CopyButton";
 import { PanelEmptyState } from "./ExpandedPanel";
 

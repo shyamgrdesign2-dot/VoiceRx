@@ -15,7 +15,7 @@ import {
   Import,
   Printer } from
 "iconsax-reactjs";
-import { MoreVertical } from "lucide-react";
+import { MoreVertical } from "@/src/components/atoms/icons/lucide";
 
 import { cn } from "@/src/hooks/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/src/components/atoms/Tooltip";

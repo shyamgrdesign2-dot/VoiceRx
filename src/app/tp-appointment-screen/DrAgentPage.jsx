@@ -26,7 +26,7 @@ import {
   TickCircle,
   Video } from
 "iconsax-reactjs";
-import { Check, ChevronDown, ListFilter, MoreVertical, Plus, Search, X } from "lucide-react";
+import { Check, ChevronDown, ListFilter, MoreVertical, Plus, Search, X } from "@/src/components/atoms/icons/lucide";
 
 import { cn } from "@/src/hooks/utils";
 import { TPButton as Button, TPSplitButton } from "@/src/components/atoms/Button/button-system";

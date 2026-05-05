@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, CheckCircle, XCircle, Clock, RefreshCw } from "lucide-react";
+import { Calendar, CheckCircle, XCircle, Clock, RefreshCw } from "@/src/components/atoms/icons/lucide";
 import { CopyButton } from "./CopyButton";
 import { PanelEmptyState } from "./ExpandedPanel";
 

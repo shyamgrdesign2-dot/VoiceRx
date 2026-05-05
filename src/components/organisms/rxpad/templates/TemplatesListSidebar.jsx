@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ClipboardList, Search, Trash2 } from "lucide-react";
+import { ClipboardList, Search, Trash2 } from "@/src/components/atoms/icons/lucide";
 
 import { deleteTemplate } from "@/src/components/organisms/rxpad/template-store";
 import { ConfirmDialog as TPConfirmDialog } from "@/src/components/molecules/ConfirmDialog";

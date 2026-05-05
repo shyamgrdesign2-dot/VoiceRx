@@ -24,7 +24,7 @@
 
 import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Download, Search } from "lucide-react";
+import { Download, Search } from "@/src/components/atoms/icons/lucide";
 import { Profile2User } from "iconsax-reactjs";
 
 import { cn } from "@/src/hooks/utils";
@@ -35,7 +35,7 @@ import { DASHBOARD_NAV_ITEMS } from "@/src/components/organisms/shared/dashboard
 import { PatientActionsMenu } from "@/src/components/organisms/shared/PatientActionsMenu";
 import { AppointmentBanner } from "@/src/components/molecules/AppointmentBanner";
 import { DateRangePicker } from "@/src/components/molecules/DateRangePicker";
-import { Plus } from "lucide-react";
+import { Plus } from "@/src/components/atoms/icons/lucide";
 
 // Patient ID convention: `P80` prefix + 6-digit suffix (e.g. P80123456).
 const MOCK_PATIENTS = [

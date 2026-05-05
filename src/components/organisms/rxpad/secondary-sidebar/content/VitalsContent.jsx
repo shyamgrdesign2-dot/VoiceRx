@@ -3,7 +3,7 @@
  * Each date can expand/collapse and provides mock values.
  */
 import React, { useMemo, useState } from "react";
-import clsx from "clsx";
+import { cn as clsx } from "@/src/hooks/utils";
 import { ArrowSquareDown, ArrowSquareUp } from "iconsax-reactjs";
 import { ActionButton, useStickyHeaderState } from "../detail-shared";
 import {

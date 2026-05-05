@@ -8,7 +8,7 @@ import {
   useRef,
   useState } from
 "react";
-import { Info, AlertCircle, Search as SearchIcon, Sparkles } from "lucide-react";
+import { Info, AlertCircle, Search as SearchIcon, Sparkles } from "@/src/components/atoms/icons/lucide";
 
 import {
   CUSTOM_MODULE_NAME_MAX } from

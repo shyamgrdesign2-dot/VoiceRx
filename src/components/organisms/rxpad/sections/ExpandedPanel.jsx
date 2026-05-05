@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useEffect } from "react";
-import { ArrowLeft, XCircle } from "lucide-react";
+import { ArrowLeft, XCircle } from "@/src/components/atoms/icons/lucide";
 
 
 

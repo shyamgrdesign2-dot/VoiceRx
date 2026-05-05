@@ -13,7 +13,7 @@ import {
   SendHorizontal,
   ShieldCheck,
   X } from
-"lucide-react";
+"@/src/components/atoms/icons/lucide";
 
 import { AiBrandSparkIcon, AI_GRADIENT_SOFT } from "@/src/components/organisms/shared/doctor-agent/ai-brand";
 import styles from "./PatientDetailAgentPanel.module.scss";

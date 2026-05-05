@@ -2,7 +2,7 @@
 
 import { forwardRef, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight } from "@/src/components/atoms/icons/lucide";
 import {
   getButtonTokens,
   BUTTON_SIZE_TOKENS } from

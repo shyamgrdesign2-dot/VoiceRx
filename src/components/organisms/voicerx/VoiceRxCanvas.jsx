@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MoreVertical, X } from "lucide-react";
+import { MoreVertical, X } from "@/src/components/atoms/icons/lucide";
 import { Copy as CopyGlyph, InfoCircle, Microphone2, DocumentText } from "iconsax-reactjs";
 import { DictationTranscript } from "./VoiceTranscriptProcessingCard";
 import { cn } from "@/src/hooks/utils";
