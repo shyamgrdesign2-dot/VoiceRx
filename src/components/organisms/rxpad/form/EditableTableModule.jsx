@@ -1127,15 +1127,23 @@ function EditableTableModule({
                                    on the right edge so it doesn't break text alignment. */}
                           {isUngroundedCell ?
                               <TPTooltip
-                                title={`Auto-filled from voice. Tap and pick a match from the ${title.toLowerCase()} list to verify this row.`}
+                                title={
+                                  // Per design call: medication-specific
+                                  // copy mentions the doctor's inventory
+                                  // (Zydus or similar). Other modules
+                                  // get a generic auto-fill cue.
+                                  /^med/i.test(title)
+                                    ? `This medication is not from your Zydus inventory list. Click to search and add the medicine.`
+                                    : `Auto-filled from voice. Tap and pick a match from the ${title.toLowerCase()} list to verify this row.`
+                                }
                                 placement="top"
                                 arrow>
-                                
+
                               <span
                                   className={`pointer-events-auto absolute top-1/2 z-30 -translate-y-1/2 inline-flex h-[18px] w-[18px] items-center justify-center rounded-full bg-[rgba(217,119,6,0.14)] text-[#B45309] ${
                                   hasDropdown ? "right-[32px]" : "right-[8px]"}`
                                   }>
-                                  
+
                                 <Info size={12} strokeWidth={2.4} />
                               </span>
                             </TPTooltip> :
