@@ -629,6 +629,20 @@ function FollowUpSection({
 
 }
 
+function PrescribedByFooter({ doctorName, specialty }) {
+  return (
+    <div className="px-[10px] pb-[12px] pt-[6px]">
+      <p className="font-sans text-[12px] leading-[18px] text-tp-slate-500">
+        <span className="text-tp-slate-400">by:</span>{" "}
+        <span className="font-semibold text-tp-slate-700">{doctorName}</span>
+      </p>
+      {specialty ? (
+        <p className="font-sans text-[12px] leading-[16px] text-tp-slate-400">{specialty}</p>
+      ) : null}
+    </div>
+  );
+}
+
 function WrittenRxPreviewCard({
   document,
   dateLabel,
@@ -648,7 +662,10 @@ function WrittenRxPreviewCard({
       </div>
       <div className="flex items-center justify-between gap-3 px-[10px] py-[8px]">
         <div className="min-w-0">
-          <p className="truncate font-sans text-[14px] font-semibold leading-[20px] text-tp-slate-700">{document.doctorName ?? dateLabel ?? document.title}</p>
+          <p className="truncate font-sans text-[14px] leading-[20px] text-tp-slate-700">
+            <span className="text-tp-slate-400">by:</span>{" "}
+            <span className="font-semibold">{document.doctorName ?? dateLabel ?? document.title}</span>
+          </p>
           {document.doctorSpecialty ? (
             <p className="truncate font-sans text-[12px] leading-[18px] text-tp-slate-400">{document.doctorSpecialty}</p>
           ) : null}
@@ -932,7 +949,14 @@ export function PastVisitsContent() {
                           fillToRxPad(requestCopyToRxPad, entry.dateLabel, { followUp: entry.digitalRx.followUp });
                           showCopySnackbar("Follow-up added successfully to RxPad");
                         }} />
-                      
+
+                        {/* Prescribing-doctor footer — mirrors the
+                            convention used on Written Rx cards so the
+                            doctor stamp is visible regardless of which
+                            tab the visit was recorded under. */}
+                        <PrescribedByFooter
+                          doctorName={entry.writtenRx?.[0]?.doctorName ?? "Dr. Shyam Sundar"}
+                          specialty={entry.writtenRx?.[0]?.doctorSpecialty ?? "General Physician"} />
                       </> :
                     null}
 

@@ -292,14 +292,26 @@ function RecordCard({
 // doctor edit it inline. Re-keyed off `record.id` so opening another
 // record always starts from that record's saved note.
 
-function RecordNotesCard({ record, initiallyEditing = false }) {
-  const [editing, setEditing] = useState(initiallyEditing);
+function RecordNotesCard({ record, editTrigger = 0 }) {
+  const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(record.note ?? "");
 
+  // When the active record changes, reset the draft and exit edit mode.
   React.useEffect(() => {
     setDraft(record.note ?? "");
-    setEditing(initiallyEditing);
-  }, [record.id, initiallyEditing, record.note]);
+    setEditing(false);
+  }, [record.id, record.note]);
+
+  // editTrigger increments each time the top-strip Edit chip is
+  // clicked — flip into edit mode every time so repeated clicks
+  // re-open the editor after Save.
+  const lastTriggerRef = React.useRef(editTrigger);
+  React.useEffect(() => {
+    if (editTrigger !== lastTriggerRef.current) {
+      lastTriggerRef.current = editTrigger;
+      if (editTrigger > 0) setEditing(true);
+    }
+  }, [editTrigger]);
 
   function handleSave() {
     // Demo: persist via toast — real wire-up would push back to the
@@ -310,36 +322,22 @@ function RecordNotesCard({ record, initiallyEditing = false }) {
 
   return (
     <section className="rounded-[12px] bg-tp-slate-100/80 p-[14px] ring-1 ring-tp-slate-200">
-      <div className="mb-[8px] flex items-center justify-between">
-        <p className="font-sans text-[12px] font-semibold uppercase tracking-[0.6px] text-tp-slate-500">
-          Doctor&apos;s notes
-        </p>
-        {editing ? (
-          <div className="flex items-center gap-[8px]">
-            <button
-              type="button"
-              onClick={() => { setDraft(record.note ?? ""); setEditing(false); }}
-              className="font-sans text-[13px] font-medium text-tp-slate-500 hover:text-tp-slate-700">
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              className="inline-flex h-[28px] items-center justify-center rounded-[8px] bg-tp-blue-500 px-[12px] font-sans text-[13px] font-semibold text-white transition-colors hover:bg-tp-blue-600">
-              Save
-            </button>
-          </div>
-        ) : (
+      {editing ? (
+        <div className="mb-[8px] flex items-center justify-end gap-[8px]">
           <button
             type="button"
-            onClick={() => setEditing(true)}
-            aria-label="Edit notes"
-            className="inline-flex h-[28px] items-center gap-[6px] rounded-[8px] bg-white px-[10px] font-sans text-[13px] font-medium text-tp-slate-700 ring-1 ring-tp-slate-200 transition-colors hover:bg-tp-slate-50">
-            <Edit2 color="currentColor" size={14} strokeWidth={1.5} variant="Linear" />
-            Edit
+            onClick={() => { setDraft(record.note ?? ""); setEditing(false); }}
+            className="font-sans text-[13px] font-medium text-tp-slate-500 hover:text-tp-slate-700">
+            Cancel
           </button>
-        )}
-      </div>
+          <button
+            type="button"
+            onClick={handleSave}
+            className="inline-flex h-[28px] items-center justify-center rounded-[8px] bg-tp-blue-500 px-[12px] font-sans text-[13px] font-semibold text-white transition-colors hover:bg-tp-blue-600">
+            Save
+          </button>
+        </div>
+      ) : null}
       {editing ? (
         <textarea
           id="tp-record-notes-textarea"
@@ -382,13 +380,18 @@ const RECORDS = [
 export function MedicalRecordsContent() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeRecord, setActiveRecord] = useState(null);
+  // Bumped each time the top Edit chip is clicked; the notes card
+  // listens on this counter and flips into edit mode regardless of
+  // its previous state. Lets repeated Edit clicks re-open the editor
+  // after Save without needing a per-record mode flag.
+  const [editTrigger, setEditTrigger] = useState(0);
 
   const handleRecordAction = (record, action) => {
-    if (action === "view" || action === "edit") {
-      // Edit opens the same sidebar — the notes block in the body is
-      // the editable surface. View is read-only by default; edit
-      // immediately focuses the notes textarea.
-      setActiveRecord({ ...record, mode: action });
+    if (action === "view") {
+      setActiveRecord(record);
+    } else if (action === "edit") {
+      setActiveRecord(record);
+      setEditTrigger((v) => v + 1);
     } else if (action === "download") {
       toast.success(`${record.label} download started`);
     } else if (action === "delete") {
@@ -443,7 +446,7 @@ export function MedicalRecordsContent() {
                   type="button"
                   aria-label="Edit record"
                   onClick={() => {
-                    setActiveRecord((prev) => prev ? { ...prev, mode: "edit" } : prev);
+                    setEditTrigger((v) => v + 1);
                     requestAnimationFrame(() => {
                       const ta = document.getElementById("tp-record-notes-textarea");
                       ta?.focus();
@@ -485,7 +488,7 @@ export function MedicalRecordsContent() {
             {activeRecord ? (
               <RecordNotesCard
                 record={activeRecord}
-                initiallyEditing={activeRecord.mode === "edit"} />
+                editTrigger={editTrigger} />
             ) : null}
             <div className="flex flex-col items-center justify-start">
               {activeRecord && RECORD_PREVIEW_BY_TYPE[activeRecord.type] ? (
