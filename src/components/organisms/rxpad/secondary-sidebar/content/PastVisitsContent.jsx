@@ -629,26 +629,33 @@ function FollowUpSection({
 
 }
 
-function PrescribedByFooter({ doctorName, specialty }) {
-  // Digital Rx footer — sits inside a very subtle violet wash so the
-  // doctor stamp reads as informative rather than transactional.
-  // Gradient is intentionally low-contrast (3% → 6%) so the strip
-  // tints without competing with the card chrome above.
-  return (
-    <div className="px-[10px] py-[6px]">
-      <div
-        className="rounded-[10px] px-[12px] py-[8px]"
-        style={{
+function PrescribedByFooter({ doctorName, specialty, bare = false, tone = "violet" }) {
+  // Digital Rx footer (default) — subtle violet wash so the doctor
+  // stamp reads as informative rather than transactional.
+  //
+  // bare=true   → drops the outer pad; caller is responsible for
+  //               positioning (used inside the Written Rx preview
+  //               drawer, where the surrounding `p-4` already
+  //               provides spacing).
+  // tone="grey" → slate-50 background instead of the violet gradient,
+  //               so it harmonises with surfaces that don't want a
+  //               coloured wash.
+  const tinted =
+    tone === "grey"
+      ? { background: "rgb(248, 250, 252)" }
+      : {
           background:
             "linear-gradient(135deg, rgba(213,101,234,0.04) 0%, rgba(103,58,172,0.06) 60%, rgba(26,25,148,0.04) 100%)"
-        }}>
-        <p className="font-sans text-[13px] font-semibold leading-[18px] text-tp-slate-700">{doctorName}</p>
-        {specialty ? (
-          <p className="font-sans text-[12px] leading-[16px] text-tp-slate-500">{specialty}</p>
-        ) : null}
-      </div>
+        };
+  const inner = (
+    <div className="rounded-[10px] px-[12px] py-[8px]" style={tinted}>
+      <p className="font-sans text-[13px] font-semibold leading-[18px] text-tp-slate-700">{doctorName}</p>
+      {specialty ? (
+        <p className="font-sans text-[12px] leading-[16px] text-tp-slate-500">{specialty}</p>
+      ) : null}
     </div>
   );
+  return bare ? inner : <div className="px-[10px] py-[6px]">{inner}</div>;
 }
 
 function WrittenRxPreviewCard({
@@ -1047,6 +1054,8 @@ export function PastVisitsContent() {
             {activeDocument ? (
               <div className="mx-auto w-full max-w-[820px]">
                 <PrescribedByFooter
+                  bare
+                  tone="grey"
                   doctorName={activeDocument.document.doctorName ?? "Dr. Shyam Sundar"}
                   specialty={activeDocument.document.doctorSpecialty ?? "General Physician"} />
               </div>
