@@ -707,7 +707,7 @@ function SignatureFooter({ doctorName, specialty }) {
       </span>
       <div className="min-w-0">
         <p className="font-sans text-[13px] font-medium leading-[18px] text-tp-slate-400">
-          <span className="font-normal text-tp-slate-400/80">Rx by </span>
+          <span className="font-normal text-tp-slate-400/80">Rx by:</span>{" "}
           {doctorName}
         </p>
         {specialty ? (
