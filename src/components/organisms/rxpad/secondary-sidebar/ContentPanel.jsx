@@ -38,7 +38,7 @@ import { rxSidebarTokens } from "./tokens";
 const SECTION_TITLES = {
   drAgent: "Dr Agent",
   pastVisits: "Past Visit",
-  vitals: "Vitals",
+  vitals: "Vitals and Body Composition",
   history: "Medical History",
   gynec: "Gynec History",
   obstetric: "Obstetric History",

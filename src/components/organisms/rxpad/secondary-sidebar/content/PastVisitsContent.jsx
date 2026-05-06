@@ -689,10 +689,15 @@ function AdditionalNotesSection({ notes, onCopy }) {
 
 function PrescribedByFooter({ doctorName, specialty, bare = false }) {
   const inner = (
-    <div className="flex items-center gap-2 rounded-[4px] bg-tp-slate-100/70 px-2 py-[6px]">
+    <div
+      className="flex items-center gap-2 rounded-[10px] px-2 py-[6px]"
+      style={{
+        background:
+          "linear-gradient(135deg, rgba(213,101,234,0.05) 0%, rgba(103,58,172,0.07) 60%, rgba(26,25,148,0.05) 100%)"
+      }}>
       <span
         aria-hidden
-        className="inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-tp-slate-200/80 text-tp-slate-500">
+        className="inline-flex h-[30px] w-[30px] shrink-0 items-center justify-center rounded-full bg-tp-violet-100/70 text-tp-violet-500">
         <StethoscopeGlyph size={18} color="currentColor" />
       </span>
       <div className="min-w-0">
