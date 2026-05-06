@@ -16,7 +16,7 @@ import { cn } from "@/src/hooks/utils";
 import styles from "./VoiceRxResultTabs.module.scss";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/molecules/Tabs";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/src/components/molecules/DropdownMenu";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/src/components/atoms/Tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger, HoverTooltip } from "@/src/components/atoms/Tooltip";
 import { ClinicalNotesEditor, emrSectionsToHtml } from "./ClinicalNotesEditor";
 import { DictationTranscript } from "./VoiceTranscriptProcessingCard";
 
@@ -356,36 +356,22 @@ export function FeedbackRow({ value, onChange, audioQuality }) {
           <span aria-hidden className="vrx-fb-divider mx-[6px]" />
           <div className="flex items-center gap-1 text-[14px] font-medium text-emerald-600">
             Audio quality: {audioQuality.charAt(0).toUpperCase() + audioQuality.slice(1)}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button type="button" className="ml-0.5 mt-0.5 text-tp-slate-400 hover:text-tp-slate-600">
-                    <InfoCircle size={14} variant="Linear" />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="top" sideOffset={6} className="max-w-[220px] rounded-[6px] border-0 bg-tp-slate-900 px-2.5 py-1.5 text-[12px] leading-[1.45] text-white shadow-[0_8px_20px_-10px_rgba(15,23,42,0.45)]">
-                  Audio was clear and easily processed by the AI models.
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <HoverTooltip content="Audio was clear and easily processed by the AI models." side="top">
+              <button type="button" className="ml-0.5 mt-0.5 text-tp-slate-400 hover:text-tp-slate-600">
+                <InfoCircle size={14} variant="Linear" />
+              </button>
+            </HoverTooltip>
           </div>
           <span aria-hidden className="vrx-fb-divider mx-[6px]" />
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                type="button"
-                onClick={() => toast.success("Transcript downloaded")}
-                className="flex h-6 w-6 items-center justify-center rounded-md text-tp-slate-400 transition-colors hover:bg-tp-slate-50 hover:text-tp-slate-600">
-                
-                  <Download size={14} strokeWidth={2.2} />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" sideOffset={6} className="rounded-[6px] border-0 bg-tp-slate-900 px-2.5 py-1.5 text-[12px] leading-[1.45] text-white shadow-[0_8px_20px_-10px_rgba(15,23,42,0.45)]">
-                Download transcript
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+          <HoverTooltip content="Download transcript" side="top">
+            <button
+              type="button"
+              onClick={() => toast.success("Transcript downloaded")}
+              className="flex h-6 w-6 items-center justify-center rounded-md text-tp-slate-400 transition-colors hover:bg-tp-slate-50 hover:text-tp-slate-600">
+
+              <Download size={14} strokeWidth={2.2} />
+            </button>
+          </HoverTooltip>
         </>
       }
     </div>);
@@ -433,44 +419,31 @@ function StickyFooter({
   "Fill all of these structured sections into the active RxPad";
   return (
     <div className="shrink-0 border-t border-tp-slate-200 bg-white px-3 py-3">
-      <TooltipProvider delayDuration={200}>
       <div className="flex items-center gap-2">
-        {/* Single primary CTA + small mic affordance. The mic re-opens
-            the floating VoiceRx overlay so the doctor can append more
-            speech — the result-tab content updates in place when they
-            submit again. Print + the larger "Add or Edit" voice CTA
-            were dropped per design call: the small mic is enough. */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              onClick={primaryAction}
-              disabled={!primaryAction}
-              className="vrx-rt-primary flex h-[42px] flex-1 items-center justify-center gap-2 rounded-[10px] px-3 text-[14px] font-semibold text-white transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
+        <HoverTooltip content={primaryHelp} side="top">
+          <button
+            type="button"
+            onClick={primaryAction}
+            disabled={!primaryAction}
+            className="vrx-rt-primary flex h-[42px] flex-1 items-center justify-center gap-2 rounded-[10px] px-3 text-[14px] font-semibold text-white transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
 
-              {primaryIcon}
-              {primaryLabel}
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="top" sideOffset={6} className={tooltipDarkCls}>{primaryHelp}</TooltipContent>
-        </Tooltip>
+            {primaryIcon}
+            {primaryLabel}
+          </button>
+        </HoverTooltip>
 
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <button
-              type="button"
-              onClick={onAddVoice}
-              disabled={!onAddVoice}
-              aria-label="Edit clinical notes with voice"
-              className="vrx-rt-voice-cta-outline flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[10px] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
+        <HoverTooltip content="Quickly edit the clinical notes using voice AI" side="top">
+          <button
+            type="button"
+            onClick={onAddVoice}
+            disabled={!onAddVoice}
+            aria-label="Edit clinical notes with voice"
+            className="vrx-rt-voice-cta-outline flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[10px] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
 
-              <VoiceRxIcon size={20} color="#673AAC" />
-            </button>
-          </TooltipTrigger>
-          <TooltipContent side="top" sideOffset={6} className={tooltipDarkCls}>Quickly edit the clinical notes using voice AI</TooltipContent>
-        </Tooltip>
+            <VoiceRxIcon size={20} color="#673AAC" />
+          </button>
+        </HoverTooltip>
       </div>
-      </TooltipProvider>
       {/* vrx-* styles live in app/globals.css */}
     </div>);
 
