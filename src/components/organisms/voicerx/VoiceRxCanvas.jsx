@@ -105,11 +105,9 @@ export function VoiceRxCanvas({
   //                isn't visible while the new note is being merged.
   //   idle (post)→ overlay closes; updated note re-appears with no flash.
   const [regenPhase, setRegenPhase] = useState("idle");
-  // Once processing ends, paint a brief gradient-text shimmer over the
-  // entire EMR card so the doctor sees which surface refreshed. Same
-  // gradient family as the historical-inline shimmer in the sidebar.
-  const [emrFresh, setEmrFresh] = useState(false);
   const navLocked = quickEditActive || regenPhase !== "idle";
+  const overlayActive = quickEditActive || regenPhase === "processing";
+  const transcriptCount = Array.isArray(transcriptSegments) ? transcriptSegments.length : 0;
 
   const [feedback, setFeedback] = useState({
     transcript: null,
@@ -222,8 +220,10 @@ export function VoiceRxCanvas({
         </div>
       </div>
 
-      {/* Tab strip */}
-      <div className="shrink-0 px-3 pb-[6px] pt-[6px]">
+      {/* Tab strip — hidden when the quick-edit overlay (recorder OR
+          processing loader) is active so the doctor's focus is on the
+          listening / processing UI only. */}
+      <div className={cn("shrink-0 px-3 pb-[6px] pt-[6px]", overlayActive && "hidden")}>
         <div className="vrx-cn-tabs flex h-[44px] w-full items-stretch gap-[4px] overflow-x-auto rounded-[14px] bg-tp-slate-100 p-[5px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <button
             type="button"
@@ -235,7 +235,7 @@ export function VoiceRxCanvas({
               "text-tp-slate-600"
             )}>
             
-            <Microphone2 size={15} variant={activeTab === "transcript" ? "Bulk" : "Linear"} color="currentColor" /> Transcript
+            <Microphone2 size={15} variant={activeTab === "transcript" ? "Bulk" : "Linear"} color="currentColor" /> {transcriptCount > 1 ? "Transcripts" : "Transcript"}
           </button>
           <button
             type="button"
@@ -252,8 +252,10 @@ export function VoiceRxCanvas({
         </div>
       </div>
 
-      {/* Body — tab content */}
-      <div className="min-h-0 flex-1 overflow-y-auto px-3 pb-[12px] pt-[6px]">
+      {/* Body — tab content. Hidden while the quick-edit overlay is
+          active; the recorder / processing UI takes over the whole
+          body region instead. */}
+      <div className={cn("min-h-0 flex-1 overflow-y-auto px-3 pb-[12px] pt-[6px]", overlayActive && "hidden")}>
         {inlineRecorderSlot ?
         <div className="mb-[10px]">{inlineRecorderSlot}</div> :
         null}
@@ -265,11 +267,16 @@ export function VoiceRxCanvas({
                 <div
                   key={seg.id ?? idx}
                   className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
-                  {transcriptSegments.length > 1 ? (
-                    <p className="mb-[6px] font-sans text-[11px] font-semibold uppercase tracking-[0.6px] text-tp-slate-500">
-                      Take {idx + 1}
+                  <div className="mb-[8px] flex items-center justify-between gap-2">
+                    <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.6px] text-tp-slate-500">
+                      {transcriptSegments.length > 1 ? `Take ${idx + 1}` : "Transcript"}
                     </p>
-                  ) : null}
+                    {seg.createdAt ? (
+                      <p className="font-sans text-[11px] leading-[14px] text-tp-slate-400">
+                        {new Date(seg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      </p>
+                    ) : null}
+                  </div>
                   <DictationTranscript raw={seg.body} animate={false} />
                 </div>
               ))
@@ -293,8 +300,7 @@ export function VoiceRxCanvas({
             <div
               className={cn(
                 "vrx-cn-emr-shell relative w-full overflow-hidden rounded-[14px] bg-white",
-                styles.emrShell,
-                emrFresh && "vrx-cn-emr-fresh"
+                styles.emrShell
               )}>
               <div className="px-3 py-[10px]">{emrCard}</div>
             </div>
@@ -380,11 +386,10 @@ export function VoiceRxCanvas({
               the same dock; the EMR area above renders shimmer
               skeletons. After ~12s the overlay clears and the
               merged notes re-appear. */}
-      {quickEditActive || regenPhase === "processing" ? (
+      {overlayActive ? (
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-stretch"
-          style={{ height: "40%" }}>
-          <div className="pointer-events-auto w-full" data-voice-allow>
+          className="pointer-events-none absolute inset-x-0 bottom-0 top-[60px] z-20 flex items-stretch">
+          <div className="pointer-events-auto h-full w-full overflow-y-auto" data-voice-allow>
             {regenPhase === "processing" ? (
               <div className={cn("flex h-full w-full items-center justify-center px-4 py-4", recorderStyles.recorderBgStack)}>
                 <VoiceRxSectionProcessing
@@ -399,13 +404,14 @@ export function VoiceRxCanvas({
                 radiusClassName="rounded-none"
                 onCancel={() => setQuickEditActive(false)}
                 onSubmit={(submittedTranscript) => {
+                  // Submit hands off to the loading phase — overlay
+                  // stays mounted, swaps to ShineBorder + loader.
+                  // After the loader completes the doctor lands
+                  // back on the EMR card directly (no transition,
+                  // no wrapper-level shimmer).
                   setQuickEditActive(false);
                   setRegenPhase("processing");
-                  window.setTimeout(() => {
-                    setRegenPhase("idle");
-                    setEmrFresh(true);
-                    window.setTimeout(() => setEmrFresh(false), 5500);
-                  }, 12000);
+                  window.setTimeout(() => setRegenPhase("idle"), 12000);
                   void submittedTranscript;
                 }} />
             )}
