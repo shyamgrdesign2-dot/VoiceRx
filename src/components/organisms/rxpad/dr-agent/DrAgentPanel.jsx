@@ -53,6 +53,7 @@ export function DrAgentPanel({
     voiceRxRecording,
     setVoiceRxRecording,
     beginVoiceAddOn,
+    flipDeg,
     voiceRxAwaitingResponse,
     voiceRxHandoffExiting,
     voiceRxResult,
@@ -139,12 +140,8 @@ export function DrAgentPanel({
         style={{
           transformStyle: "preserve-3d",
           WebkitTransformStyle: "preserve-3d",
-          transform: isFlipped ?
-          "translate3d(0,0,0) rotateY(180deg)" :
-          "translate3d(0,0,0) rotateY(0deg)",
-          WebkitTransform: isFlipped ?
-          "translate3d(0,0,0) rotateY(180deg)" :
-          "translate3d(0,0,0) rotateY(0deg)",
+          transform: `translate3d(0,0,0) rotateY(${flipDeg}deg)`,
+          WebkitTransform: `translate3d(0,0,0) rotateY(${flipDeg}deg)`,
           willChange: "transform"
         }}>
         

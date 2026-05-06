@@ -8,7 +8,7 @@ import { CopyIcon } from "../CopyIcon";
 import { ActionableTooltip } from "../ActionableTooltip";
 import { SectionSummaryBar } from "../SectionSummaryBar";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/src/components/atoms/Tooltip";
-import { DocumentText } from "iconsax-reactjs";
+import { DocumentText, Microphone2 } from "iconsax-reactjs";
 
 
 
@@ -261,14 +261,27 @@ export function VoiceStructuredRxCard({ data, onCopy, onExpand, hideHeader, isSt
             the chat), suppress the expand CTA — the doctor has already
             iterated past this generation. */}
         {!isStale ? (
-          <button
-            type="button"
-            onClick={handleExpand}
-            className="flex h-[36px] w-full items-center justify-center gap-[6px] rounded-[10px] border px-3 text-[14px] font-semibold transition-all active:scale-[0.99] border-tp-blue-300 bg-white text-tp-blue-500 hover:bg-tp-blue-50">
+          <div className="flex flex-col gap-[8px]">
+            <button
+              type="button"
+              onClick={handleExpand}
+              className="flex h-[36px] w-full items-center justify-center gap-[6px] rounded-[10px] border px-3 text-[14px] font-semibold transition-all active:scale-[0.99] border-tp-blue-300 bg-white text-tp-blue-500 hover:bg-tp-blue-50">
 
-            View clinical notes
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
-          </button>
+              View clinical notes
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M9 5l7 7-7 7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== "undefined") {
+                  window.dispatchEvent(new CustomEvent("voicerx:begin-addon"));
+                }
+              }}
+              className="vrx-rt-voice-cta-outline flex h-[36px] w-full items-center justify-center gap-[6px] rounded-[10px] px-3 text-[14px] font-semibold transition-transform active:scale-[0.99]">
+              <Microphone2 size={16} variant="Linear" color="#673AAC" />
+              VoiceRx — add more details
+            </button>
+          </div>
         ) : (
           <p className="text-[12px] italic leading-[1.5] text-tp-slate-400">
             Replaced by a newer recording below.

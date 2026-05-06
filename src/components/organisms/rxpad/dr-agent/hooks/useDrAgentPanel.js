@@ -292,6 +292,17 @@ export function useDrAgentPanel({
     }));
   }, [voiceRxDialogChoice, onVoiceCaptureModeChange, selectedPatientId, setMessagesByPatient, activeVoiceModule, resetLiveTranscript]);
 
+  // Listen for the "VoiceRx" CTA on a chat clinical-notes card —
+  // fires "voicerx:begin-addon". Routes through the same beginVoiceAddOn
+  // flow the canvas mic uses so multi-take dictation is consistent.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const handler = () => beginVoiceAddOnRef.current?.();
+    window.addEventListener("voicerx:begin-addon", handler);
+    return () => window.removeEventListener("voicerx:begin-addon", handler);
+  }, []);
+  const beginVoiceAddOnRef = useRef(null);
+
   // Stash the current voiceRxResult and flip into recorder mode WITHOUT
   // wiping the chat history of prior voice cards. The prior result's
   // transcript will be merged onto the next submit so the transcript
@@ -306,6 +317,7 @@ export function useDrAgentPanel({
     setVoiceRxRecording(true);
     onVoiceCaptureModeChange?.(voiceRxDialogChoice);
   }, [voiceRxResult, voiceRxDialogChoice, onVoiceCaptureModeChange, resetLiveTranscript]);
+  beginVoiceAddOnRef.current = beginVoiceAddOn;
 
   const cancelVoiceRxRecording = useCallback(() => {
     if (voiceRxTimeoutRef.current) {
@@ -432,15 +444,27 @@ export function useDrAgentPanel({
       setVoiceRxHandoffExiting(false);
       setVoiceRxResultMinimized(false);
       // If this submit followed an add-on dictation (prior result was
-      // stashed), prepend the prior transcript so the doctor sees the
-      // full cumulative conversation, not just the latest chunk.
+      // stashed), append a new segment to the prior transcriptSegments
+      // so the Transcript tab can render each take as its own card.
       const prior = priorVoiceResultRef.current;
-      const mergedTranscript = prior?.transcript
-        ? `${prior.transcript}\n\n${demoTranscript}`
-        : demoTranscript;
+      const newSegment = {
+        id: uid(),
+        body: demoTranscript,
+        mode: voiceRxDialogChoice ?? "ambient_consultation",
+        durationMs: meta?.durationMs ?? 0,
+        createdAt: new Date().toISOString()
+      };
+      const transcriptSegments = prior?.transcriptSegments
+        ? [...prior.transcriptSegments, newSegment]
+        : [newSegment];
+      // Keep the legacy `transcript` string filled with the merged
+      // body so consumers that still read .transcript (e.g. clinical-
+      // notes generator) keep working.
+      const mergedTranscript = transcriptSegments.map((s) => s.body).join("\n\n");
       priorVoiceResultRef.current = null;
       setVoiceRxResult({
         transcript: mergedTranscript,
+        transcriptSegments,
         sections: resultSections,
         clinicalNotesHtml: emrSectionsToHtml(resultSections),
         durationMs: (meta?.durationMs ?? 0) + (prior?.durationMs ?? 0),
@@ -1139,6 +1163,20 @@ export function useDrAgentPanel({
   // result (from chat card expand). The latter doesn't require voiceRxMode prop.
   const isFlipped = voiceRxMode && (voiceRxRecording || voiceRxAwaitingResponse) || voiceRxResult !== null && !voiceRxResultMinimized;
 
+  // Flip-step counter — increments on every toggle of isFlipped so the
+  // 3D wrapper always rotates by an additional 180° in the SAME
+  // direction. The previous implementation animated 0 → 180 → 0,
+  // which read as "flip back the way it came". Counting up gives
+  // 0 → 180 → 360 → 540, so each transition spins forward and the
+  // back→front trip rotates the opposite way to the front→back trip.
+  const flipStepRef = useRef(0);
+  const lastFlippedRef = useRef(isFlipped);
+  if (lastFlippedRef.current !== isFlipped) {
+    flipStepRef.current += 1;
+    lastFlippedRef.current = isFlipped;
+  }
+  const flipDeg = flipStepRef.current * 180;
+
   return {
     // State
     selectedPatientId,
@@ -1166,6 +1204,7 @@ export function useDrAgentPanel({
     voiceRxRecording,
     setVoiceRxRecording,
     beginVoiceAddOn,
+    flipDeg,
     voiceRxAwaitingResponse,
     voiceRxHandoffExiting,
     voiceRxResult,

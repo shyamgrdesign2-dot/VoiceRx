@@ -78,6 +78,7 @@ export function BackFace({
         <VoiceRxCanvas
           modeLabel={voiceRxResult.modeLabel}
           transcript={voiceRxResult.transcript}
+          transcriptSegments={voiceRxResult.transcriptSegments}
           emrCard={
           <VoiceStructuredRxCard
             data={voiceRxResult.structured}

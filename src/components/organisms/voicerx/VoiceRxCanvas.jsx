@@ -75,6 +75,7 @@ import { HoverTooltip } from "@/src/components/atoms/Tooltip";
 export function VoiceRxCanvas({
   modeLabel = "Conversation Mode",
   transcript = "",
+  transcriptSegments,
   emrCard,
   inlineRecorderSlot,
   onCopyToRx,
@@ -255,18 +256,33 @@ export function VoiceRxCanvas({
 
         {activeTab === "transcript" ?
         <div className="flex flex-col gap-3">
-            <div className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
-              {transcript ?
-            <DictationTranscript raw={transcript} animate={false} /> :
-
-            <p className="text-[14px] italic leading-[1.6] text-tp-slate-400">No transcript captured.</p>
-            }
-            </div>
+            {Array.isArray(transcriptSegments) && transcriptSegments.length > 0 ? (
+              transcriptSegments.map((seg, idx) => (
+                <div
+                  key={seg.id ?? idx}
+                  className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
+                  {transcriptSegments.length > 1 ? (
+                    <p className="mb-[6px] font-sans text-[11px] font-semibold uppercase tracking-[0.6px] text-tp-slate-500">
+                      Take {idx + 1}
+                    </p>
+                  ) : null}
+                  <DictationTranscript raw={seg.body} animate={false} />
+                </div>
+              ))
+            ) : transcript ? (
+              <div className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
+                <DictationTranscript raw={transcript} animate={false} />
+              </div>
+            ) : (
+              <div className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
+                <p className="text-[14px] italic leading-[1.6] text-tp-slate-400">No transcript captured.</p>
+              </div>
+            )}
             <FeedbackRow
             value={feedback.transcript}
             onChange={(v) => handleFeedback("transcript", v)}
             audioQuality="good" />
-          
+
           </div> :
 
         <div className="flex flex-col gap-3">
