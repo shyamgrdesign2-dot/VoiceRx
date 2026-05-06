@@ -702,13 +702,13 @@ function SignatureFooter({ doctorName, specialty }) {
         background:
           "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(148,163,184,0.05) 50%, rgba(148,163,184,0.10) 100%)"
       }}>
-      <span aria-hidden className="shrink-0 text-tp-slate-500">
+      <span aria-hidden className="shrink-0 text-tp-slate-400">
         <StethoscopeGlyph size={24} color="currentColor" />
       </span>
       <div className="min-w-0">
-        <p className="font-sans text-[13px] font-medium leading-[18px] text-tp-slate-500">{doctorName}</p>
+        <p className="font-sans text-[13px] font-medium leading-[18px] text-tp-slate-400">{doctorName}</p>
         {specialty ? (
-          <p className="font-sans text-[12px] leading-[16px] text-tp-slate-500">{specialty}</p>
+          <p className="font-sans text-[12px] leading-[16px] text-tp-slate-400">{specialty}</p>
         ) : null}
       </div>
     </div>
