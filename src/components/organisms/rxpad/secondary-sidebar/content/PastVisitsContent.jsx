@@ -655,7 +655,12 @@ function PrescribedByFooter({ doctorName, specialty, bare = false, tone = "viole
       ) : null}
     </div>
   );
-  return bare ? inner : <div className="px-[10px] py-[6px]">{inner}</div>;
+  // The neighbours above (DateHeader / RxTabStrip) provide their own
+  // bottom padding, but the section below (Symptoms ListSection)
+  // adds its own pt-[8px] on top. Drop our pb to 0 and lift the pt
+  // a bit so the perceived gap above the stamp matches the gap
+  // below — without doubling up the bottom margin.
+  return bare ? inner : <div className="px-[10px] pt-[10px] pb-0">{inner}</div>;
 }
 
 function WrittenRxPreviewCard({

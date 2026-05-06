@@ -376,7 +376,7 @@ export function RxCustomiseSidebar({
         open={open}
         onClose={onClose}
         width={null}
-        panelClassName="w-[94vw] md:w-[75vw] lg:w-[70vw]"
+        panelClassName="w-[94vw] md:w-[75vw] lg:w-[70vw] !bg-tp-slate-50"
         header={
           <SidebarHeader
             onClose={onClose}
@@ -412,7 +412,7 @@ export function RxCustomiseSidebar({
           />
         }>
         <div className="p-[16px]">
-          <div className="grid grid-cols-1 gap-[16px] rounded-[16px] bg-tp-slate-50 p-[16px] md:grid-cols-2">
+          <div className="grid grid-cols-1 gap-[16px] md:grid-cols-2">
           {/* Left column — Sidebar Sections */}
           <CustomisePanel
               title="Sidebar Sections"
