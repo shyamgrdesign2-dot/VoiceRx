@@ -273,34 +273,47 @@ export function VoiceRxCanvas({
         {activeTab === "transcript" ?
         <div className="flex flex-col gap-3">
             {Array.isArray(transcriptSegments) && transcriptSegments.length > 0 ? (
-              transcriptSegments.map((seg, idx) => (
-                <div
-                  key={seg.id ?? idx}
-                  className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
-                  <div className="mb-[2px] flex items-center justify-between gap-2">
-                    <p className="font-sans text-[13px] font-medium leading-[18px] text-tp-slate-400">
-                      {seg.mode === "ambient_consultation" ? "Conversation Transcript" : "Dictation Transcript"}
-                    </p>
-                    <span
-                      className="inline-flex items-center gap-[4px] rounded-full bg-white/80 px-[10px] py-[3.5px] text-[12px] font-medium text-tp-slate-400 tabular-nums"
-                      aria-label={`Recording duration ${formatDuration(seg.durationMs)}`}>
-                      <Mic size={12} strokeWidth={1.8} aria-hidden />
-                      {formatDuration(seg.durationMs)}
-                    </span>
+              transcriptSegments.map((seg, idx) => {
+                const baseTitle = seg.mode === "ambient_consultation" ? "Conversation Transcript" : "Dictation Transcript";
+                const heading = transcriptSegments.length > 1 ? `${baseTitle} ${idx + 1}` : baseTitle;
+                const timeLabel = seg.createdAt
+                  ? new Date(seg.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
+                  : null;
+                return (
+                  <div
+                    key={seg.id ?? idx}
+                    className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
+                    {/* Heading row, WhatsApp-style: title on the left,
+                        duration mic-pill flush right. The timestamp
+                        sits as a quiet sub-line under the title so the
+                        bottom feedback row can breathe. */}
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-sans text-[13px] font-medium leading-[18px] text-tp-slate-500">
+                        {heading}
+                      </p>
+                      <span
+                        className="inline-flex items-center gap-[4px] rounded-full bg-white/80 px-[10px] py-[3.5px] text-[12px] font-medium text-tp-slate-400 tabular-nums"
+                        aria-label={`Recording duration ${formatDuration(seg.durationMs)}`}>
+                        <Mic size={12} strokeWidth={1.8} aria-hidden />
+                        {formatDuration(seg.durationMs)}
+                      </span>
+                    </div>
+                    {timeLabel ? (
+                      <p className="mb-[6px] font-sans text-[11px] leading-[14px] text-tp-slate-400">
+                        {timeLabel}
+                      </p>
+                    ) : null}
+                    <DictationTranscript raw={seg.body} animate={false} />
+                    {/* Subtle horizontal gradient divider — same recipe
+                        as the Customise sidebar header divider. */}
+                    <div className="my-[10px] h-px w-full bg-gradient-to-r from-[rgba(208,213,221,0.2)] via-[#d0d5dd] to-[rgba(208,213,221,0.2)]" />
+                    <FeedbackRow
+                      value={feedback[`transcript-${seg.id ?? idx}`] ?? null}
+                      onChange={(v) => handleFeedback(`transcript-${seg.id ?? idx}`, v)}
+                      audioQuality="good" />
                   </div>
-                  <DictationTranscript raw={seg.body} animate={false} />
-                  {/* Subtle horizontal gradient divider — same recipe
-                      as the Customise sidebar header divider, rotated
-                      to the horizontal axis. Separates transcript
-                      body from the feedback footer. */}
-                  <div className="my-[10px] h-px w-full bg-gradient-to-r from-[rgba(208,213,221,0.2)] via-[#d0d5dd] to-[rgba(208,213,221,0.2)]" />
-                  <FeedbackRow
-                    value={feedback[`transcript-${seg.id ?? idx}`] ?? null}
-                    onChange={(v) => handleFeedback(`transcript-${seg.id ?? idx}`, v)}
-                    audioQuality="good"
-                    timestamp={seg.createdAt ? new Date(seg.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true }) : null} />
-                </div>
-              ))
+                );
+              })
             ) : transcript ? (
               <div className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
                 <DictationTranscript raw={transcript} animate={false} />
