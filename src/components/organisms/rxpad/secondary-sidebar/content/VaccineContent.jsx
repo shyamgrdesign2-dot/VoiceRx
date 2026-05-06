@@ -18,6 +18,7 @@
  *   • Status accents: due (tp-warning-500), overdue (tp-error-500)
  */
 import React, { useState } from "react";
+import { Calendar2 } from "iconsax-reactjs";
 import {
   ActionButton,
   Bullet,
@@ -83,15 +84,18 @@ function formatDateLabel(s) {
 }
 
 function PendingVaccineItem({ name, status, statusColor, notes }) {
+  // Status value keeps its semantic colour (red overdue, amber due)
+  // and gets font-medium per the palette-weight rule. Plain values
+  // fall through to slate-700 medium.
   const statusEl =
-    statusColor === "overdue" ? <Red>{status}</Red> :
-    statusColor === "due" ? <span className="text-tp-warning-500">{status}</span> :
-    <span>{status}</span>;
+    statusColor === "overdue" ? <span className="font-medium text-tp-error-500">{status}</span> :
+    statusColor === "due" ? <span className="font-medium text-tp-warning-500">{status}</span> :
+    <span className="font-medium text-tp-slate-700">{status}</span>;
   return (
     <div className="flex items-start gap-[6px]">
       <Bullet />
       <p className="font-sans text-[14px] leading-[22px] text-tp-slate-700 whitespace-pre-wrap min-w-0">
-        <span className="font-sans font-medium">{name}</span>
+        <span className="font-medium">{name}</span>
         <span>{" ("}</span>
         <Grey>Status: </Grey>
         {statusEl}
@@ -99,7 +103,7 @@ function PendingVaccineItem({ name, status, statusColor, notes }) {
           <>
             <Sep />
             <Grey>Notes: </Grey>
-            <span className="text-tp-slate-500">{notes}</span>
+            <span className="font-medium text-tp-slate-700">{notes}</span>
           </>
         ) : null}
         <span>)</span>
@@ -116,8 +120,9 @@ function PendingVaccineGroup({ week, vaccines, statusColor, statusFor }) {
     <div className="relative shrink-0 w-full px-[12px] py-[8px] flex flex-col gap-[6px]">
       {/* Week tag — same chrome as Symptoms / Examination section
           headers in Past Visits so the layout reads as one family. */}
-      <div className="flex h-[28px] w-full min-w-0 shrink-0 items-center gap-1.5 rounded-[4px] bg-tp-slate-100/70 px-2 py-[3px]">
-        <span className="flex min-h-0 min-w-0 flex-1 items-center text-left font-sans font-semibold text-tp-slate-500 text-[13px] leading-none">{week}</span>
+      <div className="flex h-[30px] w-full min-w-0 shrink-0 items-center gap-1.5 rounded-[4px] bg-tp-slate-100/70 px-2 py-[3px] mb-[4px]">
+        <Calendar2 size={18} variant="Bulk" color="var(--tp-slate-500)" className="shrink-0" />
+        <span className="flex min-h-0 min-w-0 flex-1 items-center text-left font-sans font-semibold text-tp-slate-500 text-[14px] leading-none">{week}</span>
       </div>
       <div className="flex flex-col gap-[4px] pl-[6px]">
         {vaccines.map((v, i) => (
@@ -151,21 +156,21 @@ function GivenVaccineItem({ name, givenDate, brand, dueDate, notes }) {
     <div className="flex items-start gap-[6px]">
       <Bullet />
       <p className="font-sans text-[14px] leading-[22px] text-tp-slate-700 whitespace-pre-wrap min-w-0">
-        <span className="font-sans font-medium">{name}</span>
+        <span className="font-medium">{name}</span>
         <span>{" ("}</span>
         <Grey>Given date: </Grey>
-        <span>{givenDate} </span>
+        <span className="font-medium text-tp-slate-700">{givenDate}</span>
         <Sep />
         <Grey>Brand: </Grey>
-        <span>{brand} </span>
+        <span className="font-medium text-tp-slate-700">{brand}</span>
         <Sep />
         <Grey>Due date: </Grey>
-        <span>{dueDate}</span>
+        <span className="font-medium text-tp-slate-700">{dueDate}</span>
         {notes ? (
           <>
             <Sep />
             <Grey>Notes: </Grey>
-            <span className="text-tp-slate-500">{notes}</span>
+            <span className="font-medium text-tp-slate-700">{notes}</span>
           </>
         ) : null}
         <span>)</span>
@@ -177,8 +182,9 @@ function GivenVaccineItem({ name, givenDate, brand, dueDate, notes }) {
 function GivenVaccineGroup({ week, vaccines }) {
   return (
     <div className="relative shrink-0 w-full px-[12px] py-[8px] flex flex-col gap-[6px]">
-      <div className="flex h-[28px] w-full min-w-0 shrink-0 items-center gap-1.5 rounded-[4px] bg-tp-slate-100/70 px-2 py-[3px]">
-        <span className="flex min-h-0 min-w-0 flex-1 items-center text-left font-sans font-semibold text-tp-slate-500 text-[13px] leading-none">{week}</span>
+      <div className="flex h-[30px] w-full min-w-0 shrink-0 items-center gap-1.5 rounded-[4px] bg-tp-slate-100/70 px-2 py-[3px] mb-[4px]">
+        <Calendar2 size={18} variant="Bulk" color="var(--tp-slate-500)" className="shrink-0" />
+        <span className="flex min-h-0 min-w-0 flex-1 items-center text-left font-sans font-semibold text-tp-slate-500 text-[14px] leading-none">{week}</span>
       </div>
       <div className="flex flex-col gap-[4px] pl-[6px]">
         {vaccines.map((v, i) => (
