@@ -4,7 +4,7 @@
  */
 import Image from "next/image";
 import React, { useState } from "react";
-import { DocumentDownload, Edit2, Eye, Import, Printer, Trash } from "iconsax-reactjs";
+import { DocumentDownload, Edit2, Eye, Printer, Trash } from "iconsax-reactjs";
 import { MoreVertical } from "@/src/components/atoms/icons/lucide";
 import { AiTriggerIcon } from "@/src/components/organisms/rxpad/dr-agent/shared/AiTriggerIcon";
 import { HistoricalNewDataBanner } from "../HistoricalNewDataBanner";
@@ -148,9 +148,9 @@ function ReportIcon({ size = 14, color = "var(--tp-slate-500)" }) {
 // works with View / Download / Delete only. The trigger continues to
 // use `MoreVertical` (kebab) as the affordance.
 const RECORD_ACTIONS = [
-{ id: "view", label: "View", icon: Eye },
+{ id: "view", label: "Preview", icon: Eye },
 { id: "edit", label: "Edit record", icon: Edit2 },
-{ id: "download", label: "Download", icon: Import },
+{ id: "download", label: "Download", icon: DocumentDownload },
 { id: "delete", label: "Delete", icon: Trash }];
 
 
