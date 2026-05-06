@@ -552,13 +552,25 @@ function ListSection({
 
 }
 
-function AdviceSection({
-  advice,
-  onCopy
+function AdviceSection({ advice, onCopy, onCopyItem }) {
+  // Normalise to array of { label, detail } objects so the section
+  // renders as a bulleted list — same convention as Symptoms /
+  // Examination / Diagnosis. Each entry's `(notes)` becomes the
+  // lighter-coloured detail; everything else is the label.
+  const items = (Array.isArray(advice) ? advice : advice ? [advice] : [])
+    .map((entry) => {
+      if (typeof entry === "object" && entry !== null) {
+        return { label: entry.label ?? "", detail: entry.detail ?? entry.notes ?? "" };
+      }
+      const text = String(entry ?? "").trim();
+      const m = text.match(/^(.+?)\s*\(([^)]+)\)\s*$/);
+      if (m) return { label: m[1].trim(), detail: m[2].trim() };
+      return { label: text, detail: "" };
+    })
+    .filter((it) => it.label);
 
+  if (items.length === 0) return null;
 
-
-}) {
   return (
     <div className="relative shrink-0 w-full px-[12px] py-[8px] flex flex-col gap-[6px]">
       <div className="flex h-[30px] w-full min-w-0 shrink-0 items-center gap-1.5 rounded-[4px] bg-tp-slate-100/70 px-2 py-[3px] mb-[4px]">
@@ -575,16 +587,39 @@ function AdviceSection({
           showOnHover={false}
           copyHint="Click to fill advice to RxPad"
           copiedLabel="Advice filled to RxPad" />
-
       </div>
-      <TapCopyTooltip
-        className="w-full pl-[6px]"
-        onCopy={onCopy}
-        copyHint="Fill this advice to RxPad"
-        copiedLabel="Advice copied to RxPad">
 
-        <span className="font-sans text-[14px] leading-[20px] text-tp-slate-600">{advice}</span>
-      </TapCopyTooltip>
+      <div className="space-y-1 pl-[6px]">
+        {items.map((item, idx) => {
+          const normalizedLabel = normalizePointerText(item.label);
+          const normalizedDetail = normalizePointerText(item.detail);
+          return (
+            <div key={`advice-${idx}-${item.label}`} className="group flex items-start gap-[4px] -mr-[6px] text-[14px] leading-[20px] text-tp-slate-700">
+              <span className="mt-[8px] h-[5px] w-[5px] shrink-0 rounded-full bg-tp-slate-500" />
+              <TapCopyTooltip
+                className="min-w-0 flex-1"
+                copyHint="Click to fill this advice to RxPad"
+                copiedLabel={`${item.label} filled to RxPad`}
+                onCopy={() => onCopyItem ? onCopyItem(item) : onCopy()}>
+                <span className="block min-w-0">
+                  <span className="font-sans font-medium text-tp-slate-700">{normalizedLabel}</span>
+                  {normalizedDetail ? (
+                    <span className="ml-1 font-sans text-[14px] leading-[20px] text-tp-slate-500">{`(${normalizedDetail})`}</span>
+                  ) : null}
+                </span>
+              </TapCopyTooltip>
+              <div className="shrink-0 self-start">
+                <CopyAffordance
+                  onCopy={() => onCopyItem ? onCopyItem(item) : onCopy()}
+                  showOnHover
+                  hideOnTouch
+                  copyHint="Click to fill this advice to RxPad"
+                  copiedLabel={`${item.label} filled to RxPad`} />
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>);
 
 }
@@ -837,7 +872,7 @@ export function PastVisitsContent() {
                           examinations: entry.digitalRx.examinations.map((e) => `${e.label}${e.detail ? ` (${e.detail})` : ""}`),
                           diagnoses: entry.digitalRx.diagnoses.map((d) => `${d.label}${d.detail ? ` (${d.detail})` : ""}`),
                           medications: entry.digitalRx.medications.map((m) => m.row),
-                          advice: entry.digitalRx.advice || undefined,
+                          advice: Array.isArray(entry.digitalRx.advice) ? entry.digitalRx.advice.join(" ") : (entry.digitalRx.advice || undefined),
                           followUp: entry.digitalRx.followUp || undefined,
                           labInvestigations: entry.digitalRx.labInvestigations.length ? entry.digitalRx.labInvestigations : undefined
                         }, { bulk: true });
@@ -942,8 +977,16 @@ export function PastVisitsContent() {
                         <AdviceSection
                         advice={entry.digitalRx.advice}
                         onCopy={() => {
-                          fillToRxPad(requestCopyToRxPad, entry.dateLabel, { advice: entry.digitalRx.advice });
+                          const adviceText = Array.isArray(entry.digitalRx.advice)
+                            ? entry.digitalRx.advice.join(" ")
+                            : entry.digitalRx.advice;
+                          fillToRxPad(requestCopyToRxPad, entry.dateLabel, { advice: adviceText });
                           showCopySnackbar("Advice added successfully to RxPad");
+                        }}
+                        onCopyItem={(item) => {
+                          const text = item.detail ? `${item.label} (${item.detail})` : item.label;
+                          fillToRxPad(requestCopyToRxPad, entry.dateLabel, { advice: text });
+                          showCopySnackbar(`${item.label} advice added successfully to RxPad`);
                         }} />
                       
 

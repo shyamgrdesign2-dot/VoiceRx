@@ -274,7 +274,7 @@ export function pastVisits(history) {
       })),
       diagnoses: p.diagnosis.map(diagnosisToItem),
       medications: p.medications.map(medicationToItem),
-      advice: p.advice.join(" "),
+      advice: Array.isArray(p.advice) ? p.advice : (p.advice ? [p.advice] : []),
       followUp: p.followUp ? `After ${p.followUp}` : "",
       labInvestigations: p.labInvestigation.map((li) => li.name).filter(Boolean),
       vitals: {
