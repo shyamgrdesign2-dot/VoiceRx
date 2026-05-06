@@ -9,6 +9,7 @@ import { cn } from "@/src/hooks/utils";
 import { FeedbackRow } from "./VoiceRxResultTabs";
 import { VoiceRxIcon } from "./voice-consult-icons";
 import { VoiceRxModuleRecorder } from "./VoiceRxModuleRecorder";
+import recorderStyles from "./VoiceRxModuleRecorder.module.scss";
 import { VoiceRxSectionProcessing } from "@/src/components/organisms/rxpad/form/VoiceRxSectionProcessing";
 import styles from "./VoiceRxCanvas.module.scss";
 
@@ -23,12 +24,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger } from
 "@/src/components/molecules/DropdownMenu";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger } from
-"@/src/components/atoms/Tooltip";
+import { HoverTooltip } from "@/src/components/atoms/Tooltip";
 
 /**
  * VoiceRxCanvas
@@ -86,9 +82,6 @@ export function VoiceRxCanvas({
   onMinimize,
   onAddDetailsByVoice
 }) {
-  const tooltipDarkCls =
-  "rounded-[6px] border-0 bg-tp-slate-900 px-2 py-1 text-[12px] leading-[1.4] text-white shadow-[0_8px_20px_-10px_rgba(15,23,42,0.45)]";
-
   const canvasTitle = "Back";
   void modeLabel;
 
@@ -327,46 +320,34 @@ export function VoiceRxCanvas({
             </button>
           </div>
         }
-        <TooltipProvider delayDuration={200}>
-          <div className="flex items-center gap-2">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={handleCopyToRx}
-                  disabled={!onCopyToRx}
-                  className="vrx-cn-secondary-blue flex h-[42px] flex-1 items-center justify-center gap-2 rounded-[10px] px-3 text-[14px] font-semibold transition-colors active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
+        <div className="flex items-center gap-2">
+          <HoverTooltip content="Fill all of these structured sections into the active RxPad" side="top">
+            <button
+              type="button"
+              onClick={handleCopyToRx}
+              disabled={!onCopyToRx}
+              className="vrx-cn-secondary-blue flex h-[42px] flex-1 items-center justify-center gap-2 rounded-[10px] px-3 text-[14px] font-semibold transition-colors active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
 
-                  <CopyGlyph size={16} variant="Linear" color="currentColor" />
-                  Copy all to RxPad
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" sideOffset={6} className={tooltipDarkCls}>
-                Fill all of these structured sections into the active RxPad
-              </TooltipContent>
-            </Tooltip>
+              <CopyGlyph size={16} variant="Linear" color="currentColor" />
+              Copy all to RxPad
+            </button>
+          </HoverTooltip>
 
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (coachmarkVisible) dismissCoachmark();
-                    setQuickEditActive(true);
-                  }}
-                  disabled={quickEditActive}
-                  aria-label="Edit clinical notes with voice"
-                  className="vrx-rt-voice-cta-outline flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[10px] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
+          <HoverTooltip content="Quickly edit the clinical notes using voice AI" side="top">
+            <button
+              type="button"
+              onClick={() => {
+                if (coachmarkVisible) dismissCoachmark();
+                setQuickEditActive(true);
+              }}
+              disabled={quickEditActive}
+              aria-label="Edit clinical notes with voice"
+              className="vrx-rt-voice-cta-outline flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-[10px] transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
 
-                  <VoiceRxIcon size={20} color="#673AAC" />
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="top" sideOffset={6} className={tooltipDarkCls}>
-                Quickly edit the clinical notes using voice AI
-              </TooltipContent>
-            </Tooltip>
-          </div>
-        </TooltipProvider>
+              <VoiceRxIcon size={20} color="#673AAC" />
+            </button>
+          </HoverTooltip>
+        </div>
       </div>
       }
 
@@ -382,9 +363,9 @@ export function VoiceRxCanvas({
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 z-20 flex items-stretch"
           style={{ height: "40%" }}>
-          <div className="pointer-events-auto w-full bg-white" data-voice-allow>
+          <div className="pointer-events-auto w-full" data-voice-allow>
             {regenPhase === "processing" ? (
-              <div className="flex h-full w-full items-center justify-center px-4 py-4">
+              <div className={cn("flex h-full w-full items-center justify-center px-4 py-4", recorderStyles.recorderBgStack)}>
                 <VoiceRxSectionProcessing
                   transcript={transcript}
                   sectionLabel="Clinical Notes" />
