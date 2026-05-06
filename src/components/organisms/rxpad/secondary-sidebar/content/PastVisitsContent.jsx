@@ -1041,7 +1041,16 @@ export function PastVisitsContent() {
               Slate wash spans the whole body; the Rx image sits inside
               naked (no nested border / rounded shell). The image
               auto-fits the column with its natural aspect ratio. */}
-          <div className="flex-1 min-h-0 overflow-auto bg-tp-slate-50 p-4">
+          <div className="flex flex-1 min-h-0 flex-col gap-3 overflow-auto bg-tp-slate-50 p-4">
+            {/* Doctor stamp — same convention as the digital Rx body
+                so the Written Rx preview also reads as "by Dr. X". */}
+            {activeDocument ? (
+              <div className="mx-auto w-full max-w-[820px]">
+                <PrescribedByFooter
+                  doctorName={activeDocument.document.doctorName ?? "Dr. Shyam Sundar"}
+                  specialty={activeDocument.document.doctorSpecialty ?? "General Physician"} />
+              </div>
+            ) : null}
             <object
               data={activeDocument?.document.pdfUrl}
               type="application/pdf"
