@@ -270,11 +270,11 @@ export function VoiceRxCanvas({
                   className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
                   <div className="mb-[8px] flex items-center justify-between gap-2">
                     <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.6px] text-tp-slate-500">
-                      {transcriptSegments.length > 1 ? `Take ${idx + 1}` : "Transcript"}
+                      {transcriptSegments.length > 1 ? `Transcript ${idx + 1}` : "Transcript"}
                     </p>
                     {seg.createdAt ? (
                       <p className="font-sans text-[11px] leading-[14px] text-tp-slate-400">
-                        {new Date(seg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        {new Date(seg.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
                       </p>
                     ) : null}
                   </div>
