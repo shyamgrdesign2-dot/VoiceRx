@@ -330,6 +330,14 @@ function VoiceRxFlowInner() {
         )
         }
         onPreview={() => setRxPreviewOpen(true)}
+        onVoiceRx={() => {
+          // Re-open the VoiceRx panel from the toolbar — flips back
+          // into the in-progress voice flow if a result is cached, or
+          // dispatches the chat-side begin-addon trigger otherwise.
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("voicerx:begin-addon"));
+          }
+        }}
         onCustomise={() => setCustomiseOpen(true)}
         onEndVisit={() => {
           // Carry a flash flag so the EndVisit page surfaces
