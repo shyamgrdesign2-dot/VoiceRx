@@ -456,7 +456,7 @@ export function Grey({ children }) {
 }
 
 export function Sep() {
-  return <span className="text-tp-slate-300">{" | "}</span>;
+  return <span className="text-tp-slate-200">{" | "}</span>;
 }
 
 /**

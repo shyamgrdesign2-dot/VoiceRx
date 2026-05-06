@@ -21,7 +21,6 @@ import React, { useState } from "react";
 import {
   ActionButton,
   Bullet,
-  GradientDivider,
   Grey,
   Red,
   SectionCard,
@@ -38,10 +37,18 @@ const TODAY = new Date();
 
 // ── Mock schedule. Real backend would supply the same shape. ───────
 const PENDING_VACCINES = [
+  // Overdue (past due dates) — bucketed automatically against TODAY.
   { week: "12-18 Weeks", name: "HPV 1", dueDate: "2025-12-30", notes: "" },
   { week: "13 Weeks", name: "PPSV23", dueDate: "2025-09-12", notes: "Discuss with parents first" },
   { week: "18 Weeks", name: "Tdap Booster", dueDate: "2026-02-12", notes: "" },
   { week: "20 Weeks", name: "Influenza", dueDate: "2026-04-10", notes: "Seasonal — confirm stock" },
+  // Upcoming (future due dates) — same bucket logic, render in
+  // amber "Due" status. Several share a week so the grouped UI shows
+  // multiple bullets under one week heading.
+  { week: "24 Weeks", name: "Hepatitis A", dueDate: "2026-09-08", notes: "" },
+  { week: "24 Weeks", name: "Varicella", dueDate: "2026-09-08", notes: "Confirm parental consent" },
+  { week: "30 Weeks", name: "MMR Booster", dueDate: "2026-11-22", notes: "" },
+  { week: "36 Weeks", name: "Meningococcal", dueDate: "2027-01-15", notes: "Annual review" },
 ];
 
 const GIVEN_VACCINES = [
@@ -75,35 +82,68 @@ function formatDateLabel(s) {
   return `${d.getDate()} ${months[d.getMonth()]}'${yr}`;
 }
 
-function PendingVaccineItem({ week, name, status, statusColor, notes }) {
+function PendingVaccineItem({ name, status, statusColor, notes }) {
   const statusEl =
     statusColor === "overdue" ? <Red>{status}</Red> :
     statusColor === "due" ? <span className="text-tp-warning-500">{status}</span> :
     <span>{status}</span>;
   return (
-    <div className="flex items-start gap-[6px] px-[10px] py-[8px]">
+    <div className="flex items-start gap-[6px]">
       <Bullet />
-      <div className="flex flex-col gap-[4px] min-w-0">
-        <p className="font-sans font-semibold text-[14px] leading-[22px] text-tp-slate-700">
-          {week}
-        </p>
-        <p className="font-sans text-[14px] leading-[22px] text-tp-slate-700 whitespace-pre-wrap">
-          <span className="font-sans font-medium">{name}</span>
-          <span>{" ("}</span>
-          <Grey>Status: </Grey>
-          {statusEl}
-          {notes ? (
-            <>
-              <Sep />
-              <Grey>Notes: </Grey>
-              <span className="text-tp-slate-500">{notes}</span>
-            </>
-          ) : null}
-          <span>)</span>
-        </p>
+      <p className="font-sans text-[14px] leading-[22px] text-tp-slate-700 whitespace-pre-wrap min-w-0">
+        <span className="font-sans font-medium">{name}</span>
+        <span>{" ("}</span>
+        <Grey>Status: </Grey>
+        {statusEl}
+        {notes ? (
+          <>
+            <Sep />
+            <Grey>Notes: </Grey>
+            <span className="text-tp-slate-500">{notes}</span>
+          </>
+        ) : null}
+        <span>)</span>
+      </p>
+    </div>
+  );
+}
+
+// Pending vaccines (Overdue / Upcoming) grouped by week, same shape
+// as GivenVaccineGroup so the three sections read alike: week heading
+// up top, bullets stacked below.
+function PendingVaccineGroup({ week, vaccines, statusColor, statusFor }) {
+  return (
+    <div className="relative shrink-0 w-full px-[12px] py-[8px] flex flex-col gap-[6px]">
+      {/* Week tag — same chrome as Symptoms / Examination section
+          headers in Past Visits so the layout reads as one family. */}
+      <div className="flex h-[28px] w-full min-w-0 shrink-0 items-center gap-1.5 rounded-[4px] bg-tp-slate-100/70 px-2 py-[3px]">
+        <span className="flex min-h-0 min-w-0 flex-1 items-center text-left font-sans font-semibold text-tp-slate-500 text-[13px] leading-none">{week}</span>
+      </div>
+      <div className="flex flex-col gap-[4px] pl-[6px]">
+        {vaccines.map((v, i) => (
+          <PendingVaccineItem
+            key={`${week}-${v.name}-${i}`}
+            name={v.name}
+            status={statusFor(v)}
+            statusColor={statusColor}
+            notes={v.notes} />
+        ))}
       </div>
     </div>
   );
+}
+
+function groupByWeek(rows) {
+  const order = [];
+  const byWeek = new Map();
+  for (const v of rows) {
+    if (!byWeek.has(v.week)) {
+      byWeek.set(v.week, []);
+      order.push(v.week);
+    }
+    byWeek.get(v.week).push(v);
+  }
+  return order.map((week) => ({ week, vaccines: byWeek.get(week) }));
 }
 
 function GivenVaccineItem({ name, givenDate, brand, dueDate, notes }) {
@@ -136,11 +176,11 @@ function GivenVaccineItem({ name, givenDate, brand, dueDate, notes }) {
 
 function GivenVaccineGroup({ week, vaccines }) {
   return (
-    <div className="relative shrink-0 w-full px-[10px] py-[8px] flex flex-col gap-[6px]">
-      <p className="font-sans font-semibold text-[14px] leading-[22px] text-tp-slate-700">
-        {week}
-      </p>
-      <div className="flex flex-col gap-[4px]">
+    <div className="relative shrink-0 w-full px-[12px] py-[8px] flex flex-col gap-[6px]">
+      <div className="flex h-[28px] w-full min-w-0 shrink-0 items-center gap-1.5 rounded-[4px] bg-tp-slate-100/70 px-2 py-[3px]">
+        <span className="flex min-h-0 min-w-0 flex-1 items-center text-left font-sans font-semibold text-tp-slate-500 text-[13px] leading-none">{week}</span>
+      </div>
+      <div className="flex flex-col gap-[4px] pl-[6px]">
         {vaccines.map((v, i) => (
           <GivenVaccineItem key={`${week}-${v.name}-${i}`} {...v} />
         ))}
@@ -150,8 +190,10 @@ function GivenVaccineGroup({ week, vaccines }) {
 }
 
 export function VaccineContent() {
-  // Bucket pending vaccines by due-date vs today.
-  const { overdueRows, upcomingRows } = React.useMemo(() => {
+  // Bucket pending vaccines by due-date vs today, then group by week
+  // so the rendered list reads as week-heading + bullets (matching
+  // the Given Vaccines layout).
+  const { overdueGroups, upcomingGroups, overdueCount, upcomingCount } = React.useMemo(() => {
     const overdue = [];
     const upcoming = [];
     for (const v of PENDING_VACCINES) {
@@ -159,22 +201,15 @@ export function VaccineContent() {
       if (d && d < TODAY) overdue.push(v);
       else upcoming.push(v);
     }
-    return { overdueRows: overdue, upcomingRows: upcoming };
+    return {
+      overdueGroups: groupByWeek(overdue),
+      upcomingGroups: groupByWeek(upcoming),
+      overdueCount: overdue.length,
+      upcomingCount: upcoming.length
+    };
   }, []);
 
-  // Bucket given vaccines by week so the same week renders as a group.
-  const givenByWeek = React.useMemo(() => {
-    const order = [];
-    const byWeek = new Map();
-    for (const v of GIVEN_VACCINES) {
-      if (!byWeek.has(v.week)) {
-        byWeek.set(v.week, []);
-        order.push(v.week);
-      }
-      byWeek.get(v.week).push(v);
-    }
-    return order.map((week) => ({ week, vaccines: byWeek.get(week) }));
-  }, []);
+  const givenByWeek = React.useMemo(() => groupByWeek(GIVEN_VACCINES), []);
 
   const [expandedState, setExpandedState] = useState({
     overdue: true,
@@ -200,25 +235,23 @@ export function VaccineContent() {
               as="span"
             />
           }>
-          {overdueRows.length === 0 ? (
+          {overdueCount === 0 ? (
             <p className="px-[10px] py-[10px] font-sans text-[13px] italic text-tp-slate-500">No overdue vaccines.</p>
           ) : (
-            overdueRows.map((row, idx) => (
-              <React.Fragment key={`overdue-${row.name}-${idx}`}>
-                {idx > 0 ? <GradientDivider /> : null}
-                <PendingVaccineItem
-                  week={row.week}
-                  name={row.name}
-                  status="Overdue"
+            overdueGroups.map((g, idx) => (
+              <React.Fragment key={`overdue-${g.week}-${idx}`}>
+                <PendingVaccineGroup
+                  week={g.week}
+                  vaccines={g.vaccines}
                   statusColor="overdue"
-                  notes={row.notes} />
+                  statusFor={() => "Overdue"} />
               </React.Fragment>
             ))
           )}
         </SectionCard>
 
         <SectionCard
-          title={`Upcoming Vaccines (${upcomingRows.length})`}
+          title={`Upcoming Vaccines (${upcomingCount})`}
           expanded={expandedState.upcoming}
           onToggle={() => setExpandedState((prev) => ({ ...prev, upcoming: !prev.upcoming }))}
           titleAddon={
@@ -230,18 +263,16 @@ export function VaccineContent() {
               as="span"
             />
           }>
-          {upcomingRows.length === 0 ? (
+          {upcomingCount === 0 ? (
             <p className="px-[10px] py-[10px] font-sans text-[13px] italic text-tp-slate-500">No upcoming vaccines.</p>
           ) : (
-            upcomingRows.map((row, idx) => (
-              <React.Fragment key={`upcoming-${row.name}-${idx}`}>
-                {idx > 0 ? <GradientDivider /> : null}
-                <PendingVaccineItem
-                  week={row.week}
-                  name={row.name}
-                  status={`Due ${formatDateLabel(row.dueDate)}`}
+            upcomingGroups.map((g, idx) => (
+              <React.Fragment key={`upcoming-${g.week}-${idx}`}>
+                <PendingVaccineGroup
+                  week={g.week}
+                  vaccines={g.vaccines}
                   statusColor="due"
-                  notes={row.notes} />
+                  statusFor={(v) => `Due ${formatDateLabel(v.dueDate)}`} />
               </React.Fragment>
             ))
           )}
@@ -261,10 +292,7 @@ export function VaccineContent() {
             />
           }>
           {givenByWeek.map((g, idx) => (
-            <React.Fragment key={`given-${g.week}-${idx}`}>
-              {idx > 0 ? <GradientDivider /> : null}
-              <GivenVaccineGroup week={g.week} vaccines={g.vaccines} />
-            </React.Fragment>
+            <GivenVaccineGroup key={`given-${g.week}-${idx}`} week={g.week} vaccines={g.vaccines} />
           ))}
         </SectionCard>
       </SectionScrollArea>
