@@ -869,6 +869,13 @@ export function PastVisitsContent() {
 
                     {showDigital && entry.digitalRx ?
                     <>
+                        {/* Doctor stamp — placed AT THE TOP of the
+                            digital Rx body, right above Symptoms,
+                            so the doctor identity reads like a
+                            letterhead before any clinical content. */}
+                        <PrescribedByFooter
+                          doctorName={entry.writtenRx?.[0]?.doctorName ?? "Dr. Shyam Sundar"}
+                          specialty={entry.writtenRx?.[0]?.doctorSpecialty ?? "General Physician"} />
                         <ListSection
                         icon={<SymptomsIcon />}
                         title="Symptoms"
@@ -956,14 +963,6 @@ export function PastVisitsContent() {
                           fillToRxPad(requestCopyToRxPad, entry.dateLabel, { followUp: entry.digitalRx.followUp });
                           showCopySnackbar("Follow-up added successfully to RxPad");
                         }} />
-
-                        {/* Prescribing-doctor footer — mirrors the
-                            convention used on Written Rx cards so the
-                            doctor stamp is visible regardless of which
-                            tab the visit was recorded under. */}
-                        <PrescribedByFooter
-                          doctorName={entry.writtenRx?.[0]?.doctorName ?? "Dr. Shyam Sundar"}
-                          specialty={entry.writtenRx?.[0]?.doctorSpecialty ?? "General Physician"} />
                       </> :
                     null}
 
