@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Mic, MoreVertical, X } from "@/src/components/atoms/icons/lucide";
-import { Copy as CopyGlyph, InfoCircle, Microphone2, DocumentText } from "iconsax-reactjs";
+import { Download as DownloadIcon, Mic, MoreVertical, X } from "@/src/components/atoms/icons/lucide";
+import { Copy as CopyGlyph, Dislike, DocumentText, InfoCircle, Like1, Microphone2 } from "iconsax-reactjs";
+import { HoverTooltip } from "@/src/components/atoms/Tooltip";
+import { FeedbackBottomSheet } from "@/src/components/organisms/rxpad/dr-agent/shell/FeedbackBottomSheet";
 import { DictationTranscript } from "./VoiceTranscriptProcessingCard";
 import { cn } from "@/src/hooks/utils";
 
@@ -25,7 +27,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger } from
 "@/src/components/molecules/DropdownMenu";
-import { HoverTooltip } from "@/src/components/atoms/Tooltip";
 
 /**
  * VoiceRxCanvas
@@ -279,50 +280,26 @@ export function VoiceRxCanvas({
                 const timeLabel = seg.createdAt
                   ? new Date(seg.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
                   : null;
+                const fbKey = `transcript-${seg.id ?? idx}`;
                 return (
-                  <div
+                  <TranscriptCard
                     key={seg.id ?? idx}
-                    className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
-                    {/* Heading row, WhatsApp-style: title on the left,
-                        duration mic-pill flush right. The timestamp
-                        sits as a quiet sub-line under the title so the
-                        bottom feedback row can breathe. */}
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-sans text-[13px] font-medium leading-[18px] text-tp-slate-500">
-                        {heading}
-                      </p>
-                      <span
-                        className="inline-flex items-center gap-[4px] rounded-full bg-white/80 px-[10px] py-[3.5px] text-[12px] font-medium text-tp-slate-400 tabular-nums"
-                        aria-label={`Recording duration ${formatDuration(seg.durationMs)}`}>
-                        <Mic size={12} strokeWidth={1.8} aria-hidden />
-                        {formatDuration(seg.durationMs)}
-                      </span>
-                    </div>
-                    {timeLabel ? (
-                      <p className="mb-[6px] font-sans text-[11px] leading-[14px] text-tp-slate-400">
-                        {timeLabel}
-                      </p>
-                    ) : null}
-                    <DictationTranscript raw={seg.body} animate={false} />
-                    {/* Subtle horizontal gradient divider — same recipe
-                        as the Customise sidebar header divider. */}
-                    <div className="my-[10px] h-px w-full bg-gradient-to-r from-[rgba(208,213,221,0.2)] via-[#d0d5dd] to-[rgba(208,213,221,0.2)]" />
-                    <FeedbackRow
-                      value={feedback[`transcript-${seg.id ?? idx}`] ?? null}
-                      onChange={(v) => handleFeedback(`transcript-${seg.id ?? idx}`, v)}
-                      audioQuality="good" />
-                  </div>
+                    heading={heading}
+                    body={seg.body}
+                    durationMs={seg.durationMs}
+                    timeLabel={timeLabel}
+                    feedbackValue={feedback[fbKey] ?? null}
+                    onFeedbackChange={(v) => handleFeedback(fbKey, v)} />
                 );
               })
             ) : transcript ? (
-              <div className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
-                <DictationTranscript raw={transcript} animate={false} />
-                <div className="my-[10px] h-px w-full bg-gradient-to-r from-[rgba(208,213,221,0.2)] via-[#d0d5dd] to-[rgba(208,213,221,0.2)]" />
-                <FeedbackRow
-                  value={feedback.transcript}
-                  onChange={(v) => handleFeedback("transcript", v)}
-                  audioQuality="good" />
-              </div>
+              <TranscriptCard
+                heading="Transcript"
+                body={transcript}
+                durationMs={0}
+                timeLabel={null}
+                feedbackValue={feedback.transcript}
+                onFeedbackChange={(v) => handleFeedback("transcript", v)} />
             ) : (
               <div className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
                 <p className="text-[14px] italic leading-[1.6] text-tp-slate-400">No transcript captured.</p>
@@ -457,4 +434,90 @@ export function VoiceRxCanvas({
       {/* vrx-* styles live in app/globals.css */}
     </div>);
 
+}
+
+// Transcript card layout (canvas Transcript tab):
+// ┌─────────── inside box ──────────────┐
+// │ CONVERSATION TRANSCRIPT     [🎤 0:05]│
+// │                                     │
+// │ "Good morning, ..."                 │
+// │                                     │
+// │ ────────────────────────────        │
+// │ Audio quality: Good ⓘ │  12:48 PM   │
+// └─────────────────────────────────────┘
+//   👍  👎  │  ⬇      ← outside the box
+function TranscriptCard({ heading, body, durationMs, timeLabel, feedbackValue, onFeedbackChange }) {
+  const [downSheetOpen, setDownSheetOpen] = useState(false);
+  const handleDown = () => {
+    onFeedbackChange?.("down");
+    setDownSheetOpen(true);
+  };
+  return (
+    <div className="flex flex-col gap-[8px]">
+      <div className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
+        <div className="flex items-center justify-between gap-2">
+          <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.6px] text-tp-slate-400">
+            {heading}
+          </p>
+          <span
+            className="inline-flex items-center gap-[4px] rounded-full bg-white/80 px-[10px] py-[3.5px] text-[12px] font-medium text-tp-slate-400 tabular-nums"
+            aria-label={`Recording duration ${formatDuration(durationMs)}`}>
+            <Mic size={12} strokeWidth={1.8} aria-hidden />
+            {formatDuration(durationMs)}
+          </span>
+        </div>
+        <DictationTranscript raw={body} animate={false} />
+        <div className="my-[10px] h-px w-full bg-gradient-to-r from-[rgba(208,213,221,0.2)] via-[#d0d5dd] to-[rgba(208,213,221,0.2)]" />
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-1 text-[12px] font-medium text-emerald-600">
+            Audio quality: Good
+            <HoverTooltip content="Audio was clear and easily processed by the AI models." side="top">
+              <button type="button" className="ml-0.5 mt-0.5 text-tp-slate-400 hover:text-tp-slate-600">
+                <InfoCircle size={14} variant="Linear" />
+              </button>
+            </HoverTooltip>
+          </div>
+          {timeLabel ? (
+            <span className="font-sans text-[11px] leading-[14px] text-tp-slate-400">{timeLabel}</span>
+          ) : null}
+        </div>
+      </div>
+      {/* Outside-the-box affordances — thumbs / divider / download.
+          Sit on the canvas slate background so the box reads as the
+          message and these read as message-actions, WhatsApp-style. */}
+      <div className="flex items-center gap-1.5 px-[4px]">
+        <button
+          type="button"
+          onClick={() => onFeedbackChange?.("up")}
+          className={cn(
+            "flex h-[20px] w-[20px] items-center justify-center rounded transition-colors",
+            feedbackValue === "up" ? "text-tp-success-500" : "text-tp-slate-400 hover:text-tp-success-500"
+          )}>
+          <Like1 size={14} variant={feedbackValue === "up" ? "Bold" : "Linear"} />
+        </button>
+        <button
+          type="button"
+          onClick={handleDown}
+          className={cn(
+            "flex h-[20px] w-[20px] items-center justify-center rounded transition-colors",
+            feedbackValue === "down" ? "text-tp-error-500" : "text-tp-slate-400 hover:text-tp-error-500"
+          )}>
+          <Dislike size={14} variant={feedbackValue === "down" ? "Bold" : "Linear"} />
+        </button>
+        <span aria-hidden className="vrx-fb-divider mx-[6px]" />
+        <HoverTooltip content="Download transcript" side="top">
+          <button
+            type="button"
+            onClick={() => toast.success("Transcript downloaded")}
+            className="flex h-6 w-6 items-center justify-center rounded-md text-tp-slate-400 transition-colors hover:bg-tp-slate-50 hover:text-tp-slate-600">
+            <DownloadIcon size={14} strokeWidth={2.2} />
+          </button>
+        </HoverTooltip>
+      </div>
+      <FeedbackBottomSheet
+        isOpen={downSheetOpen}
+        onClose={() => setDownSheetOpen(false)}
+        onSubmit={() => setDownSheetOpen(false)} />
+    </div>
+  );
 }
