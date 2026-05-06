@@ -420,12 +420,12 @@ function StickyFooter({
   return (
     <div className="shrink-0 border-t border-tp-slate-200 bg-white px-3 py-3">
       <div className="flex items-center gap-2">
-        <HoverTooltip content={primaryHelp} side="top">
+        <HoverTooltip content={primaryHelp} side="top" fill>
           <button
             type="button"
             onClick={primaryAction}
             disabled={!primaryAction}
-            className="vrx-rt-primary flex h-[42px] flex-1 items-center justify-center gap-2 rounded-[10px] px-3 text-[14px] font-semibold text-white transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
+            className="vrx-rt-primary flex h-[42px] w-full items-center justify-center gap-2 rounded-[10px] px-3 text-[14px] font-semibold text-white transition-transform active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
 
             {primaryIcon}
             {primaryLabel}

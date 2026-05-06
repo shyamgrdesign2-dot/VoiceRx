@@ -342,12 +342,12 @@ export function VoiceRxCanvas({
           </div>
         }
         <div className="flex items-center gap-2">
-          <HoverTooltip content="Fill all of these structured sections into the active RxPad" side="top">
+          <HoverTooltip content="Fill all of these structured sections into the active RxPad" side="top" fill>
             <button
               type="button"
               onClick={handleCopyToRx}
               disabled={!onCopyToRx}
-              className="vrx-cn-secondary-blue flex h-[42px] flex-1 items-center justify-center gap-2 rounded-[10px] px-3 text-[14px] font-semibold transition-colors active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
+              className="vrx-cn-secondary-blue flex h-[42px] w-full items-center justify-center gap-2 rounded-[10px] px-3 text-[14px] font-semibold transition-colors active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50">
 
               <CopyGlyph size={16} variant="Linear" color="currentColor" />
               Copy all to RxPad

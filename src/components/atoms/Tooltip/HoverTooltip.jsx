@@ -39,6 +39,13 @@ export function HoverTooltip({
   offset = 8,
   delay = 200,
   className,
+  // When the trigger lives inside a flex row and needs to stretch
+  // (e.g. a flex-1 button), pass `wrapperClassName="flex-1"` so the
+  // wrapper span participates in the parent's flex sizing.
+  wrapperClassName,
+  // Set true when the trigger needs to fill its container — convenience
+  // alias that adds `flex-1 w-full` to the wrapper.
+  fill = false,
 }) {
   const triggerRef = React.useRef(null);
   const showTimerRef = React.useRef(null);
@@ -141,7 +148,8 @@ export function HoverTooltip({
     <>
       <span
         ref={triggerRef}
-        style={{ display: "inline-flex" }}
+        className={[wrapperClassName, fill ? "flex-1 w-full" : ""].filter(Boolean).join(" ") || undefined}
+        style={{ display: fill || wrapperClassName?.includes("flex-1") ? "flex" : "inline-flex" }}
         onMouseEnter={show}
         onMouseLeave={hide}
         onFocus={show}
@@ -155,12 +163,66 @@ export function HoverTooltip({
               style={{ ...style, pointerEvents: "none" }}
               className={surfaceCls}>
               {content}
+              <TooltipArrow side={side} />
             </div>,
             document.body
           )
         : null}
     </>
   );
+}
+
+// Small triangular arrow pointing from the tooltip surface back at
+// the trigger. Lives outside the surface bounds via absolute
+// positioning so the box itself stays a clean rounded-rect.
+function TooltipArrow({ side }) {
+  const base = {
+    position: "absolute",
+    width: 0,
+    height: 0,
+    borderStyle: "solid",
+    borderColor: "transparent",
+  };
+  const colour = "var(--tp-slate-800, #2c2c35)";
+  let style = base;
+  if (side === "top") {
+    style = {
+      ...base,
+      bottom: -5,
+      left: "50%",
+      transform: "translateX(-50%)",
+      borderWidth: "5px 5px 0 5px",
+      borderTopColor: colour,
+    };
+  } else if (side === "bottom") {
+    style = {
+      ...base,
+      top: -5,
+      left: "50%",
+      transform: "translateX(-50%)",
+      borderWidth: "0 5px 5px 5px",
+      borderBottomColor: colour,
+    };
+  } else if (side === "left") {
+    style = {
+      ...base,
+      right: -5,
+      top: "50%",
+      transform: "translateY(-50%)",
+      borderWidth: "5px 0 5px 5px",
+      borderLeftColor: colour,
+    };
+  } else if (side === "right") {
+    style = {
+      ...base,
+      left: -5,
+      top: "50%",
+      transform: "translateY(-50%)",
+      borderWidth: "5px 5px 5px 0",
+      borderRightColor: colour,
+    };
+  }
+  return <span aria-hidden style={style} />;
 }
 
 HoverTooltip.displayName = "HoverTooltip";
