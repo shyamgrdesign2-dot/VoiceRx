@@ -372,7 +372,11 @@ export function VoiceRxCanvas({
             </button>
           </HoverTooltip>
 
-          <HoverTooltip content="Quickly edit the clinical notes using voice AI" side="top" align="end">
+          <HoverTooltip
+            content="Quickly edit the clinical notes using voice AI"
+            side="top"
+            align="end"
+            className="!max-w-[320px] !whitespace-normal">
             <button
               type="button"
               onClick={() => {
@@ -453,22 +457,22 @@ function TranscriptCard({ heading, body, durationMs, timeLabel, feedbackValue, o
     setDownSheetOpen(true);
   };
   return (
-    <div className="flex flex-col gap-[8px]">
+    <div className="flex flex-col gap-[4px]">
       <div className="vrx-transcript-frame rounded-[12px] bg-tp-slate-100/80 p-[12px] backdrop-blur-sm">
         <p className="font-sans text-[11px] font-semibold uppercase tracking-[0.6px] text-tp-slate-400">
           {heading}
         </p>
         <DictationTranscript raw={body} animate={false} />
         <div className="my-[10px] h-px w-full bg-gradient-to-r from-[rgba(208,213,221,0.2)] via-[#d0d5dd] to-[rgba(208,213,221,0.2)]" />
-        {/* Combined audio quality + duration. The mic icon previously
-            lived on the heading right; folded into this row so the
-            heading carries only the title. */}
-        <div className="flex items-center gap-1 text-[12px] font-medium text-emerald-600">
-          <Mic size={12} strokeWidth={1.8} aria-hidden className="text-emerald-600" />
-          Audio quality: Good
-          <span className="text-tp-slate-400 tabular-nums">({formatDuration(durationMs)})</span>
+        {/* Audio quality (with duration baked into the label) + info
+            tooltip. No mic icon — the duration in green brackets
+            doubles as the recording-length indicator. */}
+        <div className="flex items-center gap-[4px] text-[12px] font-medium text-emerald-600">
+          <span>
+            Audio quality <span className="tabular-nums">({formatDuration(durationMs)})</span>: Good
+          </span>
           <HoverTooltip content="Audio was clear and easily processed by the AI models." side="top">
-            <button type="button" className="ml-0.5 mt-0.5 text-tp-slate-400 hover:text-tp-slate-600">
+            <button type="button" className="inline-flex h-[14px] w-[14px] items-center justify-center text-tp-slate-400 hover:text-tp-slate-600">
               <InfoCircle size={14} variant="Linear" />
             </button>
           </HoverTooltip>
