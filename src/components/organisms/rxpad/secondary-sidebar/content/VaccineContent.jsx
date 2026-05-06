@@ -159,7 +159,7 @@ function GivenVaccineItem({ name, givenDate, brand, dueDate, notes }) {
         <span className="font-medium">{name}</span>
         <span>{" ("}</span>
         <Grey>Given date: </Grey>
-        <span className="font-medium text-tp-slate-700">{givenDate}</span>
+        <span className="font-medium text-tp-success-500">{givenDate}</span>
         <Sep />
         <Grey>Brand: </Grey>
         <span className="font-medium text-tp-slate-700">{brand}</span>
