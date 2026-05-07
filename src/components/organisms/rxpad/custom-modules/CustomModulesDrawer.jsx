@@ -16,9 +16,9 @@ import {
 "@/src/components/organisms/rxpad/customise-context";
 
 import { SidebarHeader } from "@/src/components/molecules/SidebarHeader";
+import { TutorialPlayIcon } from "@/src/components/atoms/TutorialPlayIcon/TutorialPlayIcon";
 import { CustomModuleEditor } from "./CustomModuleEditor";
 import { CustomModuleListItem } from "./CustomModuleListItem";
-import { ModuleAtomIcon } from "./ModuleAtomIcon";
 
 // ── Close icon (matches the customise sheet) ─────────────────────────────
 
@@ -179,34 +179,29 @@ export function CustomModulesDrawer() {
         isVisible ? "translate-x-0" : "translate-x-full"}`
         }>
         
-        {/* Header — close X | divider | title | (right) CTAs */}
+        {/* Header — close X | divider | title | tutorial | divider | Create CTA */}
         <SidebarHeader
           onClose={closeDrawer}
           closeAriaLabel="Close custom modules drawer"
           closeIcon={<CloseSquareIcon size={24} />}
-          titlePrefix={
-            <span className="my-auto inline-flex h-[28px] w-[28px] shrink-0 items-center justify-center rounded-[8px] bg-tp-blue-50 text-tp-blue-500">
-              <ModuleAtomIcon size={18} />
-            </span>
-          }
           title={isEditingMode ? "Edit Custom Module" : "Custom Modules"}
+          tutorial={
+            <button
+              type="button"
+              aria-label="Watch tutorial"
+              className="flex h-[36px] w-[36px] shrink-0 items-center justify-center rounded-[8px] text-tp-slate-600 transition-colors hover:bg-tp-slate-100 active:scale-[0.96]">
+              <TutorialPlayIcon size={36} />
+            </button>
+          }
           actionsDivider={(isCreatingMode || isEditingMode) ? <DrawerGradientDivider /> : null}
           actions={(isCreatingMode || isEditingMode) ? (
-            <>
-              <button
-                type="button"
-                onClick={closeDrawer}
-                className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] border border-tp-blue-300 bg-white px-[16px] text-[13px] font-semibold text-tp-blue-500 transition-colors hover:bg-tp-blue-50 active:scale-[0.98]">
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleHeaderSubmit}
-                disabled={!editorValid}
-                className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] bg-tp-blue-500 px-[16px] text-[13px] font-semibold text-white transition-colors hover:bg-tp-blue-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-tp-blue-500">
-                {submitLabel}
-              </button>
-            </>
+            <button
+              type="button"
+              onClick={handleHeaderSubmit}
+              disabled={!editorValid}
+              className="inline-flex h-[36px] min-w-[100px] items-center justify-center rounded-[10px] bg-tp-blue-500 px-[16px] text-[13px] font-semibold text-white transition-colors hover:bg-tp-blue-600 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-tp-blue-500">
+              {submitLabel}
+            </button>
           ) : null}
         />
 
