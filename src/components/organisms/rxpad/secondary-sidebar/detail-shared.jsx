@@ -83,8 +83,22 @@ export function ActionButton({
   icon = "plus",
   onClick,
   sectionId,
-  onVoiceClick
-
+  onVoiceClick,
+  // When true, drop the header chrome (white bg, bottom divider, full
+  // padding) so the CTA can sit inline — e.g. centred under an empty
+  // state message rather than as the panel's top bar.
+  chromeless = false,
+  // Explicit label for the voice recorder + toast. Defaults to the
+  // section name derived from `label`. Pass when `label` is generic
+  // ("Add or Edit") but the recorder should still name the section.
+  voiceLabel,
+  // "bar" (default) = the panel-top row: outlined add button + mic.
+  // "stacked" = empty-state CTAs: solid-blue primary on top, AI-gradient
+  // "Add via voice" secondary below.
+  variant = "bar",
+  // Whether the voice affordance (mic / "Add via voice") is offered. Off
+  // for sections with no dictation flow (e.g. Vitals, Medical Records).
+  showVoice = true
 
 
 
@@ -138,7 +152,7 @@ export function ActionButton({
   () => setIsVoiceActive((v) => !v) :
   null;
 
-  const sectionLabel = label.replace(/Add\/Edit\s*/i, "").trim() || "Details";
+  const sectionLabel = voiceLabel ?? (label.replace(/Add\/Edit\s*/i, "").trim() || "Details");
 
   return (
     <>
@@ -235,12 +249,71 @@ export function ActionButton({
         </div>
       </div> :
       null}
-    <div className={`bg-white content-stretch flex items-center gap-[8px] p-[12px] relative shrink-0 w-full border-b ${rxSidebarTokens.panelBorderClass}`}>
+    {variant === "stacked" ?
+    <div className="flex w-full flex-col gap-[8px]">
+        {/* Primary CTA — solid blue, white text + icon (manual add) */}
+        <button
+        type="button"
+        onClick={onClick}
+        className="flex h-[40px] w-full items-center justify-center gap-[6px] rounded-[10px] bg-tp-blue-500 px-[16px] text-white transition-colors hover:bg-tp-blue-600 active:scale-[0.98]">
+
+        {icon === "plus" ?
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M6 12H18" stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+              <path d="M12 18V6" stroke="white" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" />
+            </svg> :
+        null}
+          <span className="font-sans text-[14px] font-semibold leading-[20px] whitespace-nowrap">{label}</span>
+        </button>
+
+        {/* Secondary CTA — AI gradient, voice dictation */}
+        {showVoice && handleVoice ?
+      <button
+        type="button"
+        onClick={micDisabled || globalLocked ? undefined : handleVoice}
+        aria-label={
+        globalLocked ?
+        "VoiceRx is active — submit or close VoiceRx to use section dictation" :
+        micDisabled ?
+        rxSync.micUnavailableReason ?? "Microphone unavailable" :
+        `Add ${sectionLabel.toLowerCase()} via voice`
+        }
+        title={
+        globalLocked ?
+        "VoiceRx is active — submit or close VoiceRx to use section dictation" :
+        micDisabled ?
+        rxSync.micUnavailableReason ?? "Microphone unavailable" :
+        `Add ${sectionLabel.toLowerCase()} via voice`
+        }
+        {...isVoiceActive ?
+        { "data-voice-allow": true } :
+        { "data-voice-block": true }}
+        aria-disabled={micDisabled || globalLocked || isVoiceActive || !!voiceProcessingTranscript}
+        className={clsx(
+          // Gradient-outline secondary CTA — TP AI gradient border + text,
+          // no fill (shares the design-system .vrx-rt-voice-cta-outline recipe).
+          "vrx-rt-voice-cta-outline flex h-[40px] w-full items-center justify-center gap-[4px] rounded-[10px] px-[16px] transition-transform",
+          micDisabled || globalLocked ?
+          "opacity-40 cursor-not-allowed" :
+          isVoiceActive || voiceProcessingTranscript ?
+          "opacity-50 pointer-events-none" :
+          "hover:scale-[1.02] active:scale-[0.98]"
+        )}>
+
+          <span className="tp-voice-wave-icon" />
+          <span className="vrx-rt-voice-cta-outline__label font-sans text-[14px] font-semibold leading-[20px] whitespace-nowrap">Add via voice</span>
+        </button> :
+      null}
+      </div> :
+
+    <div className={chromeless
+    ? "content-stretch flex items-center gap-[8px] relative w-full"
+    : `bg-white content-stretch flex items-center gap-[8px] p-[12px] relative shrink-0 w-full border-b ${rxSidebarTokens.panelBorderClass}`}>
       <button
           type="button"
           onClick={onClick}
           className="h-[36px] relative shrink-0 flex-1 cursor-pointer bg-transparent p-0 text-left">
-          
+
         <div aria-hidden="true" className="absolute border border-tp-blue-500 border-solid inset-0 pointer-events-none rounded-[10px]" />
         <div className="flex flex-row items-center justify-center size-full rounded-[10px]">
           <div className="content-stretch flex gap-[4px] items-center justify-center px-[16px] py-px relative size-full">
@@ -288,11 +361,12 @@ export function ActionButton({
             "opacity-25 pointer-events-none" :
             "hover:scale-[1.06] active:scale-[0.94]"
           )}>
-          
+
           <span className="tp-voice-wave-icon" />
         </button> :
         null}
     </div>
+    }
     <TPSnackbar
         open={Boolean(toastMessage)}
         message={toastMessage ?? ""}

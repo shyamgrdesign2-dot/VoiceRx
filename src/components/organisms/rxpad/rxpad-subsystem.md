@@ -68,9 +68,19 @@ rxpad/
   secondary-sidebar/             Blue sidebar — pills + section-specific panels.
     NavPanel.jsx                 80px vertical nav rail (left).
     ContentPanel.jsx             250px content panel (right of NavPanel).
-    SecondarySidebar.jsx         Top-level orchestrator.
+                                  Routes first-time patients (see
+                                  patientHasEmptyHistory) to EmptyStateContent
+                                  for every section except Private Notes.
+    SecondarySidebar.jsx         Top-level orchestrator. Forwards `patientId`.
     content/<Section>Content.jsx Per-section content panels.
-    detail-shared.jsx            Bullet helper, GroupCard, sticky sub-headers.
+    content/EmptyStateContent.jsx  Empty state — file icon + section-specific
+                                  copy + CTAs. Primary "Add <section>" (solid
+                                  blue); secondary "Add via voice" (AI-gradient
+                                  outline) on voice-capable sections only. Past
+                                  Visits shows no CTA (created on Rx submit);
+                                  Medical Records is upload-only (no voice CTA).
+    detail-shared.jsx            Bullet helper, GroupCard, sticky sub-headers,
+                                  ActionButton (bar / stacked variants).
     types.js                     Section ID enumeration.
 
   custom-modules/                Doctor-creatable Rx modules.
@@ -85,6 +95,10 @@ rxpad/
 
   digitization/                  Schema adapters for incoming structured data.
     schema.js, adapters.js, mock-payload.js
+                                  mock-payload also exports
+                                  patientHasEmptyHistory(patientId) — true for
+                                  first-time/walk-in patients (e.g. apt-zerodata),
+                                  which drives the sidebar empty states.
 
   imports/                       Imported design assets (RxpadHeader, etc.).
 ```

@@ -369,6 +369,7 @@ function VoiceRxFlowInner() {
       }
       sidebar={
       <TPRxPadSecondarySidebar
+        patientId={patientId}
         onSectionSelect={handleSidebarSectionSelect} />
 
       }>

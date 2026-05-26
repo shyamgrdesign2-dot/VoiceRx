@@ -48,7 +48,7 @@ function neighbourSection(current, dir) {
 
 
 
-export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect }) {
+export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect, patientId }) {
   const [activeId, setActiveId] = useState("pastVisits");
   const { lastSignal, publishSignal, acknowledgeHistoricalSection, activeVoiceModule } = useRxPadSync();
   const lastSignalIdRef = useRef(0);
@@ -166,6 +166,7 @@ export function SecondarySidebar({ collapseExpandedOnly = false, onSectionSelect
       {activeId && !collapseExpandedOnly ?
       <ContentPanel
         activeId={activeId}
+        patientId={patientId}
         onClose={() => {setActiveId(null);onSectionSelect?.(null);}}
         onSwipeNavigate={handleSwipeNavigate} /> :
 

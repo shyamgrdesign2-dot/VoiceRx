@@ -24,6 +24,7 @@ import { MedicalRecordsContent } from "./content/MedicalRecordsContent";
 import { LabResultsContent } from "./content/LabResultsContent";
 import { PersonalNotesContent } from "./content/PersonalNotesContent";
 import { EmptyStateContent } from "./content/EmptyStateContent";
+import { patientHasEmptyHistory } from "@/src/components/organisms/rxpad/digitization/mock-payload";
 
 
 import { rxSidebarTokens } from "./tokens";
@@ -160,7 +161,15 @@ function SectionHeader({ title, activeId, onClose }) {
 
 // ─── Content switcher ─────────────────────────────────────────────────────────
 
-function SectionContent({ activeId }) {
+function SectionContent({ activeId, patientId }) {
+  // First-time / walk-in patients have no prior records, so every
+  // historical section shows the empty state with the Add/Edit + voice
+  // CTA. Private Notes is the doctor's own scratchpad (not patient
+  // history) so it keeps its normal editor.
+  if (patientHasEmptyHistory(patientId) && activeId !== "personalNotes") {
+    return <EmptyStateContent sectionLabel={SECTION_TITLES[activeId]} sectionId={activeId} />;
+  }
+
   switch (activeId) {
     // drAgent no longer in sidebar — falls through to pastVisits
     case "pastVisits":return <PastVisitsContent />;
@@ -222,7 +231,7 @@ function useTransitionDirection(activeId) {
   return dir;
 }
 
-export function ContentPanel({ activeId, onClose, onSwipeNavigate }) {
+export function ContentPanel({ activeId, onClose, onSwipeNavigate, patientId }) {
   const { acknowledgeHistoricalSection, isHistoricalSectionUnseen, historicalUpdates } = useRxPadSync();
   const unseenHere = isHistoricalSectionUnseen(activeId);
   const containerRef = useRef(null);
@@ -293,7 +302,7 @@ export function ContentPanel({ activeId, onClose, onSwipeNavigate }) {
             key={activeId}
             className={`flex min-h-0 flex-1 flex-col overflow-y-auto ${animClass}`}>
             
-            <SectionContent activeId={activeId} />
+            <SectionContent activeId={activeId} patientId={patientId} />
           </div>
         </div>
       </div>

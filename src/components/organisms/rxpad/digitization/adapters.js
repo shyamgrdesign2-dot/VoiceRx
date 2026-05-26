@@ -289,9 +289,12 @@ export function pastVisits(history) {
     } :
     undefined;
 
+    const firstAttachment = visit.attachments?.[0];
     return {
       id: visit.id,
       dateLabel: visit.dateLabel,
+      doctorName: visit.doctor?.name ?? firstAttachment?.doctorName,
+      doctorSpecialty: visit.doctor?.specialty ?? firstAttachment?.doctorSpecialty,
       digitalRx,
       writtenRx: visit.attachments ?? []
     };

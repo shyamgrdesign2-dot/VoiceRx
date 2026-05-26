@@ -28,6 +28,10 @@ meta)
     id: meta.id,
     dateLabel: meta.dateLabel,
     isCurrent: meta.isCurrent,
+    // Visit-level prescriber. Surfaced on the Past Visits date header so
+    // each visit can show its own doctor + specialty (short tag). Falls
+    // back to the first written-Rx attachment when absent.
+    doctor: meta.doctor,
     attachments: meta.attachments,
     payload: { ...emptyPrescription(), ...partial }
   };
@@ -131,6 +135,7 @@ const TODAY = visit(
     id: "visit-27-jan",
     dateLabel: "27 Jan'26",
     isCurrent: true,
+    doctor: { name: "Dr. Shyam Sundar", specialty: "General Physician" },
     attachments: [
     {
       id: "wrx-27-a",
@@ -184,7 +189,12 @@ const D_26 = visit(
     followUp: "5 Days",
     others: ["Digital Rx imported from 26 Jan consultation."]
   },
-  { id: "visit-26-jan", dateLabel: "26 Jan'26" }
+  {
+    id: "visit-26-jan",
+    dateLabel: "26 Jan'26",
+    // Long name — exercises the date-header truncation on narrow widths.
+    doctor: { name: "Dr. Ananya Krishnamurthy Rao", specialty: "Pediatrician" }
+  }
 );
 
 const D_24 = visit(
@@ -229,6 +239,8 @@ const D_24 = visit(
   {
     id: "visit-24-jan",
     dateLabel: "24 Jan'26",
+    // Very long name — worst-case truncation check.
+    doctor: { name: "Dr. Padmanabhan Venkataraghavan", specialty: "Cardiologist" },
     attachments: [
     {
       id: "wrx-24-a",
@@ -236,8 +248,8 @@ const D_24 = visit(
       description: "Legacy handwritten prescription (24 Jan'26)",
       pdfUrl: WRITTEN_RX_PDF,
       previewImage: WRITTEN_RX_PREVIEW,
-      doctorName: "Dr. Shyam Sundar",
-      doctorSpecialty: "General Physician"
+      doctorName: "Dr. Padmanabhan Venkataraghavan",
+      doctorSpecialty: "Cardiologist"
     }]
 
   }
@@ -261,6 +273,8 @@ const D_22 = visit(
   {
     id: "visit-22-jan",
     dateLabel: "22 Jan'26",
+    // Short name — the comfortable case.
+    doctor: { name: "Dr. Rohan Mehta", specialty: "Dermatologist" },
     attachments: [
     {
       id: "wrx-22-a",
@@ -268,8 +282,8 @@ const D_22 = visit(
       description: "Only written Rx available for this date",
       pdfUrl: WRITTEN_RX_PDF,
       previewImage: WRITTEN_RX_PREVIEW,
-      doctorName: "Dr. Shyam Sundar",
-      doctorSpecialty: "General Physician"
+      doctorName: "Dr. Rohan Mehta",
+      doctorSpecialty: "Dermatologist"
     }]
 
   }
@@ -293,6 +307,7 @@ const D_20 = visit(
   {
     id: "visit-20-jan",
     dateLabel: "20 Jan'26",
+    doctor: { name: "Dr. Lakshmi Subramaniam Iyer", specialty: "Endocrinologist" },
     attachments: [
     {
       id: "wrx-20-a",
@@ -300,8 +315,8 @@ const D_20 = visit(
       description: "Only written Rx available for this date",
       pdfUrl: WRITTEN_RX_PDF,
       previewImage: WRITTEN_RX_PREVIEW,
-      doctorName: "Dr. Shyam Sundar",
-      doctorSpecialty: "General Physician"
+      doctorName: "Dr. Lakshmi Subramaniam Iyer",
+      doctorSpecialty: "Endocrinologist"
     }]
 
   }
@@ -315,4 +330,18 @@ const MOCK_HISTORY = { visits: [TODAY, D_26, D_24, D_22, D_20] };
  */
 export function getMockPatientHistory() {
   return MOCK_HISTORY;
+}
+
+// First-time / walk-in patients who arrive with no prior records. Every
+// historical secondary-sidebar section renders its empty state for these
+// patients (the doctor captures everything fresh this visit). `apt-zerodata`
+// (Ramesh M) is the canonical new-patient permutation used across the app.
+const EMPTY_HISTORY_PATIENT_IDS = new Set(["apt-zerodata"]);
+
+/**
+ * True when the patient has no historical data to show — drives the
+ * empty-state screens across the secondary sidebar sections.
+ */
+export function patientHasEmptyHistory(patientId) {
+  return EMPTY_HISTORY_PATIENT_IDS.has(patientId);
 }

@@ -4,7 +4,7 @@
  * - Written Rx opens in a right sidebar PDF viewer.
  * - Copy affordances on date / section / item provide UX-level copy feedback.
  */
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowSquareDown,
   ArrowSquareUp,
@@ -124,6 +124,80 @@ function normalizePointerText(value) {
   replace(/\(\s+/g, "(").
   replace(/\s+\)/g, ")").
   trim();
+}
+
+// Compact specialty labels for the date-header tag. These follow the
+// abbreviations clinicians commonly use across India (e.g. Paediatrics
+// → "Paed", Gynaecology → "Gynaec", ENT, Ophthal) rather than an
+// ad-hoc shortening. Falls back to a word-initial acronym for unknown
+// multi-word specialties, or the first few letters for a single word.
+const SPECIALTY_SHORT = {
+  "general physician": "GP",
+  "general practitioner": "GP",
+  physician: "Gen Med",
+  "internal medicine": "Gen Med",
+  pediatrician: "Paed",
+  paediatrician: "Paed",
+  pediatrics: "Paed",
+  paediatrics: "Paed",
+  cardiologist: "Cardio",
+  cardiology: "Cardio",
+  dermatologist: "Derma",
+  dermatology: "Derma",
+  gynecologist: "Gynaec",
+  gynaecologist: "Gynaec",
+  gynecology: "Gynaec",
+  gynaecology: "Gynaec",
+  obstetrician: "Obs",
+  "obstetrician & gynaecologist": "OBG",
+  "obstetrics & gynaecology": "OBG",
+  "orthopedic surgeon": "Ortho",
+  orthopedic: "Ortho",
+  orthopaedic: "Ortho",
+  orthopaedics: "Ortho",
+  neurologist: "Neuro",
+  neurology: "Neuro",
+  neurosurgeon: "Neuro Surg",
+  psychiatrist: "Psych",
+  psychiatry: "Psych",
+  "ent specialist": "ENT",
+  otorhinolaryngologist: "ENT",
+  ophthalmologist: "Ophthal",
+  ophthalmology: "Ophthal",
+  endocrinologist: "Endo",
+  endocrinology: "Endo",
+  diabetologist: "Diab",
+  gastroenterologist: "Gastro",
+  gastroenterology: "Gastro",
+  pulmonologist: "Pulmo",
+  "chest physician": "Chest",
+  nephrologist: "Nephro",
+  nephrology: "Nephro",
+  oncologist: "Onco",
+  oncology: "Onco",
+  urologist: "Uro",
+  urology: "Uro",
+  radiologist: "Radio",
+  radiology: "Radio",
+  anesthesiologist: "Anaes",
+  anaesthesiologist: "Anaes",
+  anaesthetist: "Anaes",
+  "general surgeon": "Surg",
+  "general surgery": "Surg",
+  rheumatologist: "Rheum",
+  hematologist: "Haem",
+  haematologist: "Haem",
+  dentist: "Dental",
+  physiotherapist: "Physio"
+};
+
+function shortSpecialty(specialty) {
+  if (!specialty) return "";
+  const key = specialty.trim().toLowerCase();
+  if (SPECIALTY_SHORT[key]) return SPECIALTY_SHORT[key];
+  const words = key.split(/\s+/).filter(Boolean);
+  if (words.length > 1) return words.map((w) => w[0]).join("").toUpperCase();
+  return specialty.trim().slice(0, 4);
 }
 
 /**
@@ -342,7 +416,9 @@ function DateHeader({
   onToggle,
   onCopyDate,
   canCopy,
-  freshCount
+  freshCount,
+  doctorName,
+  specialty
 
 
 
@@ -357,6 +433,29 @@ function DateHeader({
 
 }) {
   const { headerRef, isStuck } = useStickyHeaderState();
+  const specialtyShort = shortSpecialty(specialty);
+
+  // Tooltip surfaces the full doctor name + full specialty, but only
+  // when the name is actually clipped. We measure at hover time (in
+  // onOpenChange) instead of via an effect so layout/webfont timing
+  // can never leave us with a stale truncation flag.
+  const nameRef = useRef(null);
+  const [nameTipOpen, setNameTipOpen] = useState(false);
+
+  const doctorBlock = doctorName ? (
+    <div className="flex min-w-0 items-center gap-[4px]">
+      <span
+        ref={nameRef}
+        className="min-w-0 truncate font-sans text-[12px] font-normal leading-[16px] text-tp-slate-500">
+        {doctorName}
+      </span>
+      {specialtyShort ?
+      <span className="shrink-0 rounded-[4px] bg-tp-slate-200/70 px-[6px] py-[1px] font-sans text-[10px] font-semibold uppercase leading-[14px] tracking-[0.4px] text-tp-slate-700">
+        {specialtyShort}
+      </span> :
+      null}
+    </div>
+  ) : null;
 
   return (
     <div
@@ -378,26 +477,57 @@ function DateHeader({
         "rounded-tl-[10px] rounded-tr-[10px]" :
         "rounded-[10px]"
       )}>
-      
-      <div className="flex items-center justify-between px-[10px] py-[8px] w-full">
-        <div className="flex items-center gap-1.5">
-          <div className="font-['Inter',sans-serif] font-semibold text-tp-slate-700 text-[14px] tracking-[0.012px] whitespace-nowrap leading-[20px]">
-            {dateLabel}
-          </div>
-          {canCopy ?
-          <CopyAffordance
-            onCopy={onCopyDate}
-            showOnHover={false}
-            copyHint={`Fill all details from ${dateLabel} to RxPad`}
-            copiedLabel={`${dateLabel} copied to RxPad`} /> :
 
-          null}
-          {!expanded && freshCount > 0 ?
-          <FreshUpdateChip count={freshCount} /> :
+      <div className="flex items-center justify-between gap-2 px-[10px] py-[8px] w-full">
+        <div className="flex min-w-0 flex-col gap-[2px]">
+          <div className="flex items-center gap-1.5">
+            <div className="font-['Inter',sans-serif] font-semibold text-tp-slate-700 text-[14px] tracking-[0.012px] whitespace-nowrap leading-[20px]">
+              {dateLabel}
+            </div>
+            {canCopy ?
+            <CopyAffordance
+              onCopy={onCopyDate}
+              showOnHover={false}
+              copyHint={`Fill all details from ${dateLabel} to RxPad`}
+              copiedLabel={`${dateLabel} copied to RxPad`} /> :
+
+            null}
+            {!expanded && freshCount > 0 ?
+            <FreshUpdateChip count={freshCount} /> :
+            null}
+          </div>
+
+          {doctorBlock ?
+          <Tooltip
+            open={nameTipOpen}
+            onOpenChange={(open) => {
+              const el = nameRef.current;
+              const truncated = Boolean(el && el.scrollWidth > el.clientWidth + 1);
+              setNameTipOpen(open && truncated);
+            }}>
+            <TooltipTrigger asChild>
+              <div className="flex min-w-0">
+                {doctorBlock}
+              </div>
+            </TooltipTrigger>
+            <TooltipContent
+              className="rounded-lg bg-tp-slate-900 px-2 py-1.5 text-white"
+              collisionPadding={10}
+              side="top"
+              align="start"
+              sideOffset={6}>
+              <div className="flex flex-col gap-[2px]">
+                <span className="font-sans text-[12px] font-semibold leading-[16px]">{doctorName}</span>
+                {specialty ?
+                <span className="font-sans text-[12px] leading-[16px] text-white/80">{specialty}</span> :
+                null}
+              </div>
+            </TooltipContent>
+          </Tooltip> :
           null}
         </div>
 
-        <div className="flex items-center gap-1.5">
+        <div className="flex shrink-0 items-center gap-1.5 self-start pt-[2px]">
           <span className="opacity-0 transition-opacity group-hover/date-card:opacity-100">
             <AiTriggerIcon
               tooltip={`Ask Dr.Agent about ${dateLabel} visit`}
@@ -405,7 +535,7 @@ function DateHeader({
               sectionId="past-visits"
               size={12}
               as="span" />
-            
+
           </span>
           <div className="relative shrink-0 size-[18px]">
             {expanded ?
@@ -687,27 +817,6 @@ function AdditionalNotesSection({ notes, onCopy }) {
 
 }
 
-// Signature-style footer that lives at the BOTTOM of the digital Rx
-// card. Single-line "Rx by: Dr. Name (Specialty)" stamp with a soft
-// slate fade so it reads as a letterhead signature at the foot of
-// the prescription.
-function SignatureFooter({ doctorName, specialty }) {
-  return (
-    <div
-      className="relative mt-[4px] overflow-hidden rounded-b-[10px] px-[14px] pt-[16px] pb-[10px]"
-      style={{
-        background:
-          "linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(148,163,184,0.05) 50%, rgba(148,163,184,0.10) 100%)"
-      }}>
-      <p className="min-w-0 truncate font-sans text-[12px] leading-[18px] text-tp-slate-400">
-        <span className="font-normal text-tp-slate-400/70">Rx by: </span>
-        <span className="font-medium">{doctorName}</span>
-        {specialty ? <span className="font-normal text-tp-slate-400/70"> ({specialty})</span> : null}
-      </p>
-    </div>
-  );
-}
-
 function PrescribedByFooter({ doctorName, specialty, bare = false }) {
   const inner = (
     <div
@@ -755,9 +864,9 @@ function WrittenRxPreviewCard({
               role="button"
               tabIndex={0}
               onClick={(event) => event.stopPropagation()}
-              className="inline-flex h-7 w-7 items-center justify-center rounded-md text-tp-slate-600 hover:bg-tp-slate-100">
-              
-              <MoreVertical color="var(--tp-slate-500)" size={16} strokeWidth={1.5} />
+              className="-mr-[4px] inline-flex h-7 w-7 items-center justify-center rounded-md text-tp-slate-700 hover:bg-tp-slate-100">
+
+              <MoreVertical color="var(--tp-slate-700)" size={16} strokeWidth={1.5} />
             </span>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40">
@@ -894,6 +1003,8 @@ export function PastVisitsContent() {
                 <DateHeader
                     dateLabel={entry.dateLabel}
                     expanded={expanded}
+                    doctorName={entry.doctorName ?? entry.writtenRx?.[0]?.doctorName ?? "Dr. Shyam Sundar"}
+                    specialty={entry.doctorSpecialty ?? entry.writtenRx?.[0]?.doctorSpecialty ?? "General Physician"}
                     canCopy={hasDigital && activeTab !== "written"}
                     freshCount={
                     /* Fresh updates from Dr.Agent attach to the most recent visit. */
@@ -1052,13 +1163,6 @@ export function PastVisitsContent() {
                         ) : null}
 
                         <FollowUpSection followUp={entry.digitalRx.followUp} />
-                        {/* Doctor signature — bottom-of-card fade
-                            (violet darkening downward). Reads like a
-                            letterhead signature stamp at the foot of
-                            the prescription. */}
-                        <SignatureFooter
-                          doctorName={entry.writtenRx?.[0]?.doctorName ?? "Dr. Shyam Sundar"}
-                          specialty={entry.writtenRx?.[0]?.doctorSpecialty ?? "General Physician"} />
                       </> :
                     null}
 

@@ -21,14 +21,14 @@
  *   • Bullet                     → grey dot pointer
  */
 
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import { cn as clsx } from "@/src/hooks/utils";
 import { ArrowSquareDown, ArrowSquareUp, Copy as CopyIcon, CopySuccess } from "iconsax-reactjs";
 import { ActionButton, Bullet, useStickyHeaderState } from "../detail-shared";
 import { tpSectionCardStyle } from "../tokens";
 import { AiTriggerIcon } from "../../dr-agent/shared/AiTriggerIcon";
 import { HistoricalNewDataBanner } from "../HistoricalNewDataBanner";
-import { HoverTooltip } from "@/src/components/atoms/Tooltip";
+import { HoverTooltip, Tooltip, TooltipTrigger, TooltipContent } from "@/src/components/atoms/Tooltip";
 import { toast } from "@/src/components/molecules/Toaster";
 
 // ─── Mock data — shape the OD/OS payload that `optalEntries(history)` will yield ──
@@ -354,13 +354,38 @@ function ExamRows({ items }) {
  * slate-100 title bar + white body + slate-200 hairline border.
  */
 function GroupCard({ id, title, icon, children, sectionLabelLower }) {
+  // Section headings stay on a single line — if a title would wrap, we
+  // truncate it and surface the full text in a hover tooltip (gated on
+  // actual overflow so short titles get no redundant tooltip).
+  const titleRef = useRef(null);
+  const [titleTipOpen, setTitleTipOpen] = useState(false);
   return (
     <div key={id} className="group relative shrink-0 w-full flex flex-col">
       <div className="flex h-[30px] w-full min-w-0 shrink-0 items-center gap-1.5 rounded-[4px] bg-tp-slate-100/70 px-2 py-[3px] mb-[8px]">
         {icon ?? null}
-        <span className="flex min-h-0 min-w-0 flex-1 items-center text-left text-[14px] font-semibold leading-none text-tp-slate-500">
-          {title}
-        </span>
+        <Tooltip
+          open={titleTipOpen}
+          onOpenChange={(open) => {
+            const el = titleRef.current;
+            const truncated = Boolean(el && el.scrollWidth > el.clientWidth + 1);
+            setTitleTipOpen(open && truncated);
+          }}>
+          <TooltipTrigger asChild>
+            <span
+              ref={titleRef}
+              className="block min-w-0 flex-1 truncate text-left text-[14px] font-semibold leading-none text-tp-slate-500">
+              {title}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent
+            className="rounded-lg bg-tp-slate-900 px-2 py-1.5 text-white"
+            side="top"
+            align="start"
+            sideOffset={6}
+            collisionPadding={10}>
+            <span className="font-sans text-[12px] font-semibold leading-[16px]">{title}</span>
+          </TooltipContent>
+        </Tooltip>
         <DummyCopyButton
           hint={`Copy ${title} to RxPad`}
           toastMsg={`${title} copied to RxPad`}
@@ -386,12 +411,19 @@ function OptalDateCard({ entry, expanded, onToggle }) {
 
   return (
     <div className="group/date-card relative shrink-0 w-full" style={tpSectionCardStyle}>
-      <button
+      <div
         ref={headerRef}
-        type="button"
+        role="button"
+        tabIndex={0}
         onClick={onToggle}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            onToggle();
+          }
+        }}
         className={clsx(
-          "group bg-tp-slate-100 sticky top-0 z-[2] shrink-0 w-full text-left",
+          "group bg-tp-slate-100 sticky top-0 z-[2] shrink-0 w-full text-left cursor-pointer",
           expanded
             ? isStuck
               ? "rounded-tl-none rounded-tr-none"
@@ -428,7 +460,7 @@ function OptalDateCard({ entry, expanded, onToggle }) {
             </div>
           </div>
         </div>
-      </button>
+      </div>
 
       {expanded && (
         <div className="bg-white rounded-bl-[10px] rounded-br-[10px] w-full px-[10px] py-[10px] flex flex-col gap-[14px]">

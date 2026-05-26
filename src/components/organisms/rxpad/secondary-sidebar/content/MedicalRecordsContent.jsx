@@ -19,6 +19,7 @@ import { HoverTooltip } from "@/src/components/atoms/Tooltip";
 import { Sidebar } from "@/src/components/molecules/Sidebar";
 import { SidebarHeader } from "@/src/components/molecules/SidebarHeader";
 import { toast } from "@/src/components/molecules/Toaster";
+import { ConfirmDialog } from "@/src/components/molecules/ConfirmDialog";
 
 /** Filled rounded-square close glyph — same one every panel sidebar uses. */
 function CloseSquareIcon({ size = 24, color = "currentColor" }) {
@@ -94,7 +95,7 @@ function FilterChip({ label, active, onClick }) {
 function DotsIcon() {
   return (
     <div className="flex items-center justify-center relative shrink-0 size-[16px]">
-      <MoreVertical color="var(--tp-slate-500)" size={16} strokeWidth={1.5} />
+      <MoreVertical color="var(--tp-slate-700)" size={16} strokeWidth={1.5} />
     </div>);
 
 }
@@ -274,7 +275,7 @@ function RecordCard({
               <p className="font-sans font-semibold leading-[20px] relative shrink-0 text-[14px]">{date}</p>
               <p className="font-sans font-normal leading-[20px] relative shrink-0 text-[14px] text-tp-slate-500">{label}</p>
             </div>
-            <div className="flex items-center justify-center relative shrink-0" onClick={(e) => e.stopPropagation()}>
+            <div className="-mr-[4px] flex items-center justify-center relative shrink-0" onClick={(e) => e.stopPropagation()}>
               <RecordActionMenu onAction={onAction} />
             </div>
           </div>
@@ -390,6 +391,9 @@ export function MedicalRecordsContent() {
   // its previous state. Lets repeated Edit clicks re-open the editor
   // after Save without needing a per-record mode flag.
   const [editTrigger, setEditTrigger] = useState(0);
+  // Record queued for deletion — drives the "Are you sure?" confirm
+  // dialog. Deletion only commits once the doctor confirms.
+  const [pendingDelete, setPendingDelete] = useState(null);
 
   const handleRecordAction = (record, action) => {
     if (action === "view") {
@@ -400,8 +404,18 @@ export function MedicalRecordsContent() {
     } else if (action === "download") {
       toast.success(`${record.label} download started`);
     } else if (action === "delete") {
-      toast.success(`${record.label} (${record.date}) deleted`);
+      setPendingDelete(record);
     }
+  };
+
+  const confirmDelete = () => {
+    if (!pendingDelete) return;
+    toast.success(`${pendingDelete.label} (${pendingDelete.date}) deleted`);
+    // Close the preview sidebar if we were deleting the open record.
+    if (activeRecord && activeRecord.id === pendingDelete.id) {
+      setActiveRecord(null);
+    }
+    setPendingDelete(null);
   };
 
   return (
@@ -477,10 +491,7 @@ export function MedicalRecordsContent() {
                 <button
                   type="button"
                   aria-label="Delete record"
-                  onClick={() => {
-                    toast.success(`${activeRecord.label} (${activeRecord.date}) deleted`);
-                    setActiveRecord(null);
-                  }}
+                  onClick={() => setPendingDelete(activeRecord)}
                   className="inline-flex h-[42px] w-[42px] items-center justify-center rounded-[10px] bg-tp-error-50 text-tp-error-600 transition-colors hover:bg-tp-error-100 active:scale-[0.96]">
                   <Trash color="currentColor" size={20} strokeWidth={1.5} variant="Linear" />
                 </button>
@@ -525,6 +536,27 @@ export function MedicalRecordsContent() {
           </div>
         </div>
       </Sidebar>
+
+      {/* Delete confirmation — both the card kebab "Delete" and the
+          preview-sidebar trash button route here. Nothing is removed
+          until the doctor confirms; the destructive action is the red
+          primary button. */}
+      <ConfirmDialog
+        open={Boolean(pendingDelete)}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null);
+        }}
+        title="Delete this record?"
+        warning={
+          pendingDelete
+            ? `${pendingDelete.label} (${pendingDelete.date}) will be permanently deleted. This can't be undone.`
+            : ""
+        }
+        secondaryLabel="Cancel"
+        onSecondary={() => setPendingDelete(null)}
+        primaryLabel="Delete"
+        primaryTone="error"
+        onPrimary={confirmDelete} />
     </div>);
 
 }
