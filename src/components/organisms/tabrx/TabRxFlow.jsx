@@ -138,6 +138,7 @@ function TabRxFlowInner() {
         open={previewOpen}
         onClose={() => setPreviewOpen(false)}
         patientId={patientId}
+        referralFormat="inline"
       />
 
       <TPConfirmDialog

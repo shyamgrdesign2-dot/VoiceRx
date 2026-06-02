@@ -59,7 +59,7 @@ function SectionList({ title, rows }) {
 
 
 
-export function RxPreviewDocument({ snapshot }) {
+export function RxPreviewDocument({ snapshot, referralFormat = "table" }) {
   const pid = snapshot?.patientId ?? RX_CONTEXT_OPTIONS[0].id;
   const patient = RX_CONTEXT_OPTIONS.find((p) => p.id === pid) ?? RX_CONTEXT_OPTIONS[0];
   const today = new Date().toISOString();
@@ -169,7 +169,7 @@ export function RxPreviewDocument({ snapshot }) {
               null}
                 </section> :
             null}
-              <ReferralPrintBlock referral={snapshot.referral} />
+              <ReferralPrintBlock referral={snapshot.referral} format={referralFormat} />
               {snapshot.additionalNotes ?
             <section className="flex flex-col gap-[2px]">
                   <h3 className="flex items-center gap-[5px] text-[14px] font-semibold leading-[18px] text-tp-slate-900">

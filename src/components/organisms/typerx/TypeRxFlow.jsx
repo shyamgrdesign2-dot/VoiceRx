@@ -144,7 +144,7 @@ function TypeRxFlowInner() {
         />
       </div>
 
-      <RxPreviewSidebar open={rxPreviewOpen} onClose={() => setRxPreviewOpen(false)} patientId={patientId} />
+      <RxPreviewSidebar open={rxPreviewOpen} onClose={() => setRxPreviewOpen(false)} patientId={patientId} referralFormat="table" />
       <RxCustomiseSidebar open={customiseOpen} onClose={() => setCustomiseOpen(false)} />
 
       <TPConfirmDialog

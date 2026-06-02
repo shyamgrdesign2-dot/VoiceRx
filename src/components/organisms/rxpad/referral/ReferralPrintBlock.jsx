@@ -12,6 +12,8 @@
  *   • "table"  — 3-column table: Doctor (specialty) | Referral Date | Notes
  *   • "inline" — single line: "Referral: Doctor (Specialty) (Referral Date: …
  *                | Referral Notes: …)" — heading + content on one line.
+ *   • "list"   — "Referral" heading on its own line, then one bullet holding
+ *                the doctor (specialty) (Referral Date: … | Referral Notes: …).
  */
 
 import { ReferralIcon } from "./ReferralIcon";
@@ -25,19 +27,33 @@ function ReferralHeading() {
   );
 }
 
+/** Shared content spans: Doctor (Specialty) (Referral Date: … | Referral Notes: …). */
+function ReferralLine({ r }) {
+  const bracket = [
+    r.date ? `Referral Date: ${r.date}` : null,
+    r.notes ? `Referral Notes: ${r.notes}` : null,
+  ]
+    .filter(Boolean)
+    .join(" | ");
+  return (
+    <>
+      {r.doctor ? <span className="font-medium text-tp-slate-900">{r.doctor}</span> : null}
+      {r.specialty ? (
+        <span className="text-tp-slate-500">{r.doctor ? " " : ""}({r.specialty})</span>
+      ) : null}
+      {bracket ? (
+        <span className="text-tp-slate-500">{(r.doctor || r.specialty) ? " " : ""}({bracket})</span>
+      ) : null}
+    </>
+  );
+}
+
 export function ReferralPrintBlock({ referral, className = "", format = "table" }) {
   const r = referral;
   if (!r || (!r.specialty && !r.doctor && !r.date && !r.notes)) return null;
 
   // ── Inline: heading + content on a single line ────────────────────────────
   if (format === "inline") {
-    const bracket = [
-      r.date ? `Referral Date: ${r.date}` : null,
-      r.notes ? `Referral Notes: ${r.notes}` : null,
-    ]
-      .filter(Boolean)
-      .join(" | ");
-
     return (
       <section className={className}>
         <p className="flex flex-wrap items-center gap-x-[6px] gap-y-[2px] text-[12px] leading-[16px] text-tp-slate-700">
@@ -46,17 +62,23 @@ export function ReferralPrintBlock({ referral, className = "", format = "table" 
             Referral:
           </span>
           <span>
-            {r.doctor ? (
-              <span className="font-medium text-tp-slate-900">{r.doctor}</span>
-            ) : null}
-            {r.specialty ? (
-              <span className="text-tp-slate-500">{r.doctor ? " " : ""}({r.specialty})</span>
-            ) : null}
-            {bracket ? (
-              <span className="text-tp-slate-500">{(r.doctor || r.specialty) ? " " : ""}({bracket})</span>
-            ) : null}
+            <ReferralLine r={r} />
           </span>
         </p>
+      </section>
+    );
+  }
+
+  // ── List: heading on its own line, then one bullet ────────────────────────
+  if (format === "list") {
+    return (
+      <section className={`flex flex-col gap-[4px] ${className}`}>
+        <ReferralHeading />
+        <ul className="m-0 flex list-disc flex-col gap-[4px] pl-[18px] marker:text-tp-slate-500">
+          <li className="text-[12px] leading-[16px] text-tp-slate-700">
+            <ReferralLine r={r} />
+          </li>
+        </ul>
       </section>
     );
   }
@@ -76,16 +98,21 @@ export function ReferralPrintBlock({ referral, className = "", format = "table" 
           </thead>
           <tbody>
             <tr className="border-t border-tp-slate-200 align-top text-tp-slate-700">
-              <td className="px-[8px] py-[5px]">
-                {r.doctor ? (
-                  <span className="font-medium text-tp-slate-900">{r.doctor}</span>
-                ) : null}
-                {r.specialty ? (
-                  <span className="text-tp-slate-500">{r.doctor ? " " : ""}({r.specialty})</span>
-                ) : null}
-                {!r.doctor && !r.specialty ? "—" : null}
+              <td className="px-[8px] py-[5px] w-[34%]">
+                {r.doctor || r.specialty ? (
+                  <div className="flex flex-col leading-[16px]">
+                    {r.doctor ? (
+                      <span className="font-medium text-tp-slate-900">{r.doctor}</span>
+                    ) : null}
+                    {r.specialty ? (
+                      <span className="text-[11px] text-tp-slate-500">{r.specialty}</span>
+                    ) : null}
+                  </div>
+                ) : (
+                  "—"
+                )}
               </td>
-              <td className="px-[8px] py-[5px] whitespace-nowrap">{r.date || "—"}</td>
+              <td className="px-[8px] py-[5px] w-[22%] whitespace-nowrap">{r.date || "—"}</td>
               <td className="px-[8px] py-[5px]">{r.notes || "—"}</td>
             </tr>
           </tbody>

@@ -478,7 +478,8 @@ function VoiceRxFlowInner() {
       <RxPreviewSidebar
         open={rxPreviewOpen}
         onClose={() => setRxPreviewOpen(false)}
-        patientId={patientId} />
+        patientId={patientId}
+        referralFormat="list" />
       
 
       {/* Customise Your Pad — two-column sheet driven by the gear icon. */}

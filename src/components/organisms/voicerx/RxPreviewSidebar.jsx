@@ -31,7 +31,7 @@ import { SidebarHeader } from "@/src/components/molecules/SidebarHeader";
  * The shell handles backdrop, slide animation, ESC-on-close, panel
  * chrome. This file only owns the body content (RxPreviewDocument).
  */
-export function RxPreviewSidebar({ open, onClose, patientId }) {
+export function RxPreviewSidebar({ open, onClose, patientId, referralFormat = "table" }) {
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => {
@@ -58,7 +58,7 @@ export function RxPreviewSidebar({ open, onClose, patientId }) {
         />
       }>
       <div className="bg-tp-slate-50/80 px-[16px] py-[16px]">
-        <RxPreviewDocument snapshot={snapshot} />
+        <RxPreviewDocument snapshot={snapshot} referralFormat={referralFormat} />
       </div>
     </Sidebar>
   );
