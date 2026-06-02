@@ -1013,15 +1013,15 @@ export function DrAgentPage() {
                                   <div className="transition-all hover:scale-105 duration-200">
                                         <TPSplitButton
                                       primaryAction={{
-                                        label: "VoiceRx",
-                                        onClick: () => openVoiceRx(row.id)
+                                        label: "TabRx",
+                                        onClick: () => openTabRx(row.id)
                                       }}
                                       secondaryActions={[
+                                      { id: "tab-rx", label: "TabRx", onClick: () => openTabRx(row.id) },
                                       { id: "voice-rx", label: "VoiceRx", onClick: () => openVoiceRx(row.id) },
                                       { id: "type-rx", label: "TypeRx", onClick: () => openTypeRx(row.id) },
                                       { id: "snap-rx", label: "SnapRx", onClick: () => {} },
-                                      { id: "smart-sync", label: "SmartSync", onClick: () => {} },
-                                      { id: "tab-rx", label: "TabRx", onClick: () => openTabRx(row.id) }]
+                                      { id: "smart-sync", label: "SmartSync", onClick: () => {} }]
                                       }
                                       variant="outline"
                                       theme="primary"
