@@ -471,8 +471,16 @@ function matchesDateFilter(rowDateKey, selected) {
   if (selected === "past-3-months" || selected === "next-3-months") {
     return rowDateKey === "today" || rowDateKey === "yesterday" || rowDateKey === "past-3-months";
   }
-  // past-4-months, next-4-months → show all
+  // past-4-months, next-4-months, till-date → show all
   return true;
+}
+
+// Default date filter per tab. Referral defaults to "Till Date" (all referrals
+// received so far); Pending Digitisation looks back 3 months; others "today".
+function defaultDateFilterFor(tab) {
+  if (tab === "pending-digitisation") return "past-3-months";
+  if (tab === "referral") return "till-date";
+  return "today";
 }
 
 const TAB_EMPTY_MESSAGES = {
@@ -499,7 +507,7 @@ export function DrAgentPage() {
   const [activeTab, setActiveTab] = useState("queue");
   const [query, setQuery] = useState("");
   const [tabDateFilters, setTabDateFilters] = useState({});
-  const dateFilter = tabDateFilters[activeTab] ?? (activeTab === "pending-digitisation" ? "past-3-months" : "today");
+  const dateFilter = tabDateFilters[activeTab] ?? defaultDateFilterFor(activeTab);
   function setDateFilter(id) {
     setTabDateFilters((prev) => ({ ...prev, [activeTab]: id }));
   }
@@ -562,7 +570,7 @@ export function DrAgentPage() {
   }
 
   const activeFilterCount = vtFilter.length + (slotConsult !== "all" ? 1 : 0);
-  const hasActiveFilters = !!query.trim() || vtFilter.length > 0 || slotConsult !== "all" || dateFilter !== "today";
+  const hasActiveFilters = !!query.trim() || vtFilter.length > 0 || slotConsult !== "all" || dateFilter !== defaultDateFilterFor(activeTab);
 
   const visibleAppointments = useMemo(() => {
     let rows = queueAppointments.filter((row) => {
@@ -591,7 +599,7 @@ export function DrAgentPage() {
 
   // Calculate counts for each tab (use each tab's own default date filter)
   const getTabCount = (tabId) => {
-    const tabFilter = tabDateFilters[tabId] ?? (tabId === "pending-digitisation" ? "past-3-months" : "today");
+    const tabFilter = tabDateFilters[tabId] ?? defaultDateFilterFor(tabId);
     return queueAppointments.filter((row) => {
       const tabMatch = row.status === tabId;
       const dateMatch = matchesDateFilter(row.dateKey, tabFilter);
@@ -817,7 +825,9 @@ export function DrAgentPage() {
                     </label>
 
                     <div className="flex shrink-0 items-center gap-2">
-                      {/* Unified filter button */}
+                      {/* Unified filter button — hidden on the Referral tab
+                           (referrals only filter by date + search). */}
+                      {activeTab !== "referral" &&
                       <button
                           ref={filterBtnRef}
                           type="button"
@@ -828,7 +838,7 @@ export function DrAgentPage() {
                             "border-tp-blue-300 bg-tp-blue-50 text-tp-blue-700 hover:bg-tp-blue-100" :
                             "border-tp-slate-200 bg-white text-tp-slate-600 hover:border-tp-slate-300 hover:bg-tp-slate-50"
                           )}>
-                          
+
                         <ListFilter size={15} strokeWidth={2} className="shrink-0 text-tp-slate-600" />
                         <span>Filter</span>
                         {activeFilterCount > 0 &&
@@ -837,6 +847,7 @@ export function DrAgentPage() {
                           </span>
                           }
                       </button>
+                      }
 
                       <DateRangePicker
                           value={dateFilter}
